@@ -8,7 +8,7 @@ OBJdisque = module_input.o \
             module_constantes.o \
             module_declarations.o 
 
-all:main
+all: main.o main
 	echo "Compilation finished"
 
 #module compile
@@ -23,6 +23,9 @@ all:main
 
 %.o : %.f90
 	$(F90) -c $<
+
+main.o : main.f90
+	$(F90) -c main.f90
 
 main : $(OBJdisque) main.f90
 	${F90} main.o $(OBJdisque) -o main
