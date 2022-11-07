@@ -23,14 +23,6 @@ REAL(KIND=XP),PARAMETER :: ALPHA
 REAL(KIND=XP),PARAMETER :: X
 REAL(KIND=XP),PARAMETER :: Y
 
-! LECTURE DES VARIABLES EN INPUT
-
-integer :: unt
-	namelist /param/ M,M_0_DOT,R_MAX_DECLARED,ALPHA,X,Y
-	open(newunit=unt,file='input.txt',action='read',status='old')
-	read(unt,param)
-	close(unt)
-
 ! DECLARATION DES CONSTANTES DU SYSTEME
 
 REAL(KIND=XP),PARAMETER :: Z                                                 ! FRACTION DE METALLICITÉ
@@ -62,9 +54,28 @@ REAL(KIND=XP),PARAMETER :: Q_ADV_0
 REAL(KIND=XP),PARAMETER :: B_0
 REAL(KIND=XP),PARAMETER :: C_0 
 
+! LECTURE DES VARIABLES EN INPUT 
+
+CALL APPEL_PARAM_INPUT
+
 CONTAINS 
 
+!-------------------------------------------------------------------------------------------
+
+SUBROUTINE APPEL_PARAM_INPUT
+
+integer :: unt
+	namelist /param/ M,M_0_DOT,R_MAX_DECLARED,ALPHA,X,Y
+	open(newunit=unt,file='input.txt',action='read',status='old')
+	read(unt,param)
+	close(unt)
+
+END SUBROUTINE APPEL_PARAM_INPUT
+
+!-------------------------------------------------------------------------------------------
+
 SUBROUTINE CALCUL_CONSTANTES
+
         Z = 1.0_XP - X - Y
 	mu = 1.0_xp/(2.0_xp*X+3.0_xp/4.0_xp*Y+Z/2.0_xp)
 	M_BH = M * M_O
@@ -96,6 +107,8 @@ SUBROUTINE CALCUL_CONSTANTES
         C_0 = R*T_0 / R_S**2.0_XP / MU / OMEGA_MAX**2.0_XP
 
 END SUBROUTINE CALCUL_CONSTANTES
+
+!------------------------------------------------------------------------------------------------
 
 SUBROUTINE AFFICHAGE
 
