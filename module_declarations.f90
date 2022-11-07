@@ -1,37 +1,102 @@
-MODULE DECLARATIONS
+MODULE CONSTANTES
 
-USE INPUT
-USE CONSTANTES
+integer,parameter :: XP =  selected_real_kind(15)
 
-real(kind=xp),parameter :: mu = 1.0_xp/(2.0_xp*X+3.0_xp/4.0_xp*Y+Z/2.0_xp)  !POID MOLECULAIRE MOYEN
-REAL(KIND=XP),PARAMETER :: M_BH = M * M_O
-real(kind=xp),parameter :: R = k_b / m_p 
-real(kind=xp),parameter :: r_s = 2.0_xp * G * M_BH / c**2.0_xp !RAYON DE SCHWARZSCHILD
-REAL(KIND=XP),PARAMETER :: R_MAX = R_S * R_MAX_DECLARED
-real(kind=xp),parameter :: r_min = 3.0_xp*r_s !RAYON MINIMALE DU DISQUE D'ACCRETION
-real(kind=xp),parameter :: omega_max = (G*M_BH/r_min**3.0_xp)**(1.0_xp/2.0_xp) ! VITESSE ROTATION MAX
-real(kind=xp),parameter :: L_tot = M_0_dot * c**2.0_xp / 12.0_xp !LUMINOSITE MAXIMALE
+! CONSTANTES PHYSIQUES 
 
-real(kind=xp),parameter :: v_0 = r_s * omega_max !CONSTANTE DE VITESSE 
-real(kind=xp),parameter :: nu_0 = 4.0_xp/3.0_xp * r_s**2.0_xp * omega_max !CONSTANTE DE VISCOSITE 
-real(kind=xp),parameter :: rho_0 = M_0_dot / 4.0_xp / pi / omega_max / r_s**3.0_xp !CONSTANTE DE DENSITE
-real(kind=xp),parameter :: T_0 = (L_tot/9.0_xp/4.0_xp/pi/r_s**2.0_xp/sigma_stefan)**(1.0_xp/4.0_xp) !CONSTANTE DE TEMPERATURE 
-real(kind=xp),parameter :: S_0 = M_0_dot/omega_max/2.0_xp/pi/r_s**2.0_xp 
-real(kind=xp),parameter :: sigma_0 = M_0_dot/omega_max/2.0_xp/pi/r_s**2.0_xp
+real(kind=xp),parameter :: k_b = 1.380649e-23_xp                             ! CONSTANTE DE BOLTZMANN
+real(kind=xp),parameter :: pi = 3.1415926535897932384626433_xp               ! PI
+real(kind=xp),parameter :: c = 2.99792458e8_xp 			             ! VITESSE LUMIERE
+real(kind=xp),parameter :: m_p = 1.67262192369e-27_xp                        ! MASSE PROTON
+real(kind=xp),parameter :: G = 6.6743e-11_xp				     ! CONSTANTE GRAVITE
+real(kind=xp),parameter :: sigma_stefan = 5.670374419e-8_xp 		     ! CONSTANTE DE STEFAN-BOLTZMANN
+real(kind=xp),parameter :: a_radiation = 7.56573085e-16 		     ! CONSTANTE DE RADIATION
+real(kind=xp),parameter :: M_o = 1.989e30_xp 				     ! MASSE DU SOLEIL
+real(kind=xp),parameter :: gamma_g = 1.6666666666666666667_xp                ! INDICE POLYTROPIQUE
 
-real(kind=xp),parameter :: P_0 = M_0_dot * omega_max / 4.0_xp / pi / r_s !CONSTANTE DE PRESSION 
-real(kind=xp),parameter :: P_rad_0 = a_radiation * T_0**4.0_xp / 3.0_xp !CONSTANTE DE PRESSION RAD
-real(kind=xp),parameter :: P_gaz_0 = R * rho_0 * T_0 / mu  !CONSTANTE DE PRESSION GAZ
-real(kind=xp),parameter :: C_v_0 = R / mu ! CONSTANTE DE CAPACITE CALORIFIQUE
-real(kind=xp),parameter :: F_Z_DIFF_0 = 2.0_xp*A_RADIATION*C*T_0**4.0_XP / 3.0_XP / S_0
-REAL(KIND=XP),PARAMETER :: F_Z_RAD_0 = R_S * RHO_0 * T_0**(1.0_XP/2.0_XP) * 6.22E19_XP
-REAL(KIND=XP),PARAMETER :: Q_PLUS_0 = 3.0_XP*R_S**2.0_XP * OMEGA_MAX**3.0_XP
-REAL(KIND=XP),PARAMETER :: Q_ADV_0 = OMEGA_MAX * T_0 * R / MU
+! DECLARATION DES VARIABLES EN INPUT
 
-REAL(KIND=XP),PARAMETER :: B_0 = 2.0_XP*A_RADIATION*T_0**4.0_XP/3.0_XP/R_S/OMEGA_MAX**2.0_xp/S_0
-REAL(KIND=XP),PARAMETER :: C_0 = R*T_0 / R_S**2.0_XP / MU / OMEGA_MAX**2.0_XP
+REAL(KIND=XP),PARAMETER :: M
+REAL(KIND=XP),PARAMETER :: M_0_DOT
+REAL(KIND=XP),PARAMETER :: R_MAX_DECLARED
+REAL(KIND=XP),PARAMETER :: ALPHA
+REAL(KIND=XP),PARAMETER :: X
+REAL(KIND=XP),PARAMETER :: Y
+
+! LECTURE DES VARIABLES EN INPUT
+
+integer :: unt
+	namelist /param/ M,M_0_DOT,R_MAX_DECLARED,ALPHA,X,Y
+	open(newunit=unt,file='param.txt',action='read',status='old')
+	read(unt,param)
+	close(unt)
+
+! DECLARATION DES CONSTANTES DU SYSTEME
+
+REAL(KIND=XP),PARAMETER :: Z                                                 ! FRACTION DE METALLICITÉ
+real(kind=xp),parameter :: mu                                                ! POID MOLECULAIRE MOYEN
+REAL(KIND=XP),PARAMETER :: M_BH                                              ! MASSE DU TROU NOIR
+real(kind=xp),parameter :: R                                                 ! BOLTZMANN OVER PROTON_MASS  / LA CONSTANTE DE COME
+real(kind=xp),parameter :: r_s                                               ! RAYON DE SCHWARZSCHILD
+REAL(KIND=XP),PARAMETER :: R_MAX                                             ! RAYON MAXIMAL
+real(kind=xp),parameter :: r_min                                             ! RAYON MINIMALE DU DISQUE D'ACCRETION
+real(kind=xp),parameter :: omega_max                                         ! VITESSE ROTATION MAX
+real(kind=xp),parameter :: L_tot                                             ! LUMINOSITE MAXIMALE
+
+real(kind=xp),parameter :: v_0                                               ! CONSTANTE DE VITESSE 
+real(kind=xp),parameter :: nu_0                                              ! CONSTANTE DE VISCOSITE 
+real(kind=xp),parameter :: rho_0                                             ! CONSTANTE DE DENSITE
+real(kind=xp),parameter :: T_0                                               ! CONSTANTE DE TEMPERATURE 
+real(kind=xp),parameter :: S_0 
+real(kind=xp),parameter :: sigma_0
+
+real(kind=xp),parameter :: P_0                                               ! CONSTANTE DE PRESSION 
+real(kind=xp),parameter :: P_rad_0                                           ! CONSTANTE DE PRESSION RAD
+real(kind=xp),parameter :: P_gaz_0                                           ! CONSTANTE DE PRESSION GAZ
+real(kind=xp),parameter :: C_v_0                                             ! CONSTANTE DE CAPACITE CALORIFIQUE
+real(kind=xp),parameter :: F_Z_DIFF_0 
+REAL(KIND=XP),PARAMETER :: F_Z_RAD_0 
+REAL(KIND=XP),PARAMETER :: Q_PLUS_0 
+REAL(KIND=XP),PARAMETER :: Q_ADV_0 
+
+REAL(KIND=XP),PARAMETER :: B_0
+REAL(KIND=XP),PARAMETER :: C_0 
 
 CONTAINS 
+
+SUBROUTINE CALCUL_CONSTANTES
+        Z = 1.0_XP - X - Y
+	mu = 1.0_xp/(2.0_xp*X+3.0_xp/4.0_xp*Y+Z/2.0_xp)
+	M_BH = M * M_O
+	R = k_b / m_p 
+	r_s = 2.0_xp * G * M_BH / c**2.0_xp
+	R_MAX = R_S * R_MAX_DECLARED
+	r_min = 3.0_xp*r_s
+	omega_max = (G*M_BH/r_min**3.0_xp)**(1.0_xp/2.0_xp) 
+	L_tot = M_0_dot * c**2.0_xp / 12.0_xp 
+
+	v_0 = r_s * omega_max
+	nu_0 = 4.0_xp/3.0_xp * r_s**2.0_xp * omega_max 
+	rho_0 = M_0_dot / 4.0_xp / pi / omega_max / r_s**3.0_xp
+	T_0 = (L_tot/9.0_xp/4.0_xp/pi/r_s**2.0_xp/sigma_stefan)**(1.0_xp/4.0_xp)
+	S_0 = M_0_dot/omega_max/2.0_xp/pi/r_s**2.0_xp 
+	sigma_0 = M_0_dot/omega_max/2.0_xp/pi/r_s**2.0_xp
+
+	P_0 = M_0_dot * omega_max / 4.0_xp / pi / r_s
+	P_rad_0 = a_radiation * T_0**4.0_xp / 3.0_xp
+	P_gaz_0 = R * rho_0 * T_0 / mu
+	 C_v_0 = R / mu
+	F_Z_DIFF_0 = 2.0_xp*A_RADIATION*C*T_0**4.0_XP / 3.0_XP / S_0
+	F_Z_RAD_0 = R_S * RHO_0 * T_0**(1.0_XP/2.0_XP) * 6.22E19_XP
+	Q_PLUS_0 = 3.0_XP*R_S**2.0_XP * OMEGA_MAX**3.0_XP
+	Q_ADV_0 = OMEGA_MAX * T_0 * R / MU
+
+
+	B_0 = 2.0_XP*A_RADIATION*T_0**4.0_XP/3.0_XP/R_S/OMEGA_MAX**2.0_xp/S_0
+        C_0 = R*T_0 / R_S**2.0_XP / MU / OMEGA_MAX**2.0_XP
+
+END SUBROUTINE CALCUL_CONSTANTES
+
 SUBROUTINE AFFICHAGE
 
 	PRINT*,'----------INITIALISATION---------'
@@ -64,4 +129,4 @@ SUBROUTINE AFFICHAGE
 
 END SUBROUTINE AFFICHAGE
 	
-END MODULE DECLARATIONS
+END MODULE CONSTANTES
