@@ -1,17 +1,14 @@
 !------------------------------------------------------------------------
-PROGRAM MAIN ! --------------------------------
+                                   PROGRAM MAIN 
 !------------------------------------------------------------------------
 
-USE CONSTANTES
-USE INPUT
 USE DECLARATIONS
 
 IMPLICIT NONE
 
-
-
+CALL CALCUL_CONSTANTES
 CALL AFFICHAGE           !affichage des paramètres en INPUT et des constantes du système
 
 !------------------------------------------------------------------------
-END PROGRAM MAIN ! ------------------------------
+                                 END PROGRAM MAIN 
 !------------------------------------------------------------------------
