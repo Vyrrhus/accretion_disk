@@ -2,7 +2,7 @@
                                    PROGRAM MAIN 
 !------------------------------------------------------------------------
 
-USE DECLARATIONS
+USE CONSTANTES
 
 IMPLICIT NONE
 
