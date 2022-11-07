@@ -27,7 +27,7 @@ REAL(KIND=XP),PARAMETER :: Y
 
 integer :: unt
 	namelist /param/ M,M_0_DOT,R_MAX_DECLARED,ALPHA,X,Y
-	open(newunit=unt,file='param.txt',action='read',status='old')
+	open(newunit=unt,file='input.txt',action='read',status='old')
 	read(unt,param)
 	close(unt)
 
