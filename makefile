@@ -1,19 +1,32 @@
 F90=gfortran
 
+.MAKEOPTS: -k -s
+
+.SUFFIXES: .f90
+
+OBJdisque = module_input.o \
+            module_constantes.o \
+            module_declarations.o \
+            module_integration.o
+
 all:main
+	echo "Compilation finished"
 
 #module compile
 
-module_constantes.o : module_constantes.f90
-	${F90} -c module_constantes.f90
-module_input.o : module_input.f90
-	${F90} -c module_input.f90
-	
-module_declarations.o : module_declarations.f90 module_constantes.o module_input.o
-	${F90} module_constantes.o module_input.o -c module_declarations.f90
+#module_constantes.o : module_constantes.f90
+#	${F90} -c module_constantes.f90
+#module_input.o : module_input.f90
+#	${F90} -c module_input.f90
+#	
+#module_declarations.o : module_declarations.f90 module_constantes.o module_input.o
+#	${F90} module_constantes.o module_input.o -c module_declarations.f90
 
-main : main.f90 module_declarations.o module_constantes.o module_input.o
-	${F90} -o main  module_declarations.o module_constantes.o module_input.o
+%.o : %.f90
+	$(F90) -c $<
+
+main : $(OBJdisque) main.f90
+	${F90} main.o $(OBJdisque) -o main
 	
 clean:
 	rm -f *.o main *.txt
