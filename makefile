@@ -6,8 +6,7 @@ F90=gfortran
 
 OBJdisque = module_input.o \
             module_constantes.o \
-            module_declarations.o \
-            module_integration.o
+            module_declarations.o 
 
 all:main
 	echo "Compilation finished"
