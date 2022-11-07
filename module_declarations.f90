@@ -1,4 +1,6 @@
-MODULE CONSTANTES
+MODULE MODULE_DECLARATIONS
+
+IMPLICIT NONE
 
 integer,parameter :: XP =  selected_real_kind(15)
 
@@ -16,65 +18,62 @@ real(kind=xp),parameter :: gamma_g = 1.6666666666666666667_xp                ! I
 
 ! DECLARATION DES VARIABLES EN INPUT
 
-REAL(KIND=XP),PARAMETER :: M
-REAL(KIND=XP),PARAMETER :: M_0_DOT
-REAL(KIND=XP),PARAMETER :: R_MAX_DECLARED
-REAL(KIND=XP),PARAMETER :: ALPHA
-REAL(KIND=XP),PARAMETER :: X
-REAL(KIND=XP),PARAMETER :: Y
+REAL(KIND=XP)  :: M
+REAL(KIND=XP)  :: M_0_DOT
+REAL(KIND=XP)  :: R_MAX_DECLARED
+REAL(KIND=XP)  :: ALPHA
+REAL(KIND=XP)  :: X
+REAL(KIND=XP)  :: Y
 
 ! DECLARATION DES CONSTANTES DU SYSTEME
 
-REAL(KIND=XP),PARAMETER :: Z                                                 ! FRACTION DE METALLICITÉ
-real(kind=xp),parameter :: mu                                                ! POID MOLECULAIRE MOYEN
-REAL(KIND=XP),PARAMETER :: M_BH                                              ! MASSE DU TROU NOIR
-real(kind=xp),parameter :: R                                                 ! BOLTZMANN OVER PROTON_MASS  / LA CONSTANTE DE COME
-real(kind=xp),parameter :: r_s                                               ! RAYON DE SCHWARZSCHILD
-REAL(KIND=XP),PARAMETER :: R_MAX                                             ! RAYON MAXIMAL
-real(kind=xp),parameter :: r_min                                             ! RAYON MINIMALE DU DISQUE D'ACCRETION
-real(kind=xp),parameter :: omega_max                                         ! VITESSE ROTATION MAX
-real(kind=xp),parameter :: L_tot                                             ! LUMINOSITE MAXIMALE
+REAL(KIND=XP)  :: Z                                                 ! FRACTION DE METALLICITÉ
+real(kind=xp)  :: mu                                                ! POID MOLECULAIRE MOYEN
+REAL(KIND=XP)  :: M_BH                                              ! MASSE DU TROU NOIR
+real(kind=xp)  :: R                                                 ! BOLTZMANN OVER PROTON_MASS  / LA CONSTANTE DE COME
+real(kind=xp)  :: r_s                                               ! RAYON DE SCHWARZSCHILD
+REAL(KIND=XP)  :: R_MAX                                             ! RAYON MAXIMAL
+real(kind=xp)  :: r_min                                             ! RAYON MINIMALE DU DISQUE D'ACCRETION
+real(kind=xp)  :: omega_max                                         ! VITESSE ROTATION MAX
+real(kind=xp)  :: L_tot                                             ! LUMINOSITE MAXIMALE
 
-real(kind=xp),parameter :: v_0                                               ! CONSTANTE DE VITESSE 
-real(kind=xp),parameter :: nu_0                                              ! CONSTANTE DE VISCOSITE 
-real(kind=xp),parameter :: rho_0                                             ! CONSTANTE DE DENSITE
-real(kind=xp),parameter :: T_0                                               ! CONSTANTE DE TEMPERATURE 
-real(kind=xp),parameter :: S_0 
-real(kind=xp),parameter :: sigma_0
+real(kind=xp)  :: v_0                                               ! CONSTANTE DE VITESSE 
+real(kind=xp)  :: nu_0                                              ! CONSTANTE DE VISCOSITE 
+real(kind=xp)  :: rho_0                                             ! CONSTANTE DE DENSITE
+real(kind=xp)  :: T_0                                               ! CONSTANTE DE TEMPERATURE 
+real(kind=xp)  :: S_0 
+real(kind=xp)  :: sigma_0
 
-real(kind=xp),parameter :: P_0                                               ! CONSTANTE DE PRESSION 
-real(kind=xp),parameter :: P_rad_0                                           ! CONSTANTE DE PRESSION RAD
-real(kind=xp),parameter :: P_gaz_0                                           ! CONSTANTE DE PRESSION GAZ
-real(kind=xp),parameter :: C_v_0                                             ! CONSTANTE DE CAPACITE CALORIFIQUE
-real(kind=xp),parameter :: F_Z_DIFF_0 
-REAL(KIND=XP),PARAMETER :: F_Z_RAD_0 
-REAL(KIND=XP),PARAMETER :: Q_PLUS_0 
-REAL(KIND=XP),PARAMETER :: Q_ADV_0 
+real(kind=xp)  :: P_0                                               ! CONSTANTE DE PRESSION 
+real(kind=xp)  :: P_rad_0                                           ! CONSTANTE DE PRESSION RAD
+real(kind=xp)  :: P_gaz_0                                           ! CONSTANTE DE PRESSION GAZ
+real(kind=xp)  :: C_v_0                                             ! CONSTANTE DE CAPACITE CALORIFIQUE
+real(kind=xp)  :: F_Z_DIFF_0 
+REAL(KIND=XP)  :: F_Z_RAD_0 
+REAL(KIND=XP)  :: Q_PLUS_0 
+REAL(KIND=XP)  :: Q_ADV_0 
 
-REAL(KIND=XP),PARAMETER :: B_0
-REAL(KIND=XP),PARAMETER :: C_0 
-
-! LECTURE DES VARIABLES EN INPUT 
-
-CALL APPEL_PARAM_INPUT
+REAL(KIND=XP)  :: B_0
+REAL(KIND=XP)  :: C_0 
 
 CONTAINS 
 
 !-------------------------------------------------------------------------------------------
 
-SUBROUTINE APPEL_PARAM_INPUT
-
+SUBROUTINE APPEL_PARAM_INPUT()
+IMPLICIT NONE
 integer :: unt
-	namelist /param/ M,M_0_DOT,R_MAX_DECLARED,ALPHA,X,Y
+	namelist /input/ M,M_0_DOT,R_MAX_DECLARED,ALPHA,X,Y
 	open(newunit=unt,file='input.txt',action='read',status='old')
-	read(unt,param)
+	read(unt,input)
 	close(unt)
 
 END SUBROUTINE APPEL_PARAM_INPUT
 
 !-------------------------------------------------------------------------------------------
 
-SUBROUTINE CALCUL_CONSTANTES
+SUBROUTINE CALCUL_CONSTANTES()
+	IMPLICIT NONE
 
         Z = 1.0_XP - X - Y
 	mu = 1.0_xp/(2.0_xp*X+3.0_xp/4.0_xp*Y+Z/2.0_xp)
@@ -110,8 +109,10 @@ END SUBROUTINE CALCUL_CONSTANTES
 
 !------------------------------------------------------------------------------------------------
 
-SUBROUTINE AFFICHAGE
+SUBROUTINE AFFICHAGE()
 
+	IMPLICIT NONE
+	
 	PRINT*,'----------INITIALISATION---------'
 	PRINT*,'---VALEURS PARAMETRES EN INPUT---'
 	PRINT*,'MASSE DU TROU NOIR EN MASSE SOLAIRES = ',M
@@ -142,4 +143,4 @@ SUBROUTINE AFFICHAGE
 
 END SUBROUTINE AFFICHAGE
 	
-END MODULE CONSTANTES
+END MODULE MODULE_DECLARATIONS
