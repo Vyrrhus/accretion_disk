@@ -12,13 +12,13 @@ all: main.o main
 #module compile
 
 %.o : %.f90
-	$(F90) -c $<
+	${F90} -c $<
 
-main.o : main.f90
-	$(F90) -c main.f90
+main.o : ${OBJdisque} main.f90
+	${F90} -c main.f90
 
 main : $(OBJdisque) main.f90
-	${F90} main.o $(OBJdisque) -o main
+	${F90} main.o ${OBJdisque} -o main
 	
 clean:
 	rm -f *.mod *.o main
