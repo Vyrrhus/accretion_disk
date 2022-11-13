@@ -95,7 +95,7 @@ CONTAINS
 SUBROUTINE APPEL_PARAM_INPUT()
 IMPLICIT NONE
 integer :: unt
-	namelist /input/ M,M_0_DOT,R_MAX_DECLARED,ALPHA,X,Y
+	namelist /input/ M,M_0_DOT,R_MAX_DECLARED,ALPHA,X_FRAC,Y_FRAC
 	open(newunit=unt,file='input.txt',action='read',status='old')
 	read(unt,input)
 	close(unt)
@@ -150,8 +150,8 @@ SUBROUTINE AFFICHAGE()
 	PRINT*,'CONSTANTE DE TAUX D ACCRETION        = ',M_0_DOT  
 	PRINT*,'R_MAX DECLARE                        = ',R_MAX_DECLARED
 	PRINT*,'ALPHA                                = ',ALPHA
-	PRINT*,'X                                    = ',X
-	PRINT*,'Y                                    = ',Y
+	PRINT*,'X                                    = ',X_FRAC
+	PRINT*,'Y                                    = ',Y_FRAC
 	
 	PRINT*,'--------------------------------'
 	PRINT*,'----CONSTANTES DE SIMULATION----'
