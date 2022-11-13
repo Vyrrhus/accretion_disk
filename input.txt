@@ -4,6 +4,6 @@
     M_0_DOT        = 10000.,   ! Taux d'accrétion du disque [M_solaire/s]
     R_MAX_DECLARED = 100.,     ! Rayon maximal du disque [rayon_Schwarzschild]
     ALPHA          = 1.,       ! Paramètre phénoménologique (taux de production d'énergie par friction de la matière)
-    X              = 0.70,     ! Abondance en hydrogène
-    Y              = 0.28 /    ! Abondance en hélium
+    X_FRAC         = 0.70,     ! Abondance en hydrogène
+    Y_FRAC         = 0.28 /    ! Abondance en hélium
 ! ============================================================================================================
