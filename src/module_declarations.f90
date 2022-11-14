@@ -38,6 +38,7 @@ real(kind=xp)  :: r_max              !! Rayon maximal du disque
 real(kind=xp)  :: ALPHA              !! Paramètre phénoménologique (taux de production d'énergie par friction de la matière)
 real(kind=xp)  :: X_FRAC             !! Abondance H
 real(kind=xp)  :: Y_FRAC             !! Abondance He
+integer        :: NX                 !! Nombre de points de discrétisation spatiale
 
 !! CONSTANTES DU SYSTEME
 real(kind=xp)  :: Z_FRAC        !! Abondance éléments lourds
@@ -109,7 +110,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     integer :: file_id
-    namelist /input/ M,f_accretion,r_max,ALPHA,X_FRAC,Y_FRAC
+    namelist /input/ M,f_accretion,r_max,ALPHA,X_FRAC,Y_FRAC,NX
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
     M             = 3._xp        ! [M_{sol}]
@@ -118,6 +119,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     ALPHA         = 1._xp
     X_FRAC        = 0.7_xp
     Y_FRAC        = 0.28_xp
+    NX            = 100
 
     ! LECTURE DES PARAMETRES DEPUIS LE FICHIER
     OPEN(newunit=file_id,file='input.txt',action='read',status='old')
@@ -135,6 +137,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     PRINT*,"ALPHA                                          = ",ALPHA
     PRINT*,"X                                              = ",X_FRAC
     PRINT*,"Y                                              = ",Y_FRAC
+    PRINT*,"NB POINTS DE DISCRETISATION SPATIALE           = ",NX
 
     ! CONVERSION UNITES SI
     M = M * M_o
