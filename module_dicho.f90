@@ -1,5 +1,5 @@
 module module_dicho
-use module_constantes
+use module_declarations
 implicit none
 
 CONTAINS

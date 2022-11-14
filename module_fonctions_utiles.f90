@@ -1,7 +1,5 @@
 MODULE FONCTIONS_UTILES
-
-use INPUT
-use DECLARATIONS
+USE module_declarations
 
 CONTAINS
 

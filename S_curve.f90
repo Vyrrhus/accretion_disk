@@ -1,8 +1,7 @@
 module courbe_S
-USE module_branche_epais
-USE module_constantes
-USE MODULE_DECLARATIONS
+USE module_declarations
 USE module_fonctions_utiles
+USE module_branche_epais
 IMPLICIT NONE
 
 real(kind=xp), DIMENSION(n)   :: T_epais
