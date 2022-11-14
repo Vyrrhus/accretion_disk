@@ -18,7 +18,7 @@ endif
 
 # CREATE OBJS
 $(BINDIR)/%.o: $(SRCDIR)/%.f90
-	$(F90) $(FFLAGS) -c -o $@ $<
+	$(F90) $(FFLAGS) -c $@ $<
 
 # CREATE EXE
 all: $(EXE)
