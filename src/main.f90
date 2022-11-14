@@ -3,6 +3,7 @@
 !------------------------------------------------------------------------
 
 USE MODULE_DECLARATIONS
+USE MODULE_FUNCTION
 
 IMPLICIT NONE
 
@@ -10,6 +11,7 @@ IMPLICIT NONE
 !--- Appel des fonctions
 CALL APPEL_PARAM_INPUT()
 CALL CALCUL_CONSTANTES()
+
 
 !------------------------------------------------------------------------
                                  END PROGRAM MAIN 
