@@ -1,7 +1,5 @@
-*.o 
-*.mod 
 *.out 
 *.dSYM
-doxygen/
-main
+disk
 .DS_Store
+doc/
