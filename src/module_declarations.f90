@@ -122,7 +122,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     NX            = 100
 
     ! LECTURE DES PARAMETRES DEPUIS LE FICHIER
-    OPEN(newunit=file_id,file='input.txt',action='read',status='old')
+    OPEN(newunit=file_id,file='config/input.config',action='read',status='old')
     READ(file_id,input)
     CLOSE(file_id)
 
