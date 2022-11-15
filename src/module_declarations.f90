@@ -91,8 +91,8 @@ real(kind=xp) :: Q_ADV_AD        !! Chaleur advectée
 real(kind=xp) :: C_V_AD          !! Capacité calorifique
 
 !! VARIABLES AVEC CONDITIONS
-real(kind=xp) :: Q_MOINS_AD  !! Chaleur dissipée adimensionnée
-real(kind=xp) :: F_Z_AD      !! Flux adimensionnée
+real(kind=xp) :: Q_MOINS  !! Chaleur dissipée adimensionnée
+real(kind=xp) :: F_Z      !! Flux adimensionnée
 real(kind=xp) :: TAU_EFF     !! Profondeur optique effective
 real(kind=xp) :: KAPPA_FF    !! Opacité free-free
 real(kind=xp) :: EPSILON_FF  !! Emissivité free-free

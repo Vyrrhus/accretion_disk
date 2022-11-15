@@ -41,6 +41,36 @@ FUNCTION EQU_ROTATION(X_AD) RESULT(OMEGA_AD)
 END FUNCTION EQU_ROTATION
 !-------------------------------------------------------------
 !-------------------------------------------------------------
+FUNCTION EQU_P_GAZ(RHO_AD,TEMP_AD) RESULT(P_GAZ_AD)
+
+     IMPLICIT NONE
+     REAL(KIND=XP),INTENT(IN) :: RHO_AD(NX),TEMP_AD(NX)
+     REAL(KIND=XP) :: P_GAZ_AD(NX)
+     P_GAZ_AD = RHO_AD * TEMP_AD
+
+END FUNCTION EQU_P_GAZ
+!-------------------------------------------------------------
+!-------------------------------------------------------------
+FUNCTION EQU_P_RAD_AD(TEMP_AD) RESULT(P_RAD_AD)
+
+     IMPLICIT NONE
+     REAL(KIND=XP),INTENT(IN) :: TEMP_AD(NX)
+     REAL(KIND=XP) :: P_RAD_AD(NX)
+     P_RAD_AD = TEMP_AD**4.0_XP
+
+END FUNCTION EQU_P_RAD
+!-------------------------------------------------------------
+!-------------------------------------------------------------
+FUNCTION EQU_P(P_RAD_AD,P_GAZ_AD) RESULT(P_AD)
+
+     IMPLICIT NONE
+     REAL(KIND=XP),INTENT(IN) :: P_RAD_AD(NX),P_GAZ_AD(NX)
+     REAL(KIND=XP) :: P_AD(NX)
+     P_AD = P_RAD_0 / P_0 * P_RAD_AD + P_GAZ_0 / P_0 * P_GAZ_AD
+
+END FUNCTION EQU_P
+!-------------------------------------------------------------
+!-------------------------------------------------------------
 FUNCTION EQU_INDIC_PRESSION(P_GAZ_AD,P_AD) RESULT(BETA)
 
      IMPLICIT NONE
@@ -122,6 +152,26 @@ FUNCTION EQU_TAU_ACCRETION(V_AD,S_AD,X_AD) RESULT(M_DOT_AD)
      M_DOT_AD = - V_AD * S_AD * X_AD
 
 END FUNCTION EQU_TAU_ACCRETION
+!-------------------------------------------------------------
+!-------------------------------------------------------------
+FUNCTION EQU_Q_PLUS(NU_AD,OMEGA_AD) RESULT(Q_PLUS_AD)
+
+     IMPLICIT NONE
+     REAL(KIND=XP), INTENT(IN) :: NU_AD(NX),OMEGA_AD(NX)
+     REAL(KIND=XP) :: Q_PLUS_AD(NX)
+     Q_PLUS_AD = NU_AD * OMEGA_AD * 2.0_XP
+
+END FUNCTION EQU_Q_PLUS
+!-------------------------------------------------------------
+!-------------------------------------------------------------
+ FUNCTION EQU_Q_MOINS(X_AD,S_AD,F_Z) RESULT(Q_MOINS)
+
+     IMPLICIT NONE
+     REAL(KIND=XP), INTENT(IN) :: NU_AD(NX),OMEGA_AD(NX)
+     REAL(KIND=XP) :: Q_PLUS(NX)
+     Q_PLUS = 2.0_XP * X_AD * F_Z / ( S_AD * S_0 )
+
+END FUNCTION EQU_Q_MOINS
 !-------------------------------------------------------------
 !-------------------------------------------------------------
 FUNCTION EQU_C_V(BETA) RESULT(C_V_AD)
