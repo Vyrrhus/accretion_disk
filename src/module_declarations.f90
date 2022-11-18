@@ -16,86 +16,86 @@
 IMPLICIT NONE
 
 !! PRECISION
-integer,parameter :: xp =  selected_real_kind(15) !! Précision des calculs
+INTEGER,PARAMETER :: XP =  SELECTED_REAL_KIND(15) !! Précision des calculs
 
 !! CONSTANTES PHYSIQUES 
-real(kind=xp),parameter :: k_b             = 1.380649e-23_xp                   !! Constante de Boltzmann
-real(kind=xp),parameter :: pi              = 3.1415926535897932384626433_xp    !! \(\pi\)
-real(kind=xp),parameter :: c_speed         = 2.99792458e8_xp                   !! Vitesse de la lumière
-real(kind=xp),parameter :: m_p             = 1.67262192369e-27_xp              !! Masse du proton
-real(kind=xp),parameter :: G               = 6.6743e-11_xp                     !! Constante de gravitation
-real(kind=xp),parameter :: sigma_stefan    = 5.670374419e-8_xp                 !! Constante de Stefan-Boltzmann
-real(kind=xp),parameter :: a_radiation     = 7.56573085e-16_xp                 !! Constante de radiation
-real(kind=xp),parameter :: M_o             = 1.989e30_xp                       !! Masse du Soleil
-real(kind=xp),parameter :: gamma_g         = 1.6666666666666666667_xp          !! Indice polytropique
-real(kind=xp), parameter :: sigma_e        = 6.6524587321e-29_xp               !! Section efficace de Thomson
+REAL(KIND=XP),PARAMETER :: K_B             = 1.380649E-23_XP                   !! Constante de Boltzmann
+REAL(KIND=XP),PARAMETER :: PI              = 3.1415926535897932384626433_XP    !! \(\pi\)
+REAL(KIND=XP),PARAMETER :: C_SPEED         = 2.99792458E8_XP                   !! Vitesse de la lumière
+REAL(KIND=XP),PARAMETER :: M_P             = 1.67262192369E-27_XP              !! Masse du proton
+REAL(KIND=XP),PARAMETER :: G               = 6.6743E-11_XP                     !! Constante de gravitation
+REAL(KIND=XP),PARAMETER :: SIGMA_STEFAN    = 5.670374419E-8_XP                 !! Constante de Stefan-Boltzmann
+REAL(KIND=XP),PARAMETER :: A_RADIATION     = 7.56573085E-16_XP                 !! Constante de radiation
+REAL(KIND=XP),PARAMETER :: M_O             = 1.989e30_xp                       !! Masse du Soleil
+REAL(KIND=XP),PARAMETER :: GAMMA_G         = 1.6666666666666666667_XP          !! Indice polytropique
+REAL(KIND=XP),PARAMETER :: SIGMA_E         = 6.6524587321E-29_XP               !! Section efficace de Thomson
 
 !! PARAMETRES MODELE
-real(kind=xp)  :: M                  !! Masse trou noir de Schwarzschild
-real(kind=xp)  :: M_0_DOT            !! Taux d'accrétion du milieu ext. sur le disque
-real(kind=xp)  :: f_accretion        !! Rapport entre le taux d'accrétion et le taux d'accrétion critique
-real(kind=xp)  :: r_max              !! Rayon maximal du disque
-real(kind=xp)  :: ALPHA              !! Paramètre phénoménologique (taux de production d'énergie par friction de la matière)
-real(kind=xp)  :: X_FRAC             !! Abondance H
-real(kind=xp)  :: Y_FRAC             !! Abondance He
-integer        :: NX                 !! Nombre de points de discrétisation spatiale
+REAL(KIND=XP)  :: M                  !! Masse trou noir de Schwarzschild
+REAL(KIND=XP)  :: M_0_DOT            !! Taux d'accrétion du milieu ext. sur le disque
+REAL(KIND=XP)  :: f_accretion        !! Rapport entre le taux d'accrétion et le taux d'accrétion critique
+REAL(KIND=XP)  :: r_max              !! Rayon maximal du disque
+REAL(KIND=XP)  :: ALPHA              !! Paramètre phénoménologique (taux de production d'énergie par friction de la matière)
+REAL(KIND=XP)  :: X_FRAC             !! Abondance H
+REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
+INTEGER        :: NX                 !! Nombre de points de discrétisation spatiale
 
 !! CONSTANTES DU SYSTEME
-real(kind=xp)  :: Z_FRAC        !! Abondance éléments lourds
-real(kind=xp)  :: mu            !! Masse atomique moyenne \(\mu\)
-real(kind=xp)  :: R             !! BOLTZMANN OVER PROTON_MASS / LA CONSTANTE DE COME
-real(kind=xp)  :: r_s           !! Rayon de Schwarzschild
-real(kind=xp)  :: r_min         !! Rayon minimal du disque
-real(kind=xp)  :: omega_max     !! Vitesse angulaire maximale (au rayon minimal)
-real(kind=xp)  :: L_tot         !! Luminosité maximale
-real(kind=xp)  :: L_Edd         !! Luminosité d'Eddington
-real(kind=xp)  :: M_crit_dot    !! Taux d'acrétion critique
+REAL(KIND=XP)  :: Z_FRAC        !! Abondance éléments lourds
+REAL(KIND=XP)  :: MU            !! Masse atomique moyenne \(\mu\)
+REAL(KIND=XP)  :: R             !! BOLTZMANN OVER PROTON_MASS / LA CONSTANTE DE COME
+REAL(KIND=XP)  :: R_S           !! Rayon de Schwarzschild
+REAL(KIND=XP)  :: R_MIN         !! Rayon minimal du disque
+REAL(KIND=XP)  :: OMEGA_MAX     !! Vitesse angulaire maximale (au rayon minimal)
+REAL(KIND=XP)  :: L_TOT         !! Luminosité maximale
+REAL(KIND=XP)  :: L_EDD         !! Luminosité d'Eddington
+REAL(KIND=XP)  :: M_CRIT_DOT    !! Taux d'acrétion critique
 
 !! CONSTANTES DE NORMALISATION
-real(kind=xp)  :: v_0           !! Vitesse d'accrétion
-real(kind=xp)  :: nu_0          !! Viscosité
-real(kind=xp)  :: Sigma_0       !! Densité de surface
-real(kind=xp)  :: S_0           !! \(S_0 = \Sigma_0\)
-real(kind=xp)  :: rho_0         !! Densité volumique
-real(kind=xp)  :: T_0           !! Température
-real(kind=xp)  :: P_0           !! Pression totale
-real(kind=xp)  :: P_rad_0       !! Pression de radiation
-real(kind=xp)  :: P_gaz_0       !! Pression gazeuse
-real(kind=xp)  :: C_v_0         !! Capacité calorifique
-real(kind=xp)  :: F_Z_DIFF_0    !! Flux (diffusif) lorsque la profondeur optique \(\tau_{eff} > 1\)
-real(kind=xp)  :: F_Z_RAD_0     !! Flux (radiatif) lorsque \(\tau_{eff} < 1\)
-real(kind=xp)  :: KAPPA_E       !! Opacité diffusion Thomson
-real(kind=xp)  :: Q_PLUS_0      !! Terme de chauffage
-real(kind=xp)  :: Q_ADV_0       !! Chaleur advectée
-real(kind=xp)  :: B_0           !! Coefficient b du trinôme pour le calcul de H
-real(kind=xp)  :: C_0           !! Coefficient c du trinôme pour le calcul de H
+REAL(KIND=XP)  :: V_0           !! Vitesse d'accrétion
+REAL(KIND=XP)  :: NU_0          !! Viscosité
+REAL(KIND=XP)  :: SIGMA_0       !! Densité de surface
+REAL(KIND=XP)  :: S_0           !! \(S_0 = \Sigma_0\)
+REAL(KIND=XP)  :: RHO_0         !! Densité volumique
+REAL(KIND=XP)  :: T_0           !! Température
+REAL(KIND=XP)  :: P_0           !! Pression totale
+REAL(KIND=XP)  :: P_RAD_0       !! Pression de radiation
+REAL(KIND=XP)  :: P_GAZ_0       !! Pression gazeuse
+REAL(KIND=XP)  :: C_V_0         !! Capacité calorifique
+REAL(KIND=XP)  :: F_Z_DIFF_0    !! Flux (diffusif) lorsque la profondeur optique \(\tau_{eff} > 1\)
+REAL(KIND=XP)  :: F_Z_RAD_0     !! Flux (radiatif) lorsque \(\tau_{eff} < 1\)
+REAL(KIND=XP)  :: KAPPA_E       !! Opacité diffusion Thomson
+REAL(KIND=XP)  :: Q_PLUS_0      !! Terme de chauffage
+REAL(KIND=XP)  :: Q_ADV_0       !! Chaleur advectée
+REAL(KIND=XP)  :: B_0           !! Coefficient b du trinôme pour le calcul de H
+REAL(KIND=XP)  :: C_0           !! Coefficient c du trinôme pour le calcul de H
 
 !! VARIABLES ADIMENSIONNÉES
-real(kind=xp) :: T_AD            !! Temps adimensionné
-real(kind=xp) :: X_AD            !! Rayon adimensionné
-real(kind=xp) :: OMEGA_AD        !! Vitesse de rotation adimensionnée
-real(kind=xp) :: P_AD            !! Pression totale adimensionnée
-real(kind=xp) :: P_GAZ_AD        !! Pression gazeuse adimensionnée
-real(kind=xp) :: P_RAD_AD        !! Pression de radiation adimensionnée
-real(kind=xp) :: BETA            !! Indicateur de pression
-real(kind=xp) :: C_S_AD          !! Vitesse de son adimensionnée
-real(kind=xp) :: H_AD            !! Demi-hauteur du disque adimensionnée
-real(kind=xp) :: RHO_AD          !! Densité volumique
-real(kind=xp) :: NU_AD           !! Viscosité
-real(kind=xp) :: S_AD            !! Densité de surface
-real(kind=xp) :: V_AD            !! Vitese d'accrétion
-real(kind=xp) :: M_DOT_AD        !! Taux d'accrétion
-real(kind=xp) :: TEMP_AD         !! Température
-real(kind=xp) :: Q_PLUS_AD       !! Chaleur apportée
-real(kind=xp) :: Q_ADV_AD        !! Chaleur advectée
-real(kind=xp) :: C_V_AD          !! Capacité calorifique
+REAL(KIND=XP) :: T_AD            !! TEMPS ADIMENSIONNÉ
+REAL(KIND=XP) :: X_AD            !! RAYON ADIMENSIONNÉ
+REAL(KIND=XP) :: OMEGA_AD        !! VITESSE DE ROTATION ADIMENSIONNÉE
+REAL(KIND=XP) :: P_AD            !! PRESSION TOTALE ADIMENSIONNÉE
+REAL(KIND=XP) :: P_GAZ_AD        !! PRESSION GAZEUSE ADIMENSIONNÉE
+REAL(KIND=XP) :: P_RAD_AD        !! PRESSION DE RADIATION ADIMENSIONNÉE
+REAL(KIND=XP) :: BETA            !! INDICATEUR DE PRESSION
+REAL(KIND=XP) :: C_S_AD          !! VITESSE DE SON ADIMENSIONNÉE
+REAL(KIND=XP) :: H_AD            !! DEMI-HAUTEUR DU DISQUE ADIMENSIONNÉE
+REAL(KIND=XP) :: RHO_AD          !! DENSITÉ VOLUMIQUE
+REAL(KIND=XP) :: NU_AD           !! VISCOSITÉ
+REAL(KIND=XP) :: S_AD            !! DENSITÉ DE SURFACE
+REAL(KIND=XP) :: V_AD            !! VITESE D'ACCRÉTION
+REAL(KIND=XP) :: M_DOT_AD        !! TAUX D'ACCRÉTION
+REAL(KIND=XP) :: TEMP_AD         !! TEMPÉRATURE
+REAL(KIND=XP) :: Q_PLUS_AD       !! CHALEUR APPORTÉE
+REAL(KIND=XP) :: Q_ADV_AD        !! CHALEUR ADVECTÉE
+REAL(KIND=XP) :: C_V_AD          !! CAPACITÉ CALORIFIQUE
 
 !! VARIABLES AVEC CONDITIONS
-real(kind=xp) :: Q_MOINS  !! Chaleur dissipée adimensionnée
-real(kind=xp) :: F_Z      !! Flux adimensionnée
-real(kind=xp) :: TAU_EFF     !! Profondeur optique effective
-real(kind=xp) :: KAPPA_FF    !! Opacité free-free
-real(kind=xp) :: EPSILON_FF  !! Emissivité free-free
+REAL(KIND=XP) :: Q_MOINS     !! CHALEUR DISSIPÉE ADIMENSIONNÉE
+REAL(KIND=XP) :: F_Z         !! FLUX ADIMENSIONNÉE
+REAL(KIND=XP) :: TAU_EFF     !! PROFONDEUR OPTIQUE EFFECTIVE
+REAL(KIND=XP) :: KAPPA_FF    !! OPACITÉ FREE-FREE
+REAL(KIND=XP) :: EPSILON_FF  !! EMISSIVITÉ FREE-FREE
 
 
 !===================================================================================================
@@ -109,8 +109,8 @@ SUBROUTINE APPEL_PARAM_INPUT()
 !>    On utilise des valeurs par défaut en cas d'erreur.
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-    integer :: file_id
-    namelist /input/ M,f_accretion,r_max,ALPHA,X_FRAC,Y_FRAC,NX
+    INTEGER :: FILE_ID
+    NAMELIST /INPUT/ M,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC,NX
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
     M             = 3._xp        ! [M_{sol}]
@@ -153,38 +153,38 @@ SUBROUTINE CALCUL_CONSTANTES()
     IMPLICIT NONE
 
     ! TAUX D'ACCRETION
-    L_Edd       = 4._xp * pi * G * M * m_p * C_SPEED / sigma_e
-    M_crit_dot  = 12._xp * L_Edd / C_SPEED**2._xp
-    M_0_DOT     = f_accretion * M_crit_dot
+    L_EDD       = 4._XP * PI * G * M * M_P * C_SPEED / SIGMA_E
+    M_CRIT_DOT  = 12._XP * L_EDD / C_SPEED**2._XP
+    M_0_DOT     = F_ACCRETION * M_CRIT_DOT
 
     ! CONSTANTES DU SYSTEME
     Z_FRAC     = 1.0_XP - X_FRAC - Y_FRAC
-    mu         = 1.0_xp / (2.0_xp * X_FRAC + 3.0_xp/4.0_xp * Y_FRAC + Z_FRAC/2.0_xp)
-    R          = k_b / m_p 
-    r_s        = 2.0_xp * G * M / C_SPEED**2.0_xp
-    r_min      = 3.0_xp * r_s
-    r_max      = r_max * r_s
-    omega_max  = (G * M / r_min**3.0_xp)**(0.5_xp) 
-    L_tot      = M_0_dot * C_SPEED**2.0_xp / 12.0_xp 
+    MU         = 1.0_XP / (2.0_XP * X_FRAC + 3.0_XP/4.0_XP * Y_FRAC + Z_FRAC/2.0_XP)
+    R          = K_B / M_P 
+    R_S        = 2.0_XP * G * M / C_SPEED**2.0_XP
+    R_MIN      = 3.0_XP * R_S
+    R_MAX      = R_MAX * R_S
+    OMEGA_MAX  = (G * M / R_MIN**3.0_XP)**(0.5_XP) 
+    L_TOT      = M_0_DOT * C_SPEED**2.0_XP / 12.0_XP 
 
     ! CONSTANTES DE NORMALISATION
-    v_0         = r_s * omega_max
-    nu_0        = 4.0_xp/3.0_xp * r_s**2.0_xp * omega_max
-    Sigma_0     = M_0_dot / (omega_max * 2.0_xp * pi * r_s**2.0_xp)
-    S_0         = Sigma_0
-    rho_0       = Sigma_0 / (2._xp * r_s)
-    T_0         = (L_tot / (9.0_xp * 4.0_xp * pi * r_s**2.0_xp * sigma_stefan))**(0.25_xp)
-    P_0         = M_0_dot * omega_max / (4.0_xp * pi * r_s)
-    P_rad_0     = a_radiation * T_0**4.0_xp / 3.0_xp
-    P_gaz_0     = R * rho_0 * T_0 / mu
-    C_v_0       = R / mu
-    F_Z_DIFF_0  = 2.0_xp * a_radiation * C_SPEED * T_0**4.0_xp / (3.0_xp * S_0)
-    F_Z_RAD_0   = r_s * rho_0**2._xp * T_0**(0.5_xp) * 6.22e13_xp
-    KAPPA_E     = 0.02_xp * (1.0_xp + X_FRAC) 
-    Q_PLUS_0    = 3.0_xp * r_s**2.0_xp * omega_max**3.0_xp
-    Q_ADV_0     = omega_max * T_0 * R / mu
-    B_0         = 2.0_xp * a_radiation * T_0**4.0_xp / (3.0_xp * r_s * S_0 * omega_max**2.0_xp)
-    C_0         = R * T_0 / (r_s**2.0_xp / mu / omega_max**2.0_xp)
+    V_0         = R_S * OMEGA_MAX
+    NU_0        = 4.0_XP/3.0_XP * R_S**2.0_XP * OMEGA_MAX
+    SIGMA_0     = M_0_DOT / (OMEGA_MAX * 2.0_XP * PI * R_S**2.0_XP)
+    S_0         = SIGMA_0
+    RHO_0       = SIGMA_0 / (2._XP * R_S)
+    T_0         = (L_TOT / (9.0_XP * 4.0_XP * PI * R_S**2.0_XP * SIGMA_STEFAN))**(0.25_XP)
+    P_0         = M_0_DOT * OMEGA_MAX / (4.0_XP * PI * R_S)
+    P_RAD_0     = A_RADIATION * T_0**4.0_XP / 3.0_XP
+    P_GAZ_0     = R * RHO_0 * T_0 / MU
+    C_V_0       = R / MU
+    F_Z_DIFF_0  = 2.0_XP * A_RADIATION * C_SPEED * T_0**4.0_XP / (3.0_XP * S_0)
+    F_Z_RAD_0   = R_S * RHO_0**2._XP * T_0**(0.5_XP) * 6.22E13_XP
+    KAPPA_E     = 0.02_XP * (1.0_XP + X_FRAC) 
+    Q_PLUS_0    = 3.0_XP * R_S**2.0_XP * OMEGA_MAX**3.0_XP
+    Q_ADV_0     = OMEGA_MAX * T_0 * R / MU
+    B_0         = 2.0_XP * A_RADIATION * T_0**4.0_XP / (3.0_XP * R_S * S_0 * OMEGA_MAX**2.0_XP)
+    C_0         = R * T_0 / (R_S**2.0_XP / MU / OMEGA_MAX**2.0_XP)
 
     WRITE(*,"(49('-'))")
     PRINT*,'------------CONSTANTES DE SIMULATION------------'
