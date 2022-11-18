@@ -43,7 +43,7 @@ INTEGER        :: NX                 !! Nombre de points de discrétisation spat
 !! CONSTANTES DU SYSTEME
 REAL(KIND=XP)  :: Z_FRAC        !! Abondance éléments lourds
 REAL(KIND=XP)  :: MU            !! Masse atomique moyenne \(\mu\)
-REAL(KIND=XP)  :: R             !! BOLTZMANN OVER PROTON_MASS / LA CONSTANTE DE COME
+REAL(KIND=XP)  :: R             !! Boltzmann over proton_mass / La constante de Come
 REAL(KIND=XP)  :: R_S           !! Rayon de Schwarzschild
 REAL(KIND=XP)  :: R_MIN         !! Rayon minimal du disque
 REAL(KIND=XP)  :: OMEGA_MAX     !! Vitesse angulaire maximale (au rayon minimal)
@@ -71,31 +71,31 @@ REAL(KIND=XP)  :: B_0           !! Coefficient b du trinôme pour le calcul de H
 REAL(KIND=XP)  :: C_0           !! Coefficient c du trinôme pour le calcul de H
 
 !! VARIABLES ADIMENSIONNÉES
-REAL(KIND=XP) :: T_AD            !! TEMPS ADIMENSIONNÉ
-REAL(KIND=XP) :: X_AD            !! RAYON ADIMENSIONNÉ
-REAL(KIND=XP) :: OMEGA_AD        !! VITESSE DE ROTATION ADIMENSIONNÉE
-REAL(KIND=XP) :: P_AD            !! PRESSION TOTALE ADIMENSIONNÉE
-REAL(KIND=XP) :: P_GAZ_AD        !! PRESSION GAZEUSE ADIMENSIONNÉE
-REAL(KIND=XP) :: P_RAD_AD        !! PRESSION DE RADIATION ADIMENSIONNÉE
-REAL(KIND=XP) :: BETA            !! INDICATEUR DE PRESSION
-REAL(KIND=XP) :: C_S_AD          !! VITESSE DE SON ADIMENSIONNÉE
-REAL(KIND=XP) :: H_AD            !! DEMI-HAUTEUR DU DISQUE ADIMENSIONNÉE
-REAL(KIND=XP) :: RHO_AD          !! DENSITÉ VOLUMIQUE
-REAL(KIND=XP) :: NU_AD           !! VISCOSITÉ
-REAL(KIND=XP) :: S_AD            !! DENSITÉ DE SURFACE
-REAL(KIND=XP) :: V_AD            !! VITESE D'ACCRÉTION
-REAL(KIND=XP) :: M_DOT_AD        !! TAUX D'ACCRÉTION
-REAL(KIND=XP) :: TEMP_AD         !! TEMPÉRATURE
-REAL(KIND=XP) :: Q_PLUS_AD       !! CHALEUR APPORTÉE
-REAL(KIND=XP) :: Q_ADV_AD        !! CHALEUR ADVECTÉE
-REAL(KIND=XP) :: C_V_AD          !! CAPACITÉ CALORIFIQUE
+REAL(KIND=XP) :: T_AD            !! Temps Adimensionné
+REAL(KIND=XP) :: X_AD            !! Rayon Adimensionné
+REAL(KIND=XP) :: OMEGA_AD        !! Vitesse De Rotation Adimensionnée
+REAL(KIND=XP) :: P_AD            !! Pression totale adimensionnée
+REAL(KIND=XP) :: P_GAZ_AD        !! Pression gazeuse adimensionnée
+REAL(KIND=XP) :: P_RAD_AD        !! Pression de radiation adimensionnée
+REAL(KIND=XP) :: BETA            !! Indicateur De Pression
+REAL(KIND=XP) :: C_S_AD          !! Vitesse De Son Adimensionnée
+REAL(KIND=XP) :: H_AD            !! Demi-Hauteur Du Disque Adimensionnée
+REAL(KIND=XP) :: RHO_AD          !! Densité Volumique
+REAL(KIND=XP) :: NU_AD           !! Viscosité
+REAL(KIND=XP) :: S_AD            !! Densité De Surface
+REAL(KIND=XP) :: V_AD            !! Vitese D'Accrétion
+REAL(KIND=XP) :: M_DOT_AD        !! Taux D'Accrétion
+REAL(KIND=XP) :: TEMP_AD         !! Température
+REAL(KIND=XP) :: Q_PLUS_AD       !! Chaleur Apportée
+REAL(KIND=XP) :: Q_ADV_AD        !! Chaleur Advectée
+REAL(KIND=XP) :: C_V_AD          !! Capacité Calorifique
 
 !! VARIABLES AVEC CONDITIONS
-REAL(KIND=XP) :: Q_MOINS     !! CHALEUR DISSIPÉE ADIMENSIONNÉE
-REAL(KIND=XP) :: F_Z         !! FLUX ADIMENSIONNÉE
-REAL(KIND=XP) :: TAU_EFF     !! PROFONDEUR OPTIQUE EFFECTIVE
-REAL(KIND=XP) :: KAPPA_FF    !! OPACITÉ FREE-FREE
-REAL(KIND=XP) :: EPSILON_FF  !! EMISSIVITÉ FREE-FREE
+REAL(KIND=XP) :: Q_MOINS     !! Chaleur Dissipée Adimensionnée
+REAL(KIND=XP) :: F_Z         !! Flux Adimensionnée
+REAL(KIND=XP) :: TAU_EFF     !! Profondeur Optique Effective
+REAL(KIND=XP) :: KAPPA_FF    !! Opacité Free-Free
+REAL(KIND=XP) :: EPSILON_FF  !! Emissivité Free-Free
 
 
 !===================================================================================================
