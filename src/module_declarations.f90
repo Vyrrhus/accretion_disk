@@ -71,31 +71,52 @@ REAL(KIND=XP)  :: B_0           !! Coefficient b du trinôme pour le calcul de H
 REAL(KIND=XP)  :: C_0           !! Coefficient c du trinôme pour le calcul de H
 
 !! VARIABLES ADIMENSIONNÉES
-REAL(KIND=XP) :: T_AD            !! Temps Adimensionné
-REAL(KIND=XP) :: X_AD            !! Rayon Adimensionné
-REAL(KIND=XP) :: OMEGA_AD        !! Vitesse De Rotation Adimensionnée
-REAL(KIND=XP) :: P_AD            !! Pression totale adimensionnée
-REAL(KIND=XP) :: P_GAZ_AD        !! Pression gazeuse adimensionnée
-REAL(KIND=XP) :: P_RAD_AD        !! Pression de radiation adimensionnée
-REAL(KIND=XP) :: BETA            !! Indicateur De Pression
-REAL(KIND=XP) :: C_S_AD          !! Vitesse De Son Adimensionnée
-REAL(KIND=XP) :: H_AD            !! Demi-Hauteur Du Disque Adimensionnée
-REAL(KIND=XP) :: RHO_AD          !! Densité Volumique
-REAL(KIND=XP) :: NU_AD           !! Viscosité
-REAL(KIND=XP) :: S_AD            !! Densité De Surface
-REAL(KIND=XP) :: V_AD            !! Vitese D'Accrétion
-REAL(KIND=XP) :: M_DOT_AD        !! Taux D'Accrétion
-REAL(KIND=XP) :: TEMP_AD         !! Température
-REAL(KIND=XP) :: Q_PLUS_AD       !! Chaleur Apportée
-REAL(KIND=XP) :: Q_ADV_AD        !! Chaleur Advectée
-REAL(KIND=XP) :: C_V_AD          !! Capacité Calorifique
+REAL(KIND=XP) :: T_AD(NX)            !! Temps Adimensionné
+REAL(KIND=XP) :: X_AD(NX)            !! Rayon Adimensionné
+REAL(KIND=XP) :: OMEGA_AD(NX)        !! Vitesse De Rotation Adimensionnée
+REAL(KIND=XP) :: P_AD(NX)            !! Pression totale adimensionnée
+REAL(KIND=XP) :: P_GAZ_AD(NX)        !! Pression gazeuse adimensionnée
+REAL(KIND=XP) :: P_RAD_AD(NX)        !! Pression de radiation adimensionnée
+REAL(KIND=XP) :: BETA(NX)            !! Indicateur De Pression
+REAL(KIND=XP) :: C_S_AD(NX)          !! Vitesse De Son Adimensionnée
+REAL(KIND=XP) :: H_AD(NX)            !! Demi-Hauteur Du Disque Adimensionnée
+REAL(KIND=XP) :: RHO_AD(NX)          !! Densité Volumique
+REAL(KIND=XP) :: NU_AD(NX)           !! Viscosité
+REAL(KIND=XP) :: S_AD(NX)            !! Densité De Surface
+REAL(KIND=XP) :: V_AD(NX)            !! Vitese D'Accrétion
+REAL(KIND=XP) :: M_DOT_AD(NX)        !! Taux D'Accrétion
+REAL(KIND=XP) :: TEMP_AD(NX)         !! Température
+REAL(KIND=XP) :: Q_PLUS_AD(NX)       !! Chaleur Apportée
+REAL(KIND=XP) :: Q_ADV_AD(NX)        !! Chaleur Advectée
+REAL(KIND=XP) :: C_V_AD(NX)          !! Capacité Calorifique
 
 !! VARIABLES AVEC CONDITIONS
-REAL(KIND=XP) :: Q_MOINS     !! Chaleur Dissipée Adimensionnée
-REAL(KIND=XP) :: F_Z         !! Flux Adimensionnée
-REAL(KIND=XP) :: TAU_EFF     !! Profondeur Optique Effective
-REAL(KIND=XP) :: KAPPA_FF    !! Opacité Free-Free
-REAL(KIND=XP) :: EPSILON_FF  !! Emissivité Free-Free
+REAL(KIND=XP) :: Q_MOINS(NX)     !! Chaleur Dissipée Adimensionnée
+REAL(KIND=XP) :: F_Z(NX)         !! Flux Adimensionnée
+REAL(KIND=XP) :: TAU_EFF(NX)     !! Profondeur Optique Effective
+REAL(KIND=XP) :: KAPPA_FF(NX)    !! Opacité Free-Free
+REAL(KIND=XP) :: EPSILON_FF(NX)  !! Emissivité Free-Free
+
+!! VARIABLES 
+REAL(KIND=XP) :: T(NX)            !! Temps
+REAL(KIND=XP) :: X(NX)            !! Rayon
+REAL(KIND=XP) :: OMEGA(NX)        !! Vitesse De Rotation
+REAL(KIND=XP) :: P(NX)            !! Pression totale
+REAL(KIND=XP) :: P_GAZ(NX)        !! Pression gazeuse
+REAL(KIND=XP) :: P_RAD(NX)        !! Pression de radiation
+REAL(KIND=XP) :: BETA(NX)         !! Indicateur De Pression
+REAL(KIND=XP) :: C_S(NX)          !! Vitesse De Son
+REAL(KIND=XP) :: H(NX)            !! Demi-Hauteur Du Disque
+REAL(KIND=XP) :: RHO(NX)          !! Densité Volumique
+REAL(KIND=XP) :: NU(NX)           !! Viscosité
+REAL(KIND=XP) :: S(NX)            !! Densité De Surface
+REAL(KIND=XP) :: V(NX)            !! Vitese D'Accrétion
+REAL(KIND=XP) :: M_DOT(NX)        !! Taux D'Accrétion
+REAL(KIND=XP) :: TEMP(NX)         !! Température
+REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
+REAL(KIND=XP) :: Q_ADV(NX)        !! Chaleur Advectée
+REAL(KIND=XP) :: C_V(NX)          !! Capacité Calorifique
+
 
 
 !===================================================================================================
