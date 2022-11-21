@@ -38,7 +38,13 @@ REAL(KIND=XP)  :: r_max              !! Rayon maximal du disque
 REAL(KIND=XP)  :: ALPHA              !! Paramètre phénoménologique (taux de production d'énergie par friction de la matière)
 REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
+
+!! PARAMÈTRES SPATIAUX
 INTEGER,PARAMETER :: NX = 500        !! Nombre de points de discrétisation spatiale
+REAL(KIND=XP)  :: DX
+REAL(KIND=XP)  :: X_MIN
+REAL(KIND=XP)  :: X_MAX
+INTEGER :: I
 
 !! CONSTANTES DU SYSTEME
 REAL(KIND=XP)  :: Z_FRAC        !! Abondance éléments lourds
@@ -89,6 +95,8 @@ REAL(KIND=XP) :: TEMP_AD(NX)         !! Température
 REAL(KIND=XP) :: Q_PLUS_AD(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV_AD(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V_AD(NX)          !! Capacité Calorifique
+REAL(KIND=XP) :: B_AD(NX)            !! Coefficient b du trinôme pour le calcul de H
+REAL(KIND=XP) :: C_AD(NX)            !! Coefficient c du trinôme pour le calcul de H
 
 !! VARIABLES AVEC CONDITIONS
 REAL(KIND=XP) :: Q_MOINS(NX)     !! Chaleur Dissipée Adimensionnée
@@ -115,7 +123,6 @@ REAL(KIND=XP) :: TEMP(NX)         !! Température
 REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V(NX)          !! Capacité Calorifique
-
 
 
 !===================================================================================================
@@ -146,17 +153,17 @@ SUBROUTINE APPEL_PARAM_INPUT()
     CLOSE(file_id)
 
     ! AFFICHAGE PARAMETRES D'ENTREE
-    PRINT*,"-----------------INITIALISATION-----------------"
-    PRINT*,"------------VALEURS PARAMETRES EN INPUT---------"
-    WRITE(*,"(49('-'))")
+    WRITE(*,"('-----------------INITIALISATION-----------------')")
+    WRITE(*,"('------------VALEURS PARAMETRES EN INPUT---------')")
+    WRITE(*,"(48('-'))")
     
-    PRINT*,"MASSE DU TROU NOIR [MASSE SOLAIRE]             = ",M
-    PRINT*,"RAPPORT TAUX D'ACCRETION / TAUX CRITIQUE       = ",f_accretion  
-    PRINT*,"R_MAX [RAYON DE SCHWARZSCHILD]                 = ",r_max
-    PRINT*,"ALPHA                                          = ",ALPHA
-    PRINT*,"X                                              = ",X_FRAC
-    PRINT*,"Y                                              = ",Y_FRAC
-    PRINT*,"NB POINTS DE DISCRETISATION SPATIALE           = ",NX
+    WRITE(*,"('MASSE DU TROU NOIR [MASSE SOLAIRE]             = ',1pE12.1)") M
+    WRITE(*,"('RAPPORT TAUX D ACCRETION / TAUX CRITIQUE       = ',1pE12.2)") f_accretion  
+    WRITE(*,"('R_MAX [RAYON DE SCHWARZSCHILD]                 = ',1pE12.1)") r_max
+    WRITE(*,"('ALPHA                                          = ',F12.2)") ALPHA
+    WRITE(*,"('X                                              = ',F12.2)") X_FRAC
+    WRITE(*,"('Y                                              = ',F12.2)") Y_FRAC
+    WRITE(*,"('NB POINTS DE DISCRETISATION SPATIALE           = ',I3)") NX
 
     ! CONVERSION UNITES SI
     M = M * M_o
@@ -170,7 +177,9 @@ SUBROUTINE CALCUL_CONSTANTES()
 !>    Cette routine calcule l'ensemble des constantes du modèle et les constantes d'adimensionnement. 
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-
+    
+    
+    
     ! TAUX D'ACCRETION
     L_EDD       = 4._XP * PI * G * M * M_P * C_SPEED / SIGMA_E
     M_CRIT_DOT  = 12._XP * L_EDD / C_SPEED**2._XP
@@ -185,7 +194,14 @@ SUBROUTINE CALCUL_CONSTANTES()
     R_MAX      = R_MAX * R_S
     OMEGA_MAX  = (G * M / R_MIN**3.0_XP)**(0.5_XP) 
     L_TOT      = M_0_DOT * C_SPEED**2.0_XP / 12.0_XP 
+    
+    ! DECLARATION DES VARIABLES SPATIALES 
+    X_MAX = SQRT(R_MAX/R_S)
+    X_MIN = SQRT(R_MIN/R_S)
 
+    DX = ( X_MAX - X_MIN ) / NX
+    X_AD = X_MIN + DX * (/(I,I=1,NX)/)
+    
     ! CONSTANTES DE NORMALISATION
     V_0         = R_S * OMEGA_MAX
     NU_0        = 4.0_XP/3.0_XP * R_S**2.0_XP * OMEGA_MAX
@@ -205,41 +221,42 @@ SUBROUTINE CALCUL_CONSTANTES()
     B_0         = 2.0_XP * A_RADIATION * T_0**4.0_XP / (3.0_XP * R_S * S_0 * OMEGA_MAX**2.0_XP)
     C_0         = R * T_0 / (R_S**2.0_XP / MU / OMEGA_MAX**2.0_XP)
 
-    WRITE(*,"(49('-'))")
-    PRINT*,'------------CONSTANTES DE SIMULATION------------'
-    WRITE(*,"(49('-'))")
+
+    WRITE(*,"(48('-'))")
+    WRITE(*,"('------------CONSTANTES DE SIMULATION------------')")
+    WRITE(*,"(48('-'))")
     
-    PRINT*,"MASSE DU TROU NOIR                           M = ",M
-    PRINT*,"TAUX D'ACCRETION                       M_0_DOT = ",M_0_DOT
-    PRINT*,"FRACTION D'ELEMENTS LOURDS                   Z = ",Z_FRAC
-    PRINT*,"POID MOLECULAIRE MOYEN                      MU = ",MU
-    PRINT*,"RAYONS DE SCHWARZSCHILD                    R_S = ",R_S
-    PRINT*,"RAYON MIN DISQUE ACCRETION               R_MIN = ",R_MIN
-    PRINT*,"RAYON MAXIMAL DU DISQUE                  R_MAX = ",R_MAX
-    PRINT*,"VITESSE ROTATION MAX                 OMEGA_MAX = ",OMEGA_MAX
-    PRINT*,"LUMINOSITE TOTALE                        L_TOT = ",L_TOT
+    WRITE(*,"('MASSE DU TROU NOIR                           M = ',1pE12.4)") M
+    WRITE(*,"('TAUX D ACCRETION                       M_0_DOT = ',1pE12.4)") M_0_DOT
+    WRITE(*,"('FRACTION D ELEMENTS LOURDS                   Z = ',1pE12.4)") Z_FRAC
+    WRITE(*,"('POID MOLECULAIRE MOYEN                      MU = ',1pE12.4)") MU
+    WRITE(*,"('RAYONS DE SCHWARZSCHILD                    R_S = ',1pE12.4)") R_S
+    WRITE(*,"('RAYON MIN DISQUE ACCRETION               R_MIN = ',1pE12.4)") R_MIN
+    WRITE(*,"('RAYON MAXIMAL DU DISQUE                  R_MAX = ',1pE12.4)") R_MAX
+    WRITE(*,"('VITESSE ROTATION MAX                 OMEGA_MAX = ',1pE12.4)") OMEGA_MAX
+    WRITE(*,"('LUMINOSITE TOTALE                        L_TOT = ',1pE12.4)") L_TOT
     
-    WRITE(*,"(49('-'))")
+    WRITE(*,"(48('-'))")
     
-    PRINT*,"CONSTANTE DE VITESSE                       V_0 = ",V_0
-    PRINT*,"CONSTANTE DE VISCOSITE                    NU_0 = ",NU_0
-    PRINT*,"CONSTANTE DE DENSITE                     RHO_0 = ",RHO_0
-    PRINT*,"CONSTANTE DE TEMPERATURE                   T_0 = ",T_0
-    PRINT*,"CONSTANTE DE DENSITE SURFACIQUE        SIGMA_0 = ",SIGMA_0
-    PRINT*,"CONSTANTE DE DENSITE                       S_0 = ",S_0
-    PRINT*,"CONSTANTE DE PRESSION                      P_0 = ",P_0
-    PRINT*,"CONSTANTE DE PRESSON RAD               P_RAD_0 = ",P_RAD_0
-    PRINT*,"CONSTANTE DE PRESSION GAZ              P_GAZ_0 = ",P_GAZ_0
-    PRINT*,"CONSTANTE DE CAPACITE CALORIFIQUE        C_V_0 = ",C_V_0
-    PRINT*,"CONSTANTE DE FLUX DIFFUSIF          F_Z_DIFF_0 = ",F_Z_DIFF_0
-    PRINT*,"CONSTANTE DE FLUX RADIATIF           F_Z_RAD_0 = ",F_Z_RAD_0
-    PRINT*,"CONSTANTE OPACITÉ DE THOMPSON          KAPPA_E = ",KAPPA_E
-    PRINT*,"CONSTANTE DE CHALEURE APPORTÉE        Q_PLUS_0 = ",Q_PLUS_0
-    PRINT*,"CONSTANTE DE CHALEURE ADVECTÉE         Q_ADV_0 = ",Q_ADV_0
-    PRINT*,"COEFFICIENT B DU POLYNOME DE H             B_0 = ",B_0
-    PRINT*,"COEFFICIENT C DU POLYNOME DE H             C_0 = ",C_0  
+    WRITE(*,"('CONSTANTE DE VITESSE                       V_0 = ',1pE12.4)") V_0
+    WRITE(*,"('CONSTANTE DE VISCOSITE                    NU_0 = ',1pE12.4)") NU_0
+    WRITE(*,"('CONSTANTE DE DENSITE                     RHO_0 = ',1pE12.4)") RHO_0
+    WRITE(*,"('CONSTANTE DE TEMPERATURE                   T_0 = ',1pE12.4)") T_0
+    WRITE(*,"('CONSTANTE DE DENSITE SURFACIQUE        SIGMA_0 = ',1pE12.4)") SIGMA_0
+    WRITE(*,"('CONSTANTE DE DENSITE                       S_0 = ',1pE12.4)") S_0
+    WRITE(*,"('CONSTANTE DE PRESSION                      P_0 = ',1pE12.4)") P_0
+    WRITE(*,"('CONSTANTE DE PRESSON RAD               P_RAD_0 = ',1pE12.4)") P_RAD_0
+    WRITE(*,"('CONSTANTE DE PRESSION GAZ              P_GAZ_0 = ',1pE12.4)") P_GAZ_0
+    WRITE(*,"('CONSTANTE DE CAPACITE CALORIFIQUE        C_V_0 = ',1pE12.4)") C_V_0
+    WRITE(*,"('CONSTANTE DE FLUX DIFFUSIF          F_Z_DIFF_0 = ',1pE12.4)") F_Z_DIFF_0
+    WRITE(*,"('CONSTANTE DE FLUX RADIATIF           F_Z_RAD_0 = ',1pE12.4)") F_Z_RAD_0
+    WRITE(*,"('CONSTANTE OPACITÉ DE THOMPSON          KAPPA_E = ',1pE12.4)") KAPPA_E
+    WRITE(*,"('CONSTANTE DE CHALEURE APPORTÉE        Q_PLUS_0 = ',1pE12.4)") Q_PLUS_0
+    WRITE(*,"('CONSTANTE DE CHALEURE ADVECTÉE         Q_ADV_0 = ',1pE12.4)") Q_ADV_0
+    WRITE(*,"('COEFFICIENT B DU POLYNOME DE H             B_0 = ',1pE12.4)") B_0
+    WRITE(*,"('COEFFICIENT C DU POLYNOME DE H             C_0 = ',1pE12.4)") C_0  
     
-    WRITE(*,"(49('-'))")
+    WRITE(*,"(48('-'))")
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE CALCUL_CONSTANTES

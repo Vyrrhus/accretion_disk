@@ -1,21 +1,25 @@
-!-------------------------------------------------------------
-                 MODULE MODULE_FUNCTION 
-!-------------------------------------------------------------
+!===================================================================================================
+          MODULE MODULE_FUNCTION 
+!===================================================================================================
+!>   Ce module permet de calculer les variables adimensionnées dans l'ordre adéquat
+!===================================================================================================
 
 USE MODULE_DECLARATIONS
-
 IMPLICIT NONE
 
-                         CONTAINS 
-!-------------------------------------------------------------
+!===================================================================================================
+          CONTAINS 
+!===================================================================================================
 
 SUBROUTINE EQU_ALGEBRIQUES(TEMP_AD,S_AD,X_AD,COND_LIM_NU,COND_LIM_S,DIFF_FINIE,FONCTION_H)
-
+!---------------------------------------------------------------------------------------------------
+!>    
+!---------------------------------------------------------------------------------------------------
      IMPLICIT NONE
      REAL(KIND=XP),INTENT(IN),DIMENSION(NX) :: TEMP_AD
      REAL(KIND=XP),INTENT(IN),DIMENSION(NX) :: S_AD
      REAL(KIND=XP),INTENT(IN),DIMENSION(NX) :: X_AD
-     REAL(KIND=XP) :: COND_LIM_NU,COND_LIM_S
+     REAL(KIND=XP) :: COND_LIM_NU, COND_LIM_S
      
      REAL(KIND=XP),DIMENSION(NX) :: NU_AD
      REAL(KIND=XP),DIMENSION(NX) :: V_AD
@@ -31,6 +35,8 @@ SUBROUTINE EQU_ALGEBRIQUES(TEMP_AD,S_AD,X_AD,COND_LIM_NU,COND_LIM_S,DIFF_FINIE,F
      REAL(KIND=XP),DIMENSION(NX) :: C_V_AD
      REAL(KIND=XP),DIMENSION(NX) :: KAPPA_FF
      REAL(KIND=XP),DIMENSION(NX) :: H_AD
+     REAL(KIND=XP),DIMENSION(NX) :: B_AD
+     REAL(KIND=XP),DIMENSION(NX) :: C_AD
      
      INTERFACE 
      	FUNCTION DIFF_FINIE(VEC,COND_LIM,NX)
@@ -52,19 +58,30 @@ SUBROUTINE EQU_ALGEBRIQUES(TEMP_AD,S_AD,X_AD,COND_LIM_NU,COND_LIM_S,DIFF_FINIE,F
      	END FUNCTION FONCTION_H
      END INTERFACE
      
-     
-     
-     OMEGA_AD = 3.0_XP**(1.5_XP)*X_AD**(-3.0_XP)
-     
-     P_RAD_AD = TEMP_AD ** 4.0_XP
-     
-     ! IMPLEMENTER EQUATION DE H
-     H_AD = 0.0_XP
+     ! Vitesse de rotation
+     OMEGA_AD = 3.0_XP**(1.5_XP) * X_AD**(-3.0_XP)
+
+     ! Pression de radiation
+     P_RAD_AD = TEMP_AD**4.0_XP
+
+     ! Demi-hauteur du disque
+     B_AD = (TEMP_AD**4._XP * X_AD) / (OMEGA_AD**2._XP * S_AD)
+     C_AD = TEMP_AD / (OMEGA_AD**2._XP)
+     H_AD = (B_0 * B_AD + sqrt((B_0 * B_AD)**2._XP + 4._XP * C_0 * C_AD)) / 2._XP
+
+     ! Vitesse du son
      C_S_AD = OMEGA_AD * H_AD
+
+     ! Densité volumique
      RHO_AD = S_AD / ( X_AD * H_AD )
      
+     ! Viscosité
      NU_AD = 0.5_XP * ALPHA * C_S_AD * H_AD
-     Q_PLUS_AD = NU_AD * OMEGA_AD ** 2.0_XP
+
+     ! Chaleur apportée
+     Q_PLUS_AD = NU_AD * OMEGA_AD**2.0_XP
+
+     ! Vitesse d'accrétion
      
      ! IMPLEMENTER EQUATION VITESSE
      !--------
@@ -82,27 +99,27 @@ SUBROUTINE EQU_ALGEBRIQUES(TEMP_AD,S_AD,X_AD,COND_LIM_NU,COND_LIM_S,DIFF_FINIE,F
      
      KAPPA_FF = RHO_AD * TEMP_AD ** (-3.5_XP) * ( RHO_0 * T_0 **(-3.5_XP) * 6.13E18_XP)
      
-     
+!---------------------------------------------------------------------------------------------------
 END SUBROUTINE EQU_ALGEBRIQUES
+!---------------------------------------------------------------------------------------------------
 
-!-------------------------------------------------------------
-!-------------------------------------------------------------
-! FUNCTION POUR CALCUL DERIVEE ET AUTRE
-!-------------------------------------------------------------
-!-------------------------------------------------------------
+
 FUNCTION DIFF_FINIE(VEC,COND_LIM) RESULT(DERIV)
+!---------------------------------------------------------------------------------------------------
+!> Fonction pour calcul de dérivée et autre
+!---------------------------------------------------------------------------------------------------
 	
      IMPLICIT NONE
      REAL(KIND=XP) :: VEC(NX)
      REAL(KIND=XP) :: DERIV(NX)
      REAL(KIND=XP) :: DX,COND_LIM
-     DX = ( R_MAX - R_MIN ) / NX 
-     DERIV(1:NX-1) = ( VEC(1:NX-1)-VEC(2:NX) ) / DX
+
+     DERIV(1:NX-1) = (VEC(1:NX-1)-VEC(2:NX) ) / DX
      DERIV(NX) = COND_LIM 
-	
+
+!---------------------------------------------------------------------------------------------------
 END FUNCTION DIFF_FINIE
-!-------------------------------------------------------------
-!-------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------
 
 
 ! FONCTIONS ALGEBRIQUES 
