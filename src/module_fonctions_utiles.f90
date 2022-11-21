@@ -12,9 +12,10 @@ MODULE FONCTIONS_UTILES
     CONTAINS
     
     REAL(kind=xp) FUNCTION trinome(a, b, c)
-    
+    ! -------------------------------------------------------------------------------------------------------------------------
     ! Fonction trinome calculant la racine positive d'un trinôme du second degré
     ! a*x**2+b*x+cc=0. La fonction retourne une erreur lorsque le déterminant est négatif
+    ! -------------------------------------------------------------------------------------------------------------------------
     
         REAL(kind=xp), INTENT(IN) :: a,b,c
         REAL(kind=xp)             :: Delta
@@ -30,9 +31,10 @@ MODULE FONCTIONS_UTILES
     END FUNCTION
     
     SUBROUTINE calc_H(T_star, x_ad, Omega_star, s_star, H_star)
-    
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcul de H_star en résolvant le trinôme H_star**2-b_0*b_star-c_0*c_star=0
     ! c_0 est défini dans le module "module_declarations
+    ! ------------------------------------------------------------------------------------------------------------------------------------------
     
         REAL(kind=xp) , INTENT(IN)      :: T_star, x_ad, omega_star, S_star
         REAL(kind=xp)                   :: b_star, c_star
@@ -47,8 +49,9 @@ MODULE FONCTIONS_UTILES
     END SUBROUTINE
     
     SUBROUTINE calc_rho(S_star, x_ad, H_star, rho_star)
-    
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcule la densité adimensionnée correspondant à un couple (H_star, S_star) pour x_ad donné
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     
         REAL(kind=xp)  , INTENT(IN)     :: S_star, x_ad, H_star
         REAL(kind=xp)  , INTENT(OUT)    :: rho_star
@@ -58,8 +61,9 @@ MODULE FONCTIONS_UTILES
     END SUBROUTINE
     
     SUBROUTINE calc_P_rad(T_star, P_rad_star)
-    
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcule la pression de radiation adimensionnée à partir de la température adimensionnée
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     
         REAL(kind=xp)  , INTENT(IN)     :: T_star
         REAL(kind=xp)  , INTENT(OUT)    :: P_rad_star
@@ -69,8 +73,9 @@ MODULE FONCTIONS_UTILES
     END SUBROUTINE
     
     SUBROUTINE calc_P_gaz(T_star, rho_star, P_gaz_star)
-    
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcule la pression de gaz adimensionnée à partir de la température et de la densité adimensionnées
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     
         REAL(kind=xp)  , INTENT(IN)     :: T_star, rho_star
         REAL(kind=xp)  , INTENT(OUT)    :: P_gaz_star
@@ -80,9 +85,10 @@ MODULE FONCTIONS_UTILES
     END SUBROUTINE
     
     SUBROUTINE calc_third_term_mince(T_star, rho_star, third_term_star)
-    
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcul du troisième terme dans le cas optiquement mince, en prenant une proposition de température et de densité
-    
+    ! --------------------------------------------------------------------------------------------------------------------------------------
+
         REAL(kind=xp)  , INTENT(IN)     :: T_star, rho_star
         REAL(kind=xp)  , INTENT(OUT)    :: third_term_star
     
@@ -91,8 +97,9 @@ MODULE FONCTIONS_UTILES
     END SUBROUTINE calc_third_term_mince
     
     SUBROUTINE calc_third_term_epais(T_star, rho_star, H_star, third_term_star)
-    
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcul du troisième terme dans le cas optiquement épais, en prenant une proposition de température, de densité et de H
+    ! --------------------------------------------------------------------------------------------------------------------------------------
     
         REAL(kind=xp)  , INTENT(IN)     :: T_star, rho_star, H_star
         REAL(kind=xp)                   :: numerator, denominator

@@ -1,4 +1,4 @@
-module courbe_S
+PROGRAM courbe_S
 USE module_declarations
 USE module_fonctions_utiles
 USE module_branche_epais
@@ -33,4 +33,4 @@ DO j=1,nx
 ENDDO
 
 
-end module courbe_S
+END PROGRAM courbe_S
