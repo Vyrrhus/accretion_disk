@@ -36,12 +36,10 @@ MODULE module_fonctions_utiles
     END FUNCTION
     
     SUBROUTINE calc_H(TEMP_AD, X_AD, OMEGA_AD, S_AD, H_AD)
-
     ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcul de H_AD en résolvant le trinôme H_AD**2-B_0*B_AD-C_AD*c_star=0
     ! C_AD est défini dans le module "module_declarations
     ! ------------------------------------------------------------------------------------------------------------------------------------------
-    
         REAL(kind=xp) , INTENT(IN)      :: TEMP_AD, X_AD, OMEGA_AD, S_AD
         REAL(kind=xp)                   :: B_AD, C_AD
         REAL(kind=xp) , INTENT(OUT)     :: H_AD
