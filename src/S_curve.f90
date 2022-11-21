@@ -1,7 +1,7 @@
 PROGRAM courbe_S
 USE module_declarations
-USE module_fonctions_utiles
 USE module_branche_epais
+USE module_fonctions_utiles
 IMPLICIT NONE
 
 !Déclarations

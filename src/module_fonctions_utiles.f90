@@ -1,6 +1,6 @@
-MODULE FONCTIONS_UTILES
+MODULE module_fonctions_utiles
 
-    USE MODULE_DECLARATIONS
+    USE module_declarations
     
     IMPLICIT NONE
     
@@ -119,4 +119,4 @@ MODULE FONCTIONS_UTILES
         
     ! END function F_to_dicho
     
-END MODULE
+END MODULE module_fonctions_utiles

@@ -1,7 +1,4 @@
 MODULE module_branche_epais
-USE module_declarations
-USE module_fonctions_utiles
-USE module_dicho
 IMPLICIT NONE
 
 CONTAINS
