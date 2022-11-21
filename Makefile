@@ -12,9 +12,10 @@ BINDIR  := bin
 MODULE_SRC 	:= 	module_declarations.f90 \
 				module_fonctions_utiles.f90 \
 				module_function.f90 \
-				# module_dicho.f90 \
-				# module_conditions_initiales.f90 \
-				# module_branche_epais.f90
+				module_branche_epais.f90 \
+				module_dicho.f90 \
+				#module_conditions_initiales.f90 \
+				
 
 MAIN_SRC 	:= main.f90
 SCURVE_SRC 	:= S_curve.f90
