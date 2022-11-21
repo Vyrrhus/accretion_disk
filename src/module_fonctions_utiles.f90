@@ -106,7 +106,7 @@ MODULE module_fonctions_utiles
         REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
     
         numerator=-F_Z_DIFF_0*(2._xp*T_AD**4._xp)
-        denominator=(KAPPA_E+6.13_xpE21*RHO_AD*T_AD**(-7._xp/2._xp)*rho_0*T_0**(-7._xp/2._xp))*S_0*RHO_AD**2*H_AD**2
+        denominator=(KAPPA_E + 6.13E18 * RHO_AD * T_AD**(-7._xp/2._xp) * rho_0 * T_0**(-7._xp/2._xp)) * S_0 * RHO_AD**2 *H_AD**2
         THIRD_TERM_AD=numerator/denominator
     
     END SUBROUTINE calc_third_term_epais
