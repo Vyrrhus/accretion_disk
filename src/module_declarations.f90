@@ -38,7 +38,7 @@ REAL(KIND=XP)  :: r_max              !! Rayon maximal du disque
 REAL(KIND=XP)  :: ALPHA              !! Paramètre phénoménologique (taux de production d'énergie par friction de la matière)
 REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
-INTEGER        :: NX                 !! Nombre de points de discrétisation spatiale
+INTEGER,PARAMETER :: NX = 500        !! Nombre de points de discrétisation spatiale
 
 !! CONSTANTES DU SYSTEME
 REAL(KIND=XP)  :: Z_FRAC        !! Abondance éléments lourds
@@ -104,7 +104,6 @@ REAL(KIND=XP) :: OMEGA(NX)        !! Vitesse De Rotation
 REAL(KIND=XP) :: P(NX)            !! Pression totale
 REAL(KIND=XP) :: P_GAZ(NX)        !! Pression gazeuse
 REAL(KIND=XP) :: P_RAD(NX)        !! Pression de radiation
-REAL(KIND=XP) :: BETA(NX)         !! Indicateur De Pression
 REAL(KIND=XP) :: C_S(NX)          !! Vitesse De Son
 REAL(KIND=XP) :: H(NX)            !! Demi-Hauteur Du Disque
 REAL(KIND=XP) :: RHO(NX)          !! Densité Volumique
@@ -131,7 +130,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: FILE_ID
-    NAMELIST /INPUT/ M,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC,NX
+    NAMELIST /INPUT/ M,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
     M             = 3._xp        ! [M_{sol}]
@@ -140,7 +139,6 @@ SUBROUTINE APPEL_PARAM_INPUT()
     ALPHA         = 1._xp
     X_FRAC        = 0.7_xp
     Y_FRAC        = 0.28_xp
-    NX            = 100
 
     ! LECTURE DES PARAMETRES DEPUIS LE FICHIER
     OPEN(newunit=file_id,file='config/input.config',action='read',status='old')
