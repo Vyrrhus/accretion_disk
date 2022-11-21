@@ -3,16 +3,13 @@
 !------------------------------------------------------------------------
 
 USE MODULE_DECLARATIONS
-USE MODULE_FUNCTION
+USE MODULE_SCHEMAS_SIGMA
 
 IMPLICIT NONE
 
 
 !--- Appel des fonctions
-CALL APPEL_PARAM_INPUT()
-CALL CALCUL_CONSTANTES()
-
-print*,x_ad
+CALL TEST()
 
 !------------------------------------------------------------------------
                                  END PROGRAM MAIN 
