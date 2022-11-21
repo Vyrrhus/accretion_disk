@@ -3,16 +3,13 @@
 !------------------------------------------------------------------------
 
 USE MODULE_DECLARATIONS
-USE MODULE_FUNCTION
-USE MODULE_CONDITIONS_INITIALES
+USE MODULE_SCHEMAS_SIGMA
 
 IMPLICIT NONE
 
 
 !--- Appel des fonctions
-CALL APPEL_PARAM_INPUT()
-CALL CALCUL_CONSTANTES()
-CALL CREATION_CONDITIONS_INITIALES()
+CALL TEST()
 
 !------------------------------------------------------------------------
                                  END PROGRAM MAIN 
