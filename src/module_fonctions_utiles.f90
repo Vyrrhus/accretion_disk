@@ -20,13 +20,13 @@ MODULE module_fonctions_utiles
         REAL(kind=xp), INTENT(IN) :: a,b,c
         REAL(kind=xp)             :: Delta
     
-        Delta = b**2-4*a*c
+        Delta = b**2._xp-4._xp*a*c
     
         IF (Delta<0) THEN
             print *,'Déterminant négatif'
         ENDIF
     
-        trinome=(-b+(Delta**2))/(2*a)
+        trinome=(-b+(Delta**2._xp))/(2._xp*a)
     
     END FUNCTION
     
@@ -40,9 +40,9 @@ MODULE module_fonctions_utiles
         REAL(kind=xp)                   :: B_AD, C_AD
         REAL(kind=xp) , INTENT(OUT)     :: H_AD
     
-        B_AD = (T_AD**4*X_AD)/(OMEGA_AD**2*S_AD)
+        B_AD = (T_AD**4._xp*X_AD)/(OMEGA_AD**2._xp*S_AD)
     
-        C_AD = T_AD/OMEGA_AD**2
+        C_AD = T_AD/OMEGA_AD**2._xp
     
         H_AD=trinome(1._xp, -B_0*B_AD, -C_0*C_AD)
     
@@ -68,7 +68,7 @@ MODULE module_fonctions_utiles
         REAL(kind=xp)  , INTENT(IN)     :: T_AD
         REAL(kind=xp)  , INTENT(OUT)    :: P_RAD_AD
     
-        P_RAD_AD=(P_rad_0/P_0)*T_AD**4
+        P_RAD_AD=(P_rad_0/P_0)*T_AD**4._xp
     
     END SUBROUTINE
     
@@ -92,7 +92,7 @@ MODULE module_fonctions_utiles
         REAL(kind=xp)  , INTENT(IN)     :: T_AD, RHO_AD
         REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
     
-        THIRD_TERM_AD=F_Z_RAD_0*RHO_AD**2*T_AD**0.5
+        THIRD_TERM_AD=F_Z_RAD_0*RHO_AD**2._xp*T_AD**0.5_xp
     
     END SUBROUTINE calc_third_term_mince
     
@@ -105,8 +105,8 @@ MODULE module_fonctions_utiles
         REAL(kind=xp)                   :: numerator, denominator
         REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
     
-        numerator=-F_Z_DIFF_0*(2*T_AD**4)
-        denominator=(KAPPA_E+6.13_xp*10._xp**21*RHO_AD*T_AD**(-7/2)*rho_0*T_0**(-7/2))*S_0*RHO_AD**2*H_AD**2
+        numerator=-F_Z_DIFF_0*(2._xp*T_AD**4._xp)
+        denominator=(KAPPA_E+6.13_xpE21*RHO_AD*T_AD**(-7._xp/2._xp)*rho_0*T_0**(-7._xp/2._xp))*S_0*RHO_AD**2*H_AD**2
         THIRD_TERM_AD=numerator/denominator
     
     END SUBROUTINE calc_third_term_epais
