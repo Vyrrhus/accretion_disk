@@ -5,7 +5,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-SUBROUTINE dichotomie(T,Sa,Sb,mince)
+SUBROUTINE dichotomie(T, Sa, Sb, mince, Sc)
 ! --------------------------------------------------------------------------------------------------------------------------------------
 !Calcul du zéro de la fonction Q+=Q- pour les deux branches.
 ! --------------------------------------------------------------------------------------------------------------------------------------
@@ -13,12 +13,13 @@ SUBROUTINE dichotomie(T,Sa,Sb,mince)
 
    REAL(KIND=xp), INTENT(in)   :: T                                               !! Température
    REAL(KIND=xp), INTENT(in)   :: Sa, Sb                                          !! Points de départ de la dichotomie
+   LOGICAL,       INTENT(in)   :: mince                                           !! Booléen pour savoir dans quelle branche on est
+   REAL(KIND=xp), INTENT(out)  :: Sc                                              !! Point milieu de la dichotomie
+ 
    REAL(KIND=xp)               :: prec=0.01_xp                                    !! Précision de la dichotomie
    REAL(KIND=xp)               :: eps=10_xp
-   REAL(KIND=xp), INTENT(out)  :: Sc                                              !! Point milieu de la dichotomie
    REAL(KIND=xp)               :: Ha, Hb, Hc                                      !! H aux points a, b et c
    REAL(KIND=xp)               :: rho_a, rho_b, rho_c                             !! rho aux points a, b et c
-   LOGICAL, INTENT(in)         :: mince                                           !! Booléen pour savoir dans quelle branche on est
    REAL(KIND=xp)               :: Prad                                            !! Pression radiative
    REAL(KIND=xp)               :: Pgaz_a, Pgaz_b, Pgaz_c                          !! Pression du gaz aux points a, b et c
    REAL(KIND=xp)               :: third_term_a, third_term_b, third_term_c        !! troisième terme de la fonction à annuler en a, b et c
