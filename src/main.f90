@@ -4,6 +4,7 @@
 
 USE MODULE_DECLARATIONS
 USE MODULE_FUNCTION
+USE MODULE_CONDITIONS_INITIALES
 
 IMPLICIT NONE
 
@@ -11,8 +12,7 @@ IMPLICIT NONE
 !--- Appel des fonctions
 CALL APPEL_PARAM_INPUT()
 CALL CALCUL_CONSTANTES()
-
-print*,x_ad
+CALL CREATION_CONDITIONS_INITIALES()
 
 !------------------------------------------------------------------------
                                  END PROGRAM MAIN 
