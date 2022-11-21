@@ -18,11 +18,15 @@ REAL(KIND=xp)                 :: Tmin, Tmax
 REAL(KIND=xp)                 :: Sa, Sb, Sc 
 LOGICAL                       :: mince=.false.
 
+
+CALL APPEL_PARAM_INPUT()
+CALL CALCUL_CONSTANTES()
+
 Tmin=1E-2
 Tmax=1._xp
 Sa=1E2
 Sb=1E3
-j=1
+j=30
 
 T_epais(1)=Tmin
 CALL dichotomie(T_epais(1),Sa,Sb,j,mince,Sc)
