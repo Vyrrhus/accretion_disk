@@ -52,18 +52,18 @@ MODULE module_fonctions_utiles
     
     END SUBROUTINE
     
-    SUBROUTINE calc_rho(S_AD, X_AD, H_AD, RHO_AD)
+    !SUBROUTINE calc_rho(S_AD, X_AD, H_AD, RHO_AD)
 
     ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcule la densité adimensionnée correspondant à un couple (H_AD, S_AD) pour X_AD donné
     ! --------------------------------------------------------------------------------------------------------------------------------------
     
-        REAL(kind=xp)  , INTENT(IN)     :: S_AD, X_AD, H_AD
-        REAL(kind=xp)  , INTENT(OUT)    :: RHO_AD
+       ! REAL(kind=xp)  , INTENT(IN)     :: S_AD, X_AD, H_AD
+      !  REAL(kind=xp)  , INTENT(OUT)    :: RHO_AD
     
-        RHO_AD = S_AD/(X_AD*H_AD)
+     !   RHO_AD = S_AD/(X_AD*H_AD)
     
-    END SUBROUTINE
+    !END SUBROUTINE
     
     ! --------------------------------------------------------------------------------------------------------------------------------------
     ! La fonction à annuler est de la forme 1/(4*3**(1.5))*(P_RAD_AD+P_GAZ_AD)+THIRD_TERM=0
@@ -71,60 +71,60 @@ MODULE module_fonctions_utiles
     ! On va calculer dans les prochaines subroutines ces différents termes.
     ! --------------------------------------------------------------------------------------------------------------------------------------
 
-    SUBROUTINE calc_P_rad(TEMP_AD, P_RAD_AD)
+    !SUBROUTINE calc_P_rad(TEMP_AD, P_RAD_AD)
 
     ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcule la pression de radiation adimensionnée à partir de la température adimensionnée
     ! --------------------------------------------------------------------------------------------------------------------------------------
     
-        REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD
-        REAL(kind=xp)  , INTENT(OUT)    :: P_RAD_AD
+       ! REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD
+      !  REAL(kind=xp)  , INTENT(OUT)    :: P_RAD_AD
     
-        P_RAD_AD = (P_rad_0 / P_0) * TEMP_AD**4._xp
+     !   P_RAD_AD = (P_rad_0 / P_0) * TEMP_AD**4._xp
     
-    END SUBROUTINE
+    !END SUBROUTINE
     
-    SUBROUTINE calc_P_gaz(TEMP_AD, RHO_AD, P_GAZ_AD)
+    !SUBROUTINE calc_P_gaz(TEMP_AD, RHO_AD, P_GAZ_AD)
 
     ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcule la pression de gaz adimensionnée à partir de la température et de la densité adimensionnées
     ! --------------------------------------------------------------------------------------------------------------------------------------
     
-        REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD, RHO_AD
-        REAL(kind=xp)  , INTENT(OUT)    :: P_GAZ_AD
+       ! REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD, RHO_AD
+      !  REAL(kind=xp)  , INTENT(OUT)    :: P_GAZ_AD
     
-        P_GAZ_AD = (P_gaz_0 / P_0) * TEMP_AD * RHO_AD
+     !   P_GAZ_AD = (P_gaz_0 / P_0) * TEMP_AD * RHO_AD
     
-    END SUBROUTINE
+    !END SUBROUTINE
     
-    SUBROUTINE calc_third_term_mince(TEMP_AD, RHO_AD, THIRD_TERM_AD)
+    !SUBROUTINE calc_third_term_mince(TEMP_AD, RHO_AD, THIRD_TERM_AD)
 
     ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcul du troisième terme dans le cas optiquement mince, en prenant une proposition de température et de densité
     ! --------------------------------------------------------------------------------------------------------------------------------------
 
-        REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD, RHO_AD
-        REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
+     !   REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD, RHO_AD
+      !  REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
     
-        THIRD_TERM_AD = F_Z_RAD_0 *RHO_AD**2._xp * TEMP_AD**0.5_xp
+       ! THIRD_TERM_AD = F_Z_RAD_0 *RHO_AD**2._xp * TEMP_AD**0.5_xp
     
-    END SUBROUTINE calc_third_term_mince
+    !END SUBROUTINE calc_third_term_mince
     
-    SUBROUTINE calc_third_term_epais(TEMP_AD, RHO_AD, H_AD, THIRD_TERM_AD)
+    !SUBROUTINE calc_third_term_epais(TEMP_AD, RHO_AD, H_AD, THIRD_TERM_AD)
 
     ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcul du troisième terme dans le cas optiquement épais, en prenant une proposition de température, de densité et de H
     ! --------------------------------------------------------------------------------------------------------------------------------------
+    !
+    !    REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD, RHO_AD, H_AD
+    !    REAL(kind=xp)                   :: NUMERATOR, DENOMINATOR
+    !    REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
+    !
+    !    numerator=-F_Z_DIFF_0*(2._xp*T_AD**4._xp)
+    !    denominator=(KAPPA_E + 6.13E18 * RHO_AD * T_AD**(-7._xp/2._xp) * rho_0 * T_0**(-7._xp/2._xp)) * S_0 &
+    !    * RHO_AD**2 *H_AD**2
+    !    THIRD_TERM_AD=numerator/denominator
     
-        REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD, RHO_AD, H_AD
-        REAL(kind=xp)                   :: NUMERATOR, DENOMINATOR
-        REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
-    
-        numerator=-F_Z_DIFF_0*(2._xp*T_AD**4._xp)
-        denominator=(KAPPA_E + 6.13E18 * RHO_AD * T_AD**(-7._xp/2._xp) * rho_0 * T_0**(-7._xp/2._xp)) * S_0 &
-        * RHO_AD**2 *H_AD**2
-        THIRD_TERM_AD=numerator/denominator
-    
-    END SUBROUTINE calc_third_term_epais
+    !END SUBROUTINE calc_third_term_epais
     
 END MODULE module_fonctions_utiles
