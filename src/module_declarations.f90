@@ -89,6 +89,8 @@ REAL(KIND=XP) :: TEMP_AD(NX)         !! Température
 REAL(KIND=XP) :: Q_PLUS_AD(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV_AD(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V_AD(NX)          !! Capacité Calorifique
+REAL(KIND=XP) :: B_AD(NX)            !! Coefficient b du trinôme pour le calcul de H
+REAL(KIND=XP) :: C_AD(NX)            !! Coefficient c du trinôme pour le calcul de H
 
 !! VARIABLES AVEC CONDITIONS
 REAL(KIND=XP) :: Q_MOINS(NX)     !! Chaleur Dissipée Adimensionnée
@@ -115,7 +117,6 @@ REAL(KIND=XP) :: TEMP(NX)         !! Température
 REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V(NX)          !! Capacité Calorifique
-
 
 
 !===================================================================================================
