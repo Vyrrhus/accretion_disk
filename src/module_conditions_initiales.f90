@@ -16,6 +16,10 @@ MODULE MODULE_CONDITIONS_INITIALES
 
     SUBROUTINE CREATION_CONDITIONS_INITIALES()
 
+    !---------------------------------------------------------------------------------------------------
+    !> Cette subroutine initialise T_AD, S_AD et H_AD
+    !---------------------------------------------------------------------------------------------------
+
         F_RG = 1-(X_AD**2 /3)**(-1._XP/2._XP)
 
         T_AD_INI = 1.4*10**4._XP/T_0 * ALPHA**(-1._XP/5._XP)  * F_RG**(3._XP/10._XP) * &
@@ -35,7 +39,9 @@ MODULE MODULE_CONDITIONS_INITIALES
         WRITE(*, "('------------------------------------------------')")
         WRITE(*, "('FRACTION DE M_0_DOT CHOISIE                    = ', 1pE12.2)") M_0_DOT_FRAC
         WRITE(*, "('T_AD MOYEN INITIALE                            = ', 1pE12.2)") SUM(T_AD_INI)/NX
+        WRITE(*, "('T MOYEN INITIALE                               = ', 1pE12.2)") SUM(T_AD_INI)/NX*T_0
         WRITE(*, "('S_AD MOYEN INITIALE                            = ', 1pE12.2)") SUM(S_AD_INI)/NX
+        WRITE(*, "('SIGMA MOYEN INITIALE                           = ', 1pE12.2)") SUM(S_AD_INI/X_AD)/NX*SIGMA_0
         WRITE(*, "('H_AD MOYEN INITIALE                            = ', 1pE12.2)") SUM(H_AD_INI)/NX
 
     END SUBROUTINE
