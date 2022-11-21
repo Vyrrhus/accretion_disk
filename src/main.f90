@@ -12,6 +12,7 @@ IMPLICIT NONE
 CALL APPEL_PARAM_INPUT()
 CALL CALCUL_CONSTANTES()
 
+print*,x_ad
 
 !------------------------------------------------------------------------
                                  END PROGRAM MAIN 
