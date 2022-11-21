@@ -31,30 +31,43 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
    REAL(KIND=xp)               :: Kffa,Kffb, Kffc                                 !! Kff aux points a, b et c
 
 
+
+   open(unit=10,file="results.out")
    
    Prad = ( P_rad_0 / P_0 ) * T ** 4._xp                                                                               !Calcul de Prad
+   WRITE (10,*) "Prad= ", Prad
    Omega = 3._xp ** (3._xp/2._xp) * X_AD(p) ** (-3._xp)
+   WRITE (10,*) "Omega= ", Omega
    CALL calc_H(T,x_ad(p),Omega,Sa,Ha)                                                                    !calcul de H au point a
+   WRITE (10,*) "Ha= ", Ha
    CALL calc_H(T,x_ad(p),Omega,Sb,Hb)                                                                    !calcul de H au point b
    rho_a = Sa / ( x_ad(p) * Ha )                                                                      !calcul de rho au point a
+   WRITE (10,*) "rho= ", rho_a
    rho_b = Sb / ( x_ad(p) * Hb )                                                                       !calcul de rho au point b
    Pgaz_a = ( P_gaz_0 / P_0 ) * T * rho_a                                                                       !calcul de Pgaz au point a
+   WRITE (10,*) "Pgaz= ", Pgaz_a
    Pa=Pgaz_a+Prad
+   WRITE (10,*) "Ptot= ", Pa
    Pgaz_b = ( P_gaz_0 / P_0 ) * T * rho_b                                                                     !calcul de Pgaz au point b
    Pb=Pgaz_b+Prad
    nua = 0.5_xp * Pa / rho_a * Ha
+   WRITE (10,*) "nu= ", nua
    nub = 0.5_xp * Pb / rho_b * Hb
 
    IF (mince .eqv. .true.) THEN                                                                               !Calculs pour la branche mince
 
       Fza=F_Z_RAD_0 * rho_a**2._xp * SQRT(T) * Ha
+      WRITE (10,*) "Fz= ", Fza
       Fzb=F_Z_RAD_0 * rho_b**2._xp * SQRT(T) * Hb
       Fa = nua * Omega ** 2._xp - 2._xp *x_ad(p) * Fza /(Sa * S_0)
       Fb = nub * Omega ** 2._xp - 2._xp *x_ad(p) * Fzb /(Sb * S_0)
+      WRITE (10,*) "Q+= ", nua*Omega**2._xp
+      WRITE (10,*) "Q- mince= ", 2._xp *x_ad(p) * Fza /(Sa * S_0)
+      
 
       DO WHILE(eps>prec)
 
-         Sc=(Sa+Sb)/2_xp
+         Sc=(Sa+Sb)/2._xp
          CALL calc_H(T,x_ad(p),OMEGA_AD(p),Sc,Hc)                                                              !calcul de H au point c
          rho_c = Sc / ( x_ad(p) * Hc )                                                                 !calcul de rho au point c
          Pgaz_c = ( P_gaz_0 / P_0 ) * T * rho_c                                                                 !calcul de Pgaz au point c
@@ -93,11 +106,15 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
    ELSE                                                                                                  !Calculs pour la branche épais
 
       Kffa = 6.13E18 *rho_a * T ** (-7._xp/2._xp) *rho_0 * T_0 ** (-7._xp/2._xp)
+      WRITE (10,*) "Kff= ", Kffa
       Kffb = 6.13E18 *rho_b * T ** (-7._xp/2._xp) *rho_0 * T_0 ** (-7._xp/2._xp)
       Fza = F_Z_DIFF_0 * X_AD(p) * T**4._xp /( (KAPPA_E + Kffa) /Sa )
+      WRITE (10,*) "Fz= ", Fza
       Fzb = F_Z_DIFF_0 * X_AD(p) * T**4._xp /( (KAPPA_E + Kffb) /Sb ) 
       Fa = nua * Omega ** 2._xp - 2._xp *x_ad(p) * Fza /(Sa * S_0)
       Fb = nub * Omega ** 2._xp - 2._xp *x_ad(p) * Fzb /(Sb * S_0)
+      WRITE(10,*) "Q+= ", nua*Omega**2._xp
+      WRITE(10,*) "Q- epais=", 2._xp *x_ad(p) * Fza /(Sa * S_0)
 
       DO WHILE(eps>prec)
 
@@ -140,6 +157,8 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
       ENDDO
 
    ENDIF
+
+   close(10)
 
 END SUBROUTINE
 
