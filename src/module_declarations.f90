@@ -38,7 +38,13 @@ REAL(KIND=XP)  :: r_max              !! Rayon maximal du disque
 REAL(KIND=XP)  :: ALPHA              !! Paramètre phénoménologique (taux de production d'énergie par friction de la matière)
 REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
+
+!! PARAMÈTRES SPATIAUX
 INTEGER,PARAMETER :: NX = 500        !! Nombre de points de discrétisation spatiale
+REAL(KIND=XP)  :: DX
+REAL(KIND=XP)  :: X_MIN
+REAL(KIND=XP)  :: X_MAX
+INTEGER :: I
 
 !! CONSTANTES DU SYSTEME
 REAL(KIND=XP)  :: Z_FRAC        !! Abondance éléments lourds
@@ -170,7 +176,9 @@ SUBROUTINE CALCUL_CONSTANTES()
 !>    Cette routine calcule l'ensemble des constantes du modèle et les constantes d'adimensionnement. 
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-
+    
+    
+    
     ! TAUX D'ACCRETION
     L_EDD       = 4._XP * PI * G * M * M_P * C_SPEED / SIGMA_E
     M_CRIT_DOT  = 12._XP * L_EDD / C_SPEED**2._XP
@@ -185,7 +193,14 @@ SUBROUTINE CALCUL_CONSTANTES()
     R_MAX      = R_MAX * R_S
     OMEGA_MAX  = (G * M / R_MIN**3.0_XP)**(0.5_XP) 
     L_TOT      = M_0_DOT * C_SPEED**2.0_XP / 12.0_XP 
+    
+    ! DECLARATION DES VARIABLES SPATIALES 
+    X_MAX = SQRT(R_MAX/R_S)
+    X_MIN = SQRT(R_MIN/R_S)
 
+    DX = ( X_MAX - X_MIN ) / NX
+    X_AD = X_MIN + DX * (/(I,I=1,NX)/)
+    
     ! CONSTANTES DE NORMALISATION
     V_0         = R_S * OMEGA_MAX
     NU_0        = 4.0_XP/3.0_XP * R_S**2.0_XP * OMEGA_MAX
@@ -204,6 +219,7 @@ SUBROUTINE CALCUL_CONSTANTES()
     Q_ADV_0     = OMEGA_MAX * T_0 * R / MU
     B_0         = 2.0_XP * A_RADIATION * T_0**4.0_XP / (3.0_XP * R_S * S_0 * OMEGA_MAX**2.0_XP)
     C_0         = R * T_0 / (R_S**2.0_XP / MU / OMEGA_MAX**2.0_XP)
+
 
     WRITE(*,"(48('-'))")
     WRITE(*,"('------------CONSTANTES DE SIMULATION------------')")
