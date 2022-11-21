@@ -107,7 +107,7 @@ REAL(KIND=XP) :: EPSILON_FF(NX)  !! Emissivité Free-Free
 
 !! VARIABLES 
 REAL(KIND=XP) :: T(NX)            !! Temps
-REAL(KIND=XP) :: X(NX)            !! Rayon
+REAL(KIND=XP) :: RAYON(NX)        !! Rayon
 REAL(KIND=XP) :: OMEGA(NX)        !! Vitesse De Rotation
 REAL(KIND=XP) :: P(NX)            !! Pression totale
 REAL(KIND=XP) :: P_GAZ(NX)        !! Pression gazeuse
@@ -124,6 +124,9 @@ REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V(NX)          !! Capacité Calorifique
 
+
+REAL(KIND=XP) :: TEMP_AD_INI(NX)
+REAL(KIND=XP) :: S_AD_INI(NX)
 
 !===================================================================================================
             CONTAINS 
@@ -221,6 +224,8 @@ SUBROUTINE CALCUL_CONSTANTES()
     B_0         = 2.0_XP * A_RADIATION * T_0**4.0_XP / (3.0_XP * R_S * S_0 * OMEGA_MAX**2.0_XP)
     C_0         = R * T_0 / (R_S**2.0_XP / MU / OMEGA_MAX**2.0_XP)
 
+    TEMP_AD_INI = 1.0E-2_XP*(/(I,I=1,NX)/)
+    S_AD_INI = 1.0E+02_XP*(/(I,I=1,NX)/)
 
     WRITE(*,"(48('-'))")
     WRITE(*,"('------------CONSTANTES DE SIMULATION------------')")
