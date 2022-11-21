@@ -140,7 +140,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     NAMELIST /INPUT/ M,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
-    M             = 3._xp        ! [M_{sol}]
+    M             = 1._xp        ! [M_{sol}]
     f_accretion   = 0.001_xp
     r_max         = 100._xp    ! [r_{Schwarzschild}]
     ALPHA         = 1._xp
@@ -199,8 +199,8 @@ SUBROUTINE CALCUL_CONSTANTES()
     X_MAX = SQRT(R_MAX/R_S)
     X_MIN = SQRT(R_MIN/R_S)
 
-    DX = ( X_MAX - X_MIN ) / NX
-    X_AD = X_MIN + DX * (/(I,I=1,NX)/)
+    DX = ( X_MAX - X_MIN ) / (NX-1)
+    X_AD = X_MIN + DX * (/(I,I=0,NX-1)/)
     
     ! CONSTANTES DE NORMALISATION
     V_0         = R_S * OMEGA_MAX
