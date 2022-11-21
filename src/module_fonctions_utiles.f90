@@ -30,19 +30,19 @@ MODULE module_fonctions_utiles
     
     END FUNCTION
     
-    SUBROUTINE calc_H(T_AD, X_AD, OMEGA_AD, S_AD, H_AD)
+    SUBROUTINE calc_H(TEMP_AD, X_AD, OMEGA_AD, S_AD, H_AD)
     ! --------------------------------------------------------------------------------------------------------------------------------------
     ! Calcul de H_AD en résolvant le trinôme H_AD**2-B_0*b_star-C_AD*c_star=0
     ! C_AD est défini dans le module "module_declarations
     ! ------------------------------------------------------------------------------------------------------------------------------------------
     
-        REAL(kind=xp) , INTENT(IN)      :: T_AD, X_AD, OMEGA_AD, S_AD
-        REAL(kind=xp)                   :: B_AD, C_AD
-        REAL(kind=xp) , INTENT(OUT)     :: H_AD
+        REAL(kind=xp) , INTENT(IN)     :: TEMP_AD, X_AD, OMEGA_AD, S_AD
+        REAL(kind=xp)                  :: B_AD, C_AD
+        REAL(kind=xp) , INTENT(OUT)    :: H_AD
     
-        B_AD = (T_AD**4._xp*X_AD)/(OMEGA_AD**2._xp*S_AD)
+        B_AD = (TEMP_AD**4._xp*X_AD)/(OMEGA_AD**2._xp*S_AD)
     
-        C_AD = T_AD/OMEGA_AD**2._xp
+        C_AD = TEMP_AD/OMEGA_AD**2._xp
     
         H_AD=trinome(1._xp, -B_0*B_AD, -C_0*C_AD)
     
@@ -106,7 +106,7 @@ MODULE module_fonctions_utiles
         REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
     
         numerator=-F_Z_DIFF_0*(2._xp*T_AD**4._xp)
-        denominator=(KAPPA_E+6.13_xpE21*RHO_AD*T_AD**(-7._xp/2._xp)*rho_0*T_0**(-7._xp/2._xp))*S_0*RHO_AD**2*H_AD**2
+        denominator=(KAPPA_E+6.13E21_XP*RHO_AD*T_AD**(-7._xp/2._xp)*rho_0*T_0**(-7._xp/2._xp))*S_0*RHO_AD**2*H_AD**2
         THIRD_TERM_AD=numerator/denominator
     
     END SUBROUTINE calc_third_term_epais
