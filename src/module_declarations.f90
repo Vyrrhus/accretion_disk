@@ -41,10 +41,9 @@ REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
 
 !! PARAMÈTRES SPATIAUX
 INTEGER,PARAMETER :: NX = 500        !! Nombre de points de discrétisation spatiale
-REAL(KIND=XP)  :: DX
-REAL(KIND=XP)  :: X_MIN
-REAL(KIND=XP)  :: X_MAX
-INTEGER :: I
+REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
+REAL(KIND=XP)     :: X_MIN           !! Rayon minimal adimensionné
+REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
 
 !! CONSTANTES DU SYSTEME
 REAL(KIND=XP)  :: Z_FRAC        !! Abondance éléments lourds
@@ -117,7 +116,7 @@ REAL(KIND=XP) :: H(NX)            !! Demi-Hauteur Du Disque
 REAL(KIND=XP) :: RHO(NX)          !! Densité Volumique
 REAL(KIND=XP) :: NU(NX)           !! Viscosité
 REAL(KIND=XP) :: S(NX)            !! Densité De Surface
-REAL(KIND=XP) :: V(NX)            !! Vitese D'Accrétion
+REAL(KIND=XP) :: V(NX)            !! Vitesse D'Accrétion
 REAL(KIND=XP) :: M_DOT(NX)        !! Taux D'Accrétion
 REAL(KIND=XP) :: TEMP(NX)         !! Température
 REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
@@ -180,9 +179,8 @@ SUBROUTINE CALCUL_CONSTANTES()
 !>    Cette routine calcule l'ensemble des constantes du modèle et les constantes d'adimensionnement. 
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-    
-    
-    
+    INTEGER :: I
+
     ! TAUX D'ACCRETION
     L_EDD       = 4._XP * PI * G * M * M_P * C_SPEED / SIGMA_E
     M_CRIT_DOT  = 12._XP * L_EDD / C_SPEED**2._XP
@@ -223,9 +221,6 @@ SUBROUTINE CALCUL_CONSTANTES()
     Q_ADV_0     = OMEGA_MAX * T_0 * R / MU
     B_0         = 2.0_XP * A_RADIATION * T_0**4.0_XP / (3.0_XP * R_S * S_0 * OMEGA_MAX**2.0_XP)
     C_0         = R * T_0 / (R_S**2.0_XP / MU / OMEGA_MAX**2.0_XP)
-
-    TEMP_AD_INI = 1.0E-2_XP*(/(I,I=1,NX)/)
-    S_AD_INI = 1.0E+02_XP*(/(I,I=1,NX)/)
 
     WRITE(*,"(48('-'))")
     WRITE(*,"('------------CONSTANTES DE SIMULATION------------')")

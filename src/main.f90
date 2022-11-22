@@ -13,14 +13,26 @@ IMPLICIT NONE
 CALL APPEL_PARAM_INPUT()
 CALL CALCUL_CONSTANTES()
 
-CALL EQU_ALGEBRIQUES(TEMP_AD_INI,S_AD_INI,X_AD,NU_AD,V_AD,OMEGA_AD,RHO_AD,C_S_AD,M_DOT_AD&
-&,P_AD,BETA,H_AD,F_Z,Q_PLUS_AD,Q_MOINS,TAU_EFF,KAPPA_FF,DIFF_FINIE)
+TEMP_AD = 1.0E-2_XP
+S_AD = 1.0E+02_XP
 
+CALL COMPUTE_EQS()
 
-PRINT*, 'F_Z             RHO_AD              H_AD                OMEGA_AD               TAU_EFF '
-DO I=1,NX
-PRINT*,F_Z(I),RHO_AD(I),H_AD(I),OMEGA_AD(I),TAU_EFF(I),KAPPA_FF(I)
-ENDDO
+PRINT*, 'X = ', X_AD(30)
+PRINT*, 'P_RAD = ', P_RAD_AD(30)
+PRINT*, 'OMEGA = ', OMEGA_AD(30)
+PRINT*, 'B = ', B_AD(30)
+PRINT*, 'C = ', C_AD(30)
+PRINT*, 'Ha = ', H_AD(30)
+PRINT*, 'RHO = ', RHO_AD(30)
+PRINT*, 'Pgaz = ', P_GAZ_AD(30)
+PRINT*, 'Ptot = ', P_AD(30)
+PRINT*, 'NU = ', NU_AD(30)
+PRINT*, 'Kff = ', KAPPA_FF(30)
+PRINT*, 'Fz = ', F_Z(30)
+PRINT*, 'Q+ = ', Q_PLUS_AD(30)
+PRINT*, 'Q- = ', Q_MOINS(30)
+
 !------------------------------------------------------------------------
                                  END PROGRAM MAIN 
 !------------------------------------------------------------------------
