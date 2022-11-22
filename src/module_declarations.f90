@@ -155,6 +155,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     CLOSE(file_id)
 
     ! AFFICHAGE PARAMETRES D'ENTREE
+    WRITE(*,"(48('-'))")
     WRITE(*,"('-----------------INITIALISATION-----------------')")
     WRITE(*,"('------------VALEURS PARAMETRES EN INPUT---------')")
     WRITE(*,"(48('-'))")
@@ -228,6 +229,11 @@ SUBROUTINE CALCUL_CONSTANTES()
     
     WRITE(*,"('MASSE DU TROU NOIR                           M = ',1pE12.4)") M
     WRITE(*,"('TAUX D ACCRETION                       M_0_DOT = ',1pE12.4)") M_0_DOT
+    WRITE(*,"('TAUX D ACCRETION CRITIQUE           M_CRIT_DOT = ',1pE12.4)") M_CRIT_DOT
+    WRITE(*,"('LUMINOSITÉ D EDDINGTON                   L_EDD = ',1pE12.4)") L_EDD
+    
+    WRITE(*,"(48('-'))")
+    
     WRITE(*,"('FRACTION D ELEMENTS LOURDS                   Z = ',1pE12.4)") Z_FRAC
     WRITE(*,"('POID MOLECULAIRE MOYEN                      MU = ',1pE12.4)") MU
     WRITE(*,"('RAYONS DE SCHWARZSCHILD                    R_S = ',1pE12.4)") R_S
@@ -236,6 +242,16 @@ SUBROUTINE CALCUL_CONSTANTES()
     WRITE(*,"('VITESSE ROTATION MAX                 OMEGA_MAX = ',1pE12.4)") OMEGA_MAX
     WRITE(*,"('LUMINOSITE TOTALE                        L_TOT = ',1pE12.4)") L_TOT
     
+    WRITE(*,"(48('-'))")
+    WRITE(*,"('------------VARIABLES SPATIALES-----------------')")
+    WRITE(*,"(48('-'))")
+    
+    WRITE(*,"('PAS DE DISCRETISATION DX                    DX = ',1pE12.3)") DX
+    WRITE(*,"('RAYON NORMALISÉ MINIMAL                  X_MIN = ',F12.3)") X_MIN
+    WRITE(*,"('RAYON NORMALISÉ MAXIMAL                  X_MAX = ',F12.1)") X_MAX
+    
+    WRITE(*,"(48('-'))")
+    WRITE(*,"('--------CONSTANTES DE NORMALISATION-------------')")
     WRITE(*,"(48('-'))")
     
     WRITE(*,"('CONSTANTE DE VITESSE                       V_0 = ',1pE12.4)") V_0
