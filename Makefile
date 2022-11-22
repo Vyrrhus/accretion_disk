@@ -16,6 +16,7 @@ MODULE_SRC 	:= 	module_declarations.f90 \
 				module_branche_epais.f90 \
 				module_dicho.f90 \
 				module_conditions_initiales.f90 \
+				module_schemas_T.f90 \
 				
 
 MAIN_SRC 	:= main.f90
