@@ -11,18 +11,18 @@ BINDIR  := bin
 
 # SOURCES
 MODULE_SRC 	:= 	module_declarations.f90 \
-				module_fonctions_utiles.f90 \
-				module_function.f90 \
-				module_branche_epais.f90 \
-				module_dicho.f90 \
-				module_conditions_initiales.f90 \
-				module_schemas_T.f90 \
-				
+                module_fonctions_utiles.f90 \
+                module_function.f90 \
+                module_branche_epais.f90 \
+                module_dicho.f90 \
+                module_conditions_initiales.f90 \
+                module_schemas_T.f90 \
+                
 
 MAIN_SRC 	:= main.f90
 SCURVE_SRC 	:= S_curve.f90
 SCHEMA_SRC  := module_schemas_sigma.f90 \
-			   program_schema.f90 \
+               program_schema.f90 \
 
 # EXECUTABLES
 MAIN_EXE := disk
@@ -59,23 +59,23 @@ curve: $(SCURVE_EXE)
 schema: $(SCHEMA_EXE)
 
 $(MAIN_EXE): $(MODULE_OBJ) $(MAIN_OBJ)
-	$(F90) $(FFLAGS) $^ -o $@
+    $(F90) $(FFLAGS) $^ -o $@
 
 $(SCURVE_EXE): $(MODULE_OBJ) $(SCURVE_OBJ)
-	$(F90) $(FFLAGS) $^ -o $@
+    $(F90) $(FFLAGS) $^ -o $@
 
 $(SCHEMA_EXE): $(MODULE_OBJ) $(SCHEMA_OBJ) 
-	$(F90) $(FFLAGS) $^ -o $@ $(LIB)
+    $(F90) $(FFLAGS) $^ -o $@ $(LIB)
 
 $(BINDIR)/%.o: $(SRCDIR)/%.f90
-	$(F90) $(FFLAGS) -c -o $@ $<
+    $(F90) $(FFLAGS) -c -o $@ $<
 
 # CLEAN
 clean:
-	@rm -rf $(BINDIR)/*.o $(BINDIR)/*.mod
-	@rm -rf $(EXE)
-	@echo "All binaries and exe deleted"
+    @rm -rf $(BINDIR)/*.o $(BINDIR)/*.mod
+    @rm -rf $(EXE)
+    @echo "All binaries and exe deleted"
 
 # DOCUMENTATION
 docu:
-	@ford documentation.md
+    @ford documentation.md
