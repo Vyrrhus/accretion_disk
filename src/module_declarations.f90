@@ -203,8 +203,8 @@ SUBROUTINE CALCUL_CONSTANTES()
     X_MAX = SQRT(R_MAX/R_S)
     X_MIN = SQRT(R_MIN/R_S)
 
-    DX = ( X_MAX - X_MIN ) / (NX-1)
-    X_AD = X_MIN + DX * (/(I,I=0,NX-1)/)
+    DX = ( X_MAX - X_MIN ) / (NX)
+    X_AD = X_MIN + DX * (/(I,I=1,NX)/)
     
     ! DECLARATION DES VARIABLES TEMPORELLES
     T_MAX = 1.0E10_XP * OMEGA_MAX
