@@ -40,10 +40,16 @@ REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
 
 !! PARAMÈTRES SPATIAUX
-INTEGER,PARAMETER :: NX = 500        !! Nombre de points de discrétisation spatiale
+INTEGER,PARAMETER :: NX = 501        !! Nombre de points de discrétisation spatiale
 REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
 REAL(KIND=XP)     :: X_MIN           !! Rayon minimal adimensionné
 REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
+
+!! PARAMÈTRES TEMPORELS
+INTEGER        :: NT
+REAL(KIND=XP)  :: DT
+REAL(KIND=XP)  :: T_MIN
+REAL(KIND=XP)  :: T_MAX  
 
 !! CONSTANTES DU SYSTEME
 REAL(KIND=XP)  :: Z_FRAC        !! Abondance éléments lourds
@@ -123,10 +129,6 @@ REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V(NX)          !! Capacité Calorifique
 
-
-REAL(KIND=XP) :: TEMP_AD_INI(NX)
-REAL(KIND=XP) :: S_AD_INI(NX)
-
 !===================================================================================================
             CONTAINS 
 !===================================================================================================
@@ -160,13 +162,13 @@ SUBROUTINE APPEL_PARAM_INPUT()
     WRITE(*,"('------------VALEURS PARAMETRES EN INPUT---------')")
     WRITE(*,"(48('-'))")
     
-    WRITE(*,"('MASSE DU TROU NOIR [MASSE SOLAIRE]             = ',1pE12.1)") M
-    WRITE(*,"('RAPPORT TAUX D ACCRETION / TAUX CRITIQUE       = ',1pE12.2)") f_accretion  
-    WRITE(*,"('R_MAX [RAYON DE SCHWARZSCHILD]                 = ',1pE12.1)") r_max
+    WRITE(*,"('MASSE DU TROU NOIR [MASSE SOLAIRE]             = ',F12.1)") M
+    WRITE(*,"('RAPPORT TAUX D ACCRETION / TAUX CRITIQUE       = ',F12.3)") f_accretion  
+    WRITE(*,"('R_MAX [RAYON DE SCHWARZSCHILD]                 = ',F12.1)") r_max
     WRITE(*,"('ALPHA                                          = ',F12.2)") ALPHA
     WRITE(*,"('X                                              = ',F12.2)") X_FRAC
     WRITE(*,"('Y                                              = ',F12.2)") Y_FRAC
-    WRITE(*,"('NB POINTS DE DISCRETISATION SPATIALE           = ',I3)") NX
+    WRITE(*,"('NB POINTS DE DISCRETISATION SPATIALE           = ',I12)") NX
 
     ! CONVERSION UNITES SI
     M = M * M_o
@@ -204,6 +206,13 @@ SUBROUTINE CALCUL_CONSTANTES()
     DX = ( X_MAX - X_MIN ) / (NX-1)
     X_AD = X_MIN + DX * (/(I,I=0,NX-1)/)
     
+    ! DECLARATION DES VARIABLES TEMPORELLES
+    T_MAX = 1.0E10_XP * OMEGA_MAX
+    T_MIN = 0.0_XP * OMEGA_MAX
+    
+    DT = ( T_MAX - T_MIN ) / (NT-1)
+    T_AD = T_MIN + DT * (/(I,I=0,NT-1)/)
+    
     ! CONSTANTES DE NORMALISATION
     V_0         = R_S * OMEGA_MAX
     NU_0        = 4.0_XP/3.0_XP * R_S**2.0_XP * OMEGA_MAX
@@ -234,12 +243,12 @@ SUBROUTINE CALCUL_CONSTANTES()
     
     WRITE(*,"(48('-'))")
     
-    WRITE(*,"('FRACTION D ELEMENTS LOURDS                   Z = ',1pE12.4)") Z_FRAC
-    WRITE(*,"('POID MOLECULAIRE MOYEN                      MU = ',1pE12.4)") MU
+    WRITE(*,"('FRACTION D ELEMENTS LOURDS                   Z = ',F12.2)") Z_FRAC
+    WRITE(*,"('POID MOLECULAIRE MOYEN                      MU = ',F12.4)") MU
     WRITE(*,"('RAYONS DE SCHWARZSCHILD                    R_S = ',1pE12.4)") R_S
     WRITE(*,"('RAYON MIN DISQUE ACCRETION               R_MIN = ',1pE12.4)") R_MIN
     WRITE(*,"('RAYON MAXIMAL DU DISQUE                  R_MAX = ',1pE12.4)") R_MAX
-    WRITE(*,"('VITESSE ROTATION MAX                 OMEGA_MAX = ',1pE12.4)") OMEGA_MAX
+    WRITE(*,"('VITESSE ROTATION MAX                 OMEGA_MAX = ',F12.4)") OMEGA_MAX
     WRITE(*,"('LUMINOSITE TOTALE                        L_TOT = ',1pE12.4)") L_TOT
     
     WRITE(*,"(48('-'))")
@@ -281,4 +290,3 @@ END SUBROUTINE CALCUL_CONSTANTES
 !===================================================================================================
 END MODULE MODULE_DECLARATIONS
 !===================================================================================================
-

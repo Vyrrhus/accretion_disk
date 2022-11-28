@@ -76,7 +76,11 @@ SUBROUTINE COMPUTE_EQS()
     GAMMA_3 = (4.0_XP - 3.0_XP * BETA) / (BETA * C_V_AD) + 1.0_XP
     
     ! Q_ADV
-    ! @todo     
+    ! @todo  : CALCULER COND LIM SUR LA TEMPÉRATURE ET S_CURVE ET CODER DÉRIVÉE T DE S. 
+    !Q_ADV_AD = C_V_AD *( (GAMMA_3-1.0_XP) * TEMP_AD / S_AD * ( ( EULER_T_S ) + &
+    !&V_AD * EULER_SPATIALE(S_AD,COND_LIM_S) / (2.0_XP*X_AD) - V_AD * S_AD /&
+    !& ( 2.0_XP * X_AD**2.0_XP)) - V_AD * (EULER_SPATIALE(TEMP_AD,COND_LIM_TEMP)&
+    !& / ( 2.0_XP * X_AD ) )
     
     ! KAPPA_FF
     KAPPA_FF = RHO_AD * TEMP_AD**(-3.5_XP) * (RHO_0 * T_0**(-3.5_XP) * 6.13E18_XP)
@@ -119,6 +123,23 @@ FUNCTION EULER_SPATIAL(VECTOR,CONDITION_LIMITE) RESULT(DERIVEE)
 END FUNCTION EULER_SPATIAL
 !---------------------------------------------------------------------------------------------------
 
+FUNCTION EULER_TEMPORAL(VECTOR_T,CONDITION_LIMITE_T) RESULT(DERIVEE_T)
+!---------------------------------------------------------------------------------------------------
+!> Calcul de la dérivée temporellle d'un vecteur de dimension NX
+!> 
+!> Le pase utilisé est fixe : DT (cd. module déclaration)
+!--------------------------------------------------------------------------------------------------
+
+    IMPLICIT NONE
+    REAL(KIND=XP) :: VECTOR_T(NX)
+    REAL(KIND=XP) :: DERIVEE_T
+    REAL(KIND=XP) :: CONDITION_LIMITE_T 
+    
+    !DERIVEE_T(1:NX-1) = (VECTOR_T(1:NX-1) - VECTOR_T(2:NX)) / DT
+    !DERIVEE_T(NX) = CONDITION_LIMITE_T 
+
+!--------------------------------------------------------------------------------------------------
+END FUNCTION EULER_TEMPORAL
 !---------------------------------------------------------------------------
             END MODULE MODULE_FUNCTION
 !---------------------------------------------------------------------------
