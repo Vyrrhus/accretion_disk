@@ -1,7 +1,6 @@
 !========================================================================
 PROGRAM MAIN 
 !========================================================================
-
 USE MODULE_DECLARATIONS
 USE MODULE_FUNCTION
 USE MODULE_CONDITIONS_INITIALES

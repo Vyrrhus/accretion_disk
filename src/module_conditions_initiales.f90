@@ -9,8 +9,8 @@ MODULE MODULE_CONDITIONS_INITIALES
     IMPLICIT NONE
 
     REAL(kind=xp), dimension(NX)   :: TEMP_AD_INI, S_AD_INI, H_AD_INI     !! Tableaux initiaux de TEMP_AD, S_AD et H_AD
-    REAL(kind=xp)                  :: M_0_DOT_FRAC = 0.01                    !! Fraction du M_0_DOT utilisé pour calculer les conditions initiales 
-    REAL(kind=xp), dimension(NX)   :: F_RG                             !! Facteur correctif de relativité générale
+    REAL(kind=xp)                  :: M_0_DOT_FRAC = 0.01_XP              !! Fraction du M_0_DOT utilisé pour calculer les conditions initiales 
+    REAL(kind=xp), dimension(NX)   :: F_RG                                !! Facteur correctif de relativité générale
     
     CONTAINS
 
