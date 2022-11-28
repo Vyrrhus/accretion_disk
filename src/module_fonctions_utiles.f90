@@ -31,7 +31,7 @@ MODULE module_fonctions_utiles
             PRINT *,'Déterminant négatif' ! Message d'erreur
         ENDIF
     
-        trinome = (-b + (Delta**2._xp) ) / (2._xp*a)
+        trinome = (-b + (SQRT(Delta) ) / (2._xp*a))
     
     END FUNCTION
     
