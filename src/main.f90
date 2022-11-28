@@ -27,9 +27,11 @@ CALL CREATION_CONDITIONS_INITIALES()
 !TEMP_AD = 1.0E-2_XP
 !S_AD = 1.0E+02_XP
 
-TEMP_AD = TEMP_AD_INI
-S_AD = S_AD_INI
+!TEMP_AD = TEMP_AD_INI
+!S_AD = S_AD_INI
 
+TEMP_AD = 1E68
+S_AD    = 
 !-----------------------------------------------------------------------
 !-- CALCUL L'ETAT DU DISQUE 
 !-----------------------------------------------------------------------
