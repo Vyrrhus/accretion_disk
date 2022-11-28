@@ -11,6 +11,7 @@ USE MODULE_SCHEMAS_T
 IMPLICIT NONE
 
 INTEGER :: I,J
+real(kind=xp) :: t_cur
 
 !-----------------------------------------------------------------------
 !-- INITIALISATION
@@ -23,43 +24,38 @@ CALL CALCUL_CONSTANTES()
 !-----------------------------------------------------------------------
 CALL CREATION_CONDITIONS_INITIALES()
 
-!TEMP_AD = 1.0E-2_XP
-!S_AD = 1.0E+02_XP
-
 TEMP_AD = TEMP_AD_INI
 S_AD = S_AD_INI
 
-!-----------------------------------------------------------------------
 !-- CALCUL L'ETAT DU DISQUE 
 !-----------------------------------------------------------------------
 CALL COMPUTE_EQS()
 
-!-------------------------------------------------
 !-- INITIALISER VECTEUR DES SCHEMA EXPLICITES-----
 CALL CREER_LAMBDA()
 
 DELTA_T_TH=0.001*DELTA_T_VISQ
 
-DO I=1,20
+DO I=1,4
     
     
     !---APPEL DU SCHEMA NUMÉRIQUES
     CALL SCHEMA_IMPLICITE_S(NU_AD)
     
     DO J=1,1000
+    
         CALL ITERATION_TEMP_AD()
         
-        CALL COMPUTE_EQS()
-        IF (MOD(100,J)==1) THEN
-        CALL ECRITURE_AD_2(101,I)
-        ENDIF
+	CALL COMPUTE_EQS()
+	
+	!--- SORTIE ADIMENSIONNEES
+	IF (MOD(J,100)==1) THEN
+	T_cur = REAL(I,KIND=XP)+REAL(J,KIND=XP)*DELTA_T_TH
+	CALL ECRITURE_AD_2(101,T_cur)
+	
+	ENDIF
+		
     ENDDO
-    
-    
-    !-----------------------------------------------------------------------
-    !-- SORTIES ADIMENSIONNEES
-    !-----------------------------------------------------------------------
-    
     
 ENDDO
 
