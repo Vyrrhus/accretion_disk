@@ -73,7 +73,6 @@ SUBROUTINE CREER_LAMBDA()
 
     !!variables internes
     INTEGER :: iter
-    REAL(KIND=xp) :: DX
 
     DO iter=1, Nx
         LAMBDA(iter) = DELTA_T_visq / (DX**2 * X_AD(iter)**2 )
