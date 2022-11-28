@@ -11,7 +11,7 @@ SUBROUTINE ECRITURE_AD_1(NB_VALUES)
      
      INTEGER,INTENT(IN) :: NB_VALUES
      INTEGER :: PAS,I
-     INTEGER,PARAMETER :: NB_VARIABLES = 14
+     INTEGER,PARAMETER :: NB_VARIABLES = 20
      INTEGER :: ID_WANTED_VARIABLES 
      INTEGER :: LIST(NB_VARIABLES)
      CHARACTER(LEN=1024),PARAMETER :: FILE_NAME = 'data.dat'  
@@ -66,7 +66,7 @@ SUBROUTINE ECRITURE_AD_1(NB_VALUES)
      ENDIF
      
      !IF (LIST(8)==1) THEN
-     !WRITE(11,"("//VALUES_LINE//"(1pE11.4,2X))") SIGMA_AD(::PAS)
+     !WRITE(11,"("//VALUES_LINE//"(1pE11.4,2X))") S_AD(::PAS)
      !ENDIF
      
      IF (LIST(9)==1) THEN
@@ -90,7 +90,19 @@ SUBROUTINE ECRITURE_AD_1(NB_VALUES)
      ENDIF
      
      IF(LIST(14)==1) THEN
-     WRITE(11,"('P_RAD  ',"//VALUES_LINE//"(1pE11.4,2X))") P_RAD_AD(::PAS)
+     WRITE(11,"('P_RAD  ',"//VALUES_LINE//"(1pE11.4,2X))") Q_PLUS_AD(::PAS)
+     ENDIF
+     
+     IF(LIST(15)==1) THEN
+     WRITE(11,"('P_RAD  ',"//VALUES_LINE//"(1pE11.4,2X))") Q_ADV_AD(::PAS)
+     ENDIF
+     
+     IF(LIST(16)==1) THEN
+     WRITE(11,"('P_RAD  ',"//VALUES_LINE//"(1pE11.4,2X))") Q_MOINS(::PAS)
+     ENDIF
+     
+     IF(LIST(17)==1) THEN
+     WRITE(11,"('P_RAD  ',"//VALUES_LINE//"(1pE11.4,2X))") TAU_EFF(::PAS)
      ENDIF
      
      CLOSE(11)
@@ -104,7 +116,7 @@ SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
      INTEGER,INTENT(IN) :: NB_VALUES
      REAL(KIND=XP),INTENT(IN) :: T_CUR
      INTEGER :: PAS,I
-     INTEGER,PARAMETER :: NB_VARIABLES = 14
+     INTEGER,PARAMETER :: NB_VARIABLES = 20
      INTEGER :: ID_WANTED_VARIABLES 
      INTEGER :: LIST(NB_VARIABLES)
      CHARACTER(LEN=1024),PARAMETER :: FILE_NAME = 'data1.dat' 
@@ -157,7 +169,7 @@ SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
      ENDIF 
      
      IF (LIST(8)==1) THEN
-     WRITE(11,"('    SIGMA    ')",ADVANCE="NO")
+     WRITE(11,"('    S_AD     ')",ADVANCE="NO")
      ENDIF 
      
      IF (LIST(9)==1) THEN
@@ -182,6 +194,30 @@ SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
      
      IF (LIST(14)==1) THEN
      WRITE(11,"('    P_RAD    ')",ADVANCE="NO")
+     ENDIF
+     
+     IF (LIST(15)==1) THEN
+     WRITE(11,"('    Q_PLUS   ')",ADVANCE="NO")
+     ENDIF
+     
+     IF (LIST(16)==1) THEN
+     WRITE(11,"('    Q_ADV    ')",ADVANCE="NO")
+     ENDIF
+     
+     IF (LIST(17)==1) THEN
+     WRITE(11,"('    Q_MOINS   ')",ADVANCE="NO")
+     ENDIF
+     
+     IF (LIST(18)==1) THEN
+     WRITE(11,"('    TAU_EFF   ')",ADVANCE="NO")
+     ENDIF
+     
+     IF (LIST(19)==1) THEN
+     WRITE(11,"('    KAPPA_FF  ')",ADVANCE="NO")
+     ENDIF
+     
+     IF (LIST(20)==1) THEN
+     WRITE(11,"('   EPSILON_FF ')",ADVANCE="NO")
      ENDIF
      
      WRITE(11,*)
@@ -220,7 +256,7 @@ SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
           ENDIF
           
           IF (LIST(8)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") SIGMA_AD(I)
+          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") S_AD(I)
           ENDIF
           
           IF (LIST(9)==1) THEN
@@ -245,6 +281,30 @@ SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
           
           IF(LIST(14)==1) THEN
           WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") P_RAD_AD(I)
+          ENDIF
+          
+          IF(LIST(15)==1) THEN
+          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") Q_PLUS_AD(I)
+          ENDIF
+          
+          IF(LIST(16)==1) THEN
+          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") Q_ADV_AD(I)
+          ENDIF
+          
+          IF(LIST(17)==1) THEN
+          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") Q_MOINS(I)
+          ENDIF
+          
+          IF(LIST(18)==1) THEN
+          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") TAU_EFF(I)
+          ENDIF
+          
+          IF(LIST(19)==1) THEN
+          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") KAPPA_FF(I)
+          ENDIF
+          
+          IF(LIST(20)==1) THEN
+          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") EPSILON_FF(I)
           ENDIF
           
           WRITE(11,*)
