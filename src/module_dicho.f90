@@ -17,8 +17,8 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
    REAL(KIND=xp), INTENT(out)  :: Sc                                              !! Point milieu de la dichotomie
    INTEGER,       INTENT(in)   :: p                                               !! Indice de la position
  
-   REAL(KIND=xp)               :: prec=0.1_xp                                    !! Précision de la dichotomie
-   REAL(KIND=xp)               :: eps=10_xp
+   REAL(KIND=xp)               :: prec=1E-15                                       !! Précision de la dichotomie
+   REAL(KIND=xp)               :: eps
    REAL(KIND=xp)               :: Ha, Hb, Hc                                      !! H aux points a, b et c
    REAL(KIND=xp)               :: rho_a, rho_b, rho_c                             !! rho aux points a, b et c
    REAL(KIND=xp)               :: Prad                                            !! Pression radiative
@@ -32,8 +32,7 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
    LOGICAL                     :: Aff
 
 
-
-   open(unit=10,file="results.out")
+   eps=10._xp
    
    PRINT*, "x= ", X_AD(p)
    Prad = ( P_rad_0 / P_0 ) * T ** 4._xp                                                                               !Calcul de Prad
@@ -43,7 +42,7 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
    Aff=.true.
    CALL calc_H(T,x_ad(p),Omega,Sa,Aff,Ha)                                                                    !calcul de H au point a
    Aff=.false.
-   PRINT*, "Ha= ", Ha
+   PRINT*, "H= ", Ha
    CALL calc_H(T,x_ad(p),Omega,Sb,Aff,Hb)                                                                    !calcul de H au point b
    rho_a = Sa / ( x_ad(p) * Ha )                                                                      !calcul de rho au point a
    PRINT*, "rho= ", rho_a
@@ -54,9 +53,9 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
    PRINT*, "Ptot= ", Pa
    Pgaz_b = ( P_gaz_0 / P_0 ) * T * rho_b                                                                     !calcul de Pgaz au point b
    Pb=Pgaz_b+Prad
-   nua = 0.5_xp * Pa / rho_a * Ha
+   nua = 0.5_xp * SQRT(Pa / rho_a) * Ha
    PRINT*, "nu= ", nua
-   nub = 0.5_xp * Pb / rho_b * Hb
+   nub = 0.5_xp * SQRT(Pb / rho_b) * Hb
 
    IF (mince .eqv. .true.) THEN                                                                               !Calculs pour la branche mince
 
@@ -72,11 +71,11 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
       DO WHILE(eps>prec)
 
          Sc=(Sa+Sb)/2._xp
-         CALL calc_H(T,x_ad(p),OMEGA_AD(p),Sc,Aff,Hc)                                                              !calcul de H au point c
-         rho_c = Sc / ( x_ad(p) * Hc )                                                                 !calcul de rho au point c
+         CALL calc_H(T,x_ad(p),Omega,Sc,Aff,Hc)                                                              !calcul de H au point c
+         rho_c = Sc / ( x_ad(p) * Hc )                                                                             !calcul de rho au point c
          Pgaz_c = ( P_gaz_0 / P_0 ) * T * rho_c                                                                 !calcul de Pgaz au point c
          Pc=Prad+Pgaz_c
-         nuc = 0.5_xp * Pc / rho_c * Hc
+         nuc = 0.5_xp * SQRT(Pc / rho_c) * Hc
          Fzc=F_Z_RAD_0 * rho_c**2._xp * SQRT(T) * Hc
          Fc = nuc * Omega ** 2._xp - 2._xp *x_ad(p) * Fzc /(Sc * S_0)
 
@@ -105,6 +104,7 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
          ENDIF
 
          eps=ABS(Fc)                                                      !Calcul de l'erreur
+         PRINT*, "erreur= ", eps
 
       ENDDO
    ELSE                                                                                                  !Calculs pour la branche épais
@@ -123,11 +123,11 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
       DO WHILE(eps>prec)
 
          Sc=(Sa+Sb)/2_xp
-         CALL calc_H(T,x_ad(p),OMEGA_AD(p),Sc,Aff,Hc)
+         CALL calc_H(T,x_ad(p),Omega,Sc,Aff,Hc)
          rho_c = Sc / ( x_ad(p) * Hc )                                                                 !calcul de rho au point c
          Pgaz_c = ( P_gaz_0 / P_0 ) * T * rho_c
          Pc=Prad+Pgaz_c
-         nuc = 0.5_xp * Pc / rho_c * Hc
+         nuc = 0.5_xp * SQRT(Pc / rho_c) * Hc
          Kffc = 6.13E18 *rho_c * T ** (-7._xp/2._xp) *rho_0 * T_0 ** (-7._xp/2._xp)
          Fzc = F_Z_DIFF_0 * X_AD(p) * T**4._xp /( (KAPPA_E + Kffc) *Sc )
          Fc = nuc * Omega ** 2._xp - 2._xp *x_ad(p) * Fzc /(Sc * S_0)
@@ -157,12 +157,11 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
          ENDIF
 
          eps=ABS(Fc)
+         !PRINT*, "erreur= ", eps
 
       ENDDO
 
    ENDIF
-
-   close(10)
 
 END SUBROUTINE
 
