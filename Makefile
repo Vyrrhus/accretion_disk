@@ -17,12 +17,13 @@ MODULE_SRC 	:= 	module_declarations.f90 \
 				module_ecriture.f90 \
 				module_dicho.f90 \
 				module_conditions_initiales.f90 \
-				#module_schemas_T.f90 \			
+				module_schemas_sigma.f90 \
+				module_schemas_T.f90 	
 
 MAIN_SRC 	:= main.f90
 SCURVE_SRC 	:= S_curve.f90
-SCHEMA_SRC  := module_schemas_sigma.f90 \
-			   program_schema.f90 \
+#SCHEMA_SRC  := module_schemas_sigma.f90 \
+#			   module_schemas_T.f90 \
 
 # EXECUTABLES
 MAIN_EXE := disk
@@ -59,10 +60,10 @@ curve: $(SCURVE_EXE)
 schema: $(SCHEMA_EXE)
 
 $(MAIN_EXE): $(MODULE_OBJ) $(MAIN_OBJ)
-	$(F90) $(FFLAGS) $^ -o $@
+	$(F90) $(FFLAGS) $^ -o $@ $(LIB)
 
 $(SCURVE_EXE): $(MODULE_OBJ) $(SCURVE_OBJ)
-	$(F90) $(FFLAGS) $^ -o $@
+	$(F90) $(FFLAGS) $^ -o $@ 
 
 $(SCHEMA_EXE): $(MODULE_OBJ) $(SCHEMA_OBJ) 
 	$(F90) $(FFLAGS) $^ -o $@ $(LIB)
