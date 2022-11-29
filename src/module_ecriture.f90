@@ -52,90 +52,91 @@ SUBROUTINE ECRITURE_AD_1(NB_VALUES,T_CUR)
      
      OPEN(11,FILE=FILE_NAME,STATUS='UNKNOWN',POSITION='APPEND')
      
-     WRITE(11,"('# T = ',1PE12.3)") T_CUR
+     WRITE(11,"('# T   =   ',1PE11.4)") T_CUR
      
-     WRITE(11,"('X      ',"//VALUES_LINE//"(1pE11.4,2X))") X_AD(::PAS)
+     WRITE(11,"('X_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") X_AD(::PAS)
      
      IF (LIST(1)==1) THEN
-     WRITE(11,"('OMEGA  ',"//VALUES_LINE//"(1pE11.4,2X))") OMEGA_AD(::PAS)
+     WRITE(11,"('OMEGA_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") OMEGA_AD(::PAS)
      ENDIF
      
      IF (LIST(2)==1) THEN
-     WRITE(11,"('P      ',"//VALUES_LINE//"(1pE11.4,2X))") P_AD(::PAS)
+     WRITE(11,"('P_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") P_AD(::PAS)
      ENDIF
      
      IF (LIST(3)==1) THEN
-     WRITE(11,"('BETA   ',"//VALUES_LINE//"(1pE11.4,2X))") BETA(::PAS)
+     WRITE(11,"('BETA      ',"//VALUES_LINE//"(1pE11.4,2X))") BETA(::PAS)
      ENDIF  
      
      IF (LIST(4)==1) THEN
-     WRITE(11,"('C_S    ',"//VALUES_LINE//"(1pE11.4,2X))") C_S_AD(::PAS)
+     WRITE(11,"('C_S_AD    ',"//VALUES_LINE//"(1pE11.4,2X))") C_S_AD(::PAS)
      ENDIF
      
      IF (LIST(5)==1) THEN
-     WRITE(11,"('H      ',"//VALUES_LINE//"(1pE11.4,2X))") H_AD(::PAS)
+     WRITE(11,"('H_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") H_AD(::PAS)
      ENDIF
      
      IF (LIST(6)==1) THEN
-     WRITE(11,"('RHO    ',"//VALUES_LINE//"(1pE11.4,2X))") RHO_AD(::PAS)
+     WRITE(11,"('RHO_AD    ',"//VALUES_LINE//"(1pE11.4,2X))") RHO_AD(::PAS)
      ENDIF
      
      IF (LIST(7)==1) THEN
-     WRITE(11,"('NU     ',"//VALUES_LINE//"(1pE11.4,2X))") NU_AD(::PAS)
+     WRITE(11,"('NU_AD     ',"//VALUES_LINE//"(1pE11.4,2X))") NU_AD(::PAS)
      ENDIF
      
      IF (LIST(8)==1) THEN
-     WRITE(11,"('S      ',"//VALUES_LINE//"(1pE11.4,2X))") S_AD(::PAS)
+     WRITE(11,"('S_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") S_AD(::PAS)
      ENDIF
      
      IF (LIST(9)==1) THEN
-     WRITE(11,"('V      ',"//VALUES_LINE//"(1pE11.4,2X))") V_AD(::PAS)
+     WRITE(11,"('V_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") V_AD(::PAS)
      ENDIF
      
      IF (LIST(10)==1) THEN
-     WRITE(11,"('TEMP   ',"//VALUES_LINE//"(1pE11.4,2X))") TEMP_AD(::PAS)
+     WRITE(11,"('TEMP_AD   ',"//VALUES_LINE//"(1pE11.4,2X))") TEMP_AD(::PAS)
      ENDIF
      
      IF (LIST(11)==1) THEN
-     WRITE(11,"('M_DOT  ',"//VALUES_LINE//"(1pE11.4,2X))") M_DOT_AD(::PAS)
+     WRITE(11,"('M_DOT_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") M_DOT_AD(::PAS)
      ENDIF
      
      IF (LIST(12)==1) THEN
-     WRITE(11,"('F_Z    ',"//VALUES_LINE//"(1pE11.4,2X))") F_Z(::PAS)
+     WRITE(11,"('F_Z       ',"//VALUES_LINE//"(1pE11.4,2X))") F_Z(::PAS)
      ENDIF
      
      IF(LIST(13)==1) THEN
-     WRITE(11,"('P_GAZ  ',"//VALUES_LINE//"(1pE11.4,2X))") P_GAZ_AD(::PAS)
+     WRITE(11,"('P_GAZ_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") P_GAZ_AD(::PAS)
      ENDIF
      
      IF(LIST(14)==1) THEN
-     WRITE(11,"('P_RAD  ',"//VALUES_LINE//"(1pE11.4,2X))") P_RAD_AD(::PAS)
+     WRITE(11,"('P_RAD_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") P_RAD_AD(::PAS)
      ENDIF
      
      IF(LIST(15)==1) THEN
-     WRITE(11,"('Q_PLUS ',"//VALUES_LINE//"(1pE11.4,2X))") Q_PLUS_AD(::PAS)
+     WRITE(11,"('Q_PLUS_AD ',"//VALUES_LINE//"(1pE11.4,2X))") Q_PLUS_AD(::PAS)
      ENDIF
      
      IF(LIST(16)==1) THEN
-     WRITE(11,"('Q_ADV  ',"//VALUES_LINE//"(1pE11.4,2X))") Q_ADV_AD(::PAS)
+     WRITE(11,"('Q_ADV_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") Q_ADV_AD(::PAS)
      ENDIF
      
      IF(LIST(17)==1) THEN
-     WRITE(11,"('Q_MOINS ',"//VALUES_LINE//"(1pE11.4,2X))") Q_MOINS(::PAS)
+     WRITE(11,"('Q_MOINS   ',"//VALUES_LINE//"(1pE11.4,2X))") Q_MOINS(::PAS)
      ENDIF
      
      IF(LIST(18)==1) THEN
-     WRITE(11,"('TAU_EFF ',"//VALUES_LINE//"(1pE11.4,2X))") TAU_EFF(::PAS)
+     WRITE(11,"('TAU_EFF   ',"//VALUES_LINE//"(1pE11.4,2X))") TAU_EFF(::PAS)
      ENDIF
      
      IF(LIST(19)==1) THEN
-     WRITE(11,"('K_FF   ',"//VALUES_LINE//"(1pE11.4,2X))") KAPPA_FF(::PAS)
+     WRITE(11,"('K_FF      ',"//VALUES_LINE//"(1pE11.4,2X))") KAPPA_FF(::PAS)
      ENDIF
      
      IF(LIST(20)==1) THEN
-     WRITE(11,"('E_FF   ',"//VALUES_LINE//"(1pE11.4,2X))") EPSILON_FF(::PAS)
+     WRITE(11,"('E_FF      ',"//VALUES_LINE//"(1pE11.4,2X))") EPSILON_FF(::PAS)
      ENDIF
      
+     WRITE(11,*)
      CLOSE(11)
      
 END SUBROUTINE ECRITURE_AD_1
@@ -172,16 +173,16 @@ SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
      
      OPEN(11,FILE=FILE_NAME,STATUS='UNKNOWN',POSITION='APPEND')
      
-     WRITE(11,"('# T = ',1PE12.3)") T_CUR
+     WRITE(11,"('# T  =  ',1PE12.3)") T_CUR
      
-     WRITE(11,"('#     X      ')",ADVANCE="NO")
+     WRITE(11,"('#    X_AD    ')",ADVANCE="NO")
      
      IF (LIST(1)==1) THEN
-     WRITE(11,"('    OMEGA    ')",ADVANCE="NO")
+     WRITE(11,"('  OMEGA_AD   ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(2)==1) THEN
-     WRITE(11,"('      P      ')",ADVANCE="NO")
+     WRITE(11,"('     P_AD    ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(3)==1) THEN
@@ -189,19 +190,19 @@ SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
      ENDIF
      
      IF (LIST(4)==1) THEN
-     WRITE(11,"('     C_S     ')",ADVANCE="NO")
+     WRITE(11,"('    C_S_AD   ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(5)==1) THEN
-     WRITE(11,"('      H      ')",ADVANCE="NO")
+     WRITE(11,"('     H_AD    ')",ADVANCE="NO")
      ENDIF 
      
      IF (LIST(6)==1) THEN
-     WRITE(11,"('     RHO     ')",ADVANCE="NO")
+     WRITE(11,"('    RHO_AD   ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(7)==1) THEN
-     WRITE(11,"('     NU      ')",ADVANCE="NO")
+     WRITE(11,"('    NU_AD    ')",ADVANCE="NO")
      ENDIF 
      
      IF (LIST(8)==1) THEN
@@ -209,15 +210,15 @@ SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
      ENDIF
      
      IF (LIST(9)==1) THEN
-     WRITE(11,"('      V      ')",ADVANCE="NO")
+     WRITE(11,"('    V_AD     ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(10)==1) THEN
-     WRITE(11,"('      T      ')",ADVANCE="NO")
+     WRITE(11,"('   TEMP_AD   ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(11)==1) THEN
-     WRITE(11,"('    M_DOT    ')",ADVANCE="NO")
+     WRITE(11,"('   M_DOT_AD  ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(12)==1) THEN
@@ -225,19 +226,19 @@ SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
      ENDIF
      
      IF (LIST(13)==1) THEN
-     WRITE(11,"('    P_GAZ    ')",ADVANCE="NO")
+     WRITE(11,"('   P_GAZ_AD  ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(14)==1) THEN
-     WRITE(11,"('    P_RAD    ')",ADVANCE="NO")
+     WRITE(11,"('   P_RAD_AD  ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(15)==1) THEN
-     WRITE(11,"('    Q_PLUS   ')",ADVANCE="NO")
+     WRITE(11,"('  Q_PLUS_AD  ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(16)==1) THEN
-     WRITE(11,"('    Q_ADV    ')",ADVANCE="NO")
+     WRITE(11,"('   Q_ADV_AD  ')",ADVANCE="NO")
      ENDIF
      
      IF (LIST(17)==1) THEN
@@ -390,72 +391,72 @@ SUBROUTINE ECRITURE_1(NB_VALUES,T_CUR)
      
      OPEN(11,FILE=FILE_NAME,STATUS='UNKNOWN',POSITION='APPEND')
      
-     WRITE(11,"('# T = ',1PE12.3)") T_CUR
+     WRITE(11,"('# T  =  ',1PE12.3)") T_CUR
      
-     WRITE(11,"('RAYON  ',"//VALUES_LINE//"(1pE11.4,2X))") RAYON(::PAS)
+     WRITE(11,"('RAYON   ',"//VALUES_LINE//"(1pE11.4,2X))") RAYON(::PAS)
      
      IF (LIST(1)==1) THEN
-     WRITE(11,"('OMEGA  ',"//VALUES_LINE//"(1pE11.4,2X))") OMEGA(::PAS)
+     WRITE(11,"('OMEGA   ',"//VALUES_LINE//"(1pE11.4,2X))") OMEGA(::PAS)
      ENDIF
      
      IF (LIST(2)==1) THEN
-     WRITE(11,"('P      ',"//VALUES_LINE//"(1pE11.4,2X))") P(::PAS)
+     WRITE(11,"('P       ',"//VALUES_LINE//"(1pE11.4,2X))") P(::PAS)
      ENDIF
      
      IF (LIST(3)==1) THEN
-     WRITE(11,"('BETA   ',"//VALUES_LINE//"(1pE11.4,2X))") BETA(::PAS)
+     WRITE(11,"('BETA    ',"//VALUES_LINE//"(1pE11.4,2X))") BETA(::PAS)
      ENDIF
      
      IF (LIST(4)==1) THEN
-     WRITE(11,"('C_S    ',"//VALUES_LINE//"(1pE11.4,2X))") C_S(::PAS)
+     WRITE(11,"('C_S     ',"//VALUES_LINE//"(1pE11.4,2X))") C_S(::PAS)
      ENDIF
      
      IF (LIST(5)==1) THEN
-     WRITE(11,"('H      ',"//VALUES_LINE//"(1pE11.4,2X))") H(::PAS)
+     WRITE(11,"('H       ',"//VALUES_LINE//"(1pE11.4,2X))") H(::PAS)
      ENDIF
      
      IF (LIST(6)==1) THEN
-     WRITE(11,"('RHO    ',"//VALUES_LINE//"(1pE11.4,2X))") RHO(::PAS)
+     WRITE(11,"('RHO     ',"//VALUES_LINE//"(1pE11.4,2X))") RHO(::PAS)
      ENDIF
      
      IF (LIST(7)==1) THEN
-     WRITE(11,"('NU     ',"//VALUES_LINE//"(1pE11.4,2X))") NU(::PAS)
+     WRITE(11,"('NU      ',"//VALUES_LINE//"(1pE11.4,2X))") NU(::PAS)
      ENDIF
      
      IF (LIST(8)==1) THEN
-     WRITE(11,"('SIGMA  ',"//VALUES_LINE//"(1pE11.4,2X))") SIGMA(::PAS)
+     WRITE(11,"('SIGMA   ',"//VALUES_LINE//"(1pE11.4,2X))") SIGMA(::PAS)
      ENDIF
      
      IF (LIST(9)==1) THEN
-     WRITE(11,"('V      ',"//VALUES_LINE//"(1pE11.4,2X))") V(::PAS)
+     WRITE(11,"('V       ',"//VALUES_LINE//"(1pE11.4,2X))") V(::PAS)
      ENDIF
      
      IF (LIST(10)==1) THEN
-     WRITE(11,"('TEMP   ',"//VALUES_LINE//"(1pE11.4,2X))") TEMP(::PAS)
+     WRITE(11,"('TEMP    ',"//VALUES_LINE//"(1pE11.4,2X))") TEMP(::PAS)
      ENDIF
      
      IF (LIST(11)==1) THEN
-     WRITE(11,"('M_DOT  ',"//VALUES_LINE//"(1pE11.4,2X))") M_DOT(::PAS)
+     WRITE(11,"('M_DOT   ',"//VALUES_LINE//"(1pE11.4,2X))") M_DOT(::PAS)
      ENDIF
      
      IF (LIST(12)==1) THEN
-     WRITE(11,"('F_Z    ',"//VALUES_LINE//"(1pE11.4,2X))") F_Z(::PAS)
+     WRITE(11,"('F_Z     ',"//VALUES_LINE//"(1pE11.4,2X))") F_Z(::PAS)
      ENDIF
      
      IF(LIST(13)==1) THEN
-     WRITE(11,"('P_GAZ  ',"//VALUES_LINE//"(1pE11.4,2X))") P_GAZ(::PAS)
+     WRITE(11,"('P_GAZ   ',"//VALUES_LINE//"(1pE11.4,2X))") P_GAZ(::PAS)
      ENDIF
      
      IF(LIST(14)==1) THEN
-     WRITE(11,"('P_RAD  ',"//VALUES_LINE//"(1pE11.4,2X))") P_RAD(::PAS)
+     WRITE(11,"('P_RAD   ',"//VALUES_LINE//"(1pE11.4,2X))") P_RAD(::PAS)
      ENDIF
      
      IF(LIST(15)==1) THEN
-     WRITE(11,"('Q_PLUS ',"//VALUES_LINE//"(1pE11.4,2X))") Q_PLUS(::PAS)
+     WRITE(11,"('Q_PLUS  ',"//VALUES_LINE//"(1pE11.4,2X))") Q_PLUS(::PAS)
      ENDIF
      
      IF(LIST(16)==1) THEN
-     WRITE(11,"('Q_ADV  ',"//VALUES_LINE//"(1pE11.4,2X))") Q_ADV(::PAS)
+     WRITE(11,"('Q_ADV   ',"//VALUES_LINE//"(1pE11.4,2X))") Q_ADV(::PAS)
      ENDIF
      
      IF(LIST(17)==1) THEN
@@ -467,13 +468,14 @@ SUBROUTINE ECRITURE_1(NB_VALUES,T_CUR)
      ENDIF
      
      IF(LIST(19)==1) THEN
-     WRITE(11,"('K_FF   ',"//VALUES_LINE//"(1pE11.4,2X))") KAPPA_FF(::PAS)
+     WRITE(11,"('K_FF    ',"//VALUES_LINE//"(1pE11.4,2X))") KAPPA_FF(::PAS)
      ENDIF
      
      IF(LIST(20)==1) THEN
-     WRITE(11,"('E_FF   ',"//VALUES_LINE//"(1pE11.4,2X))") EPSILON_FF(::PAS)
+     WRITE(11,"('E_FF    ',"//VALUES_LINE//"(1pE11.4,2X))") EPSILON_FF(::PAS)
      ENDIF
      
+     WRITE(11,*)
      CLOSE(11)
      
 END SUBROUTINE ECRITURE_1
