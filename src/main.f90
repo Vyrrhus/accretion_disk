@@ -2,6 +2,7 @@
 PROGRAM MAIN 
 !========================================================================
 USE MODULE_DECLARATIONS
+USE DIMENSIONNEMENT
 USE MODULE_FUNCTION
 USE MODULE_CONDITIONS_INITIALES
 USE MODULE_ECRITURE
@@ -25,9 +26,10 @@ CALL CALCUL_CONSTANTES()
 ! CALL CREATION_CONDITIONS_INITIALES()
 
 ! CONDITIONS PARTICULIERES POUR OBTENIR Q+ - Q- = 0
-X_AD    = 2.570185704218493_xp
-TEMP_AD = 9906635.9_xp / T_0
-S_AD    = 395.08_xp / S_0 * X_AD
+RAYON = 1.95143549e4_xp		! <=> X_AD    = 2.570185704218493_xp
+TEMP  = 9906635.9_xp
+SIGMA = 395.08_xp
+CALL PHYSIQUE_TO_ADIM()
 
 ! TEMP_AD = TEMP_AD_INI
 ! S_AD = S_AD_INI
@@ -35,21 +37,23 @@ S_AD    = 395.08_xp / S_0 * X_AD
 !-- CALCUL L'ETAT DU DISQUE 
 !-----------------------------------------------------------------------
 CALL COMPUTE_EQS()
+CALL ADIM_TO_PHYSIQUE()
+
+PRINT*, 'R =       ', RAYON(30)
+PRINT*, 'OMEGA =   ', OMEGA(30)
+PRINT*, 'H =       ', H(30)
+PRINT*, 'CS =      ', C_S(30)
+PRINT*, 'RHO =     ', RHO(30)
+PRINT*, 'NU =      ', NU(30)
+PRINT*, 'v =       ', V(30)
+PRINT*, 'M_DOT =   ', M_DOT(30)
+
 PRINT*, 'X =       ', X_AD(30)
-PRINT*, 'P_RAD =   ', P_RAD_AD(30) 
-PRINT*, 'OMEGA =   ', OMEGA_AD(30) * OMEGA_MAX
 PRINT*, 'B =       ', B_AD(30) * B_0
 PRINT*, 'C =       ', C_AD(30) * C_0
-PRINT*, 'Ha =      ', H_AD(30) * R_S
-PRINT*, 'CS =      ', C_S_AD(30) * V_0
-PRINT*, 'RHO =     ', RHO_AD(30) * RHO_0
-PRINT*, 'NU =      ', NU_AD(30) * NU_0
-PRINT*, 'v =       ', V_AD(30) * V_0
-PRINT*, 'M_DOT =   ', M_DOT_AD(30) * M_0_DOT
+PRINT*, 'Prad =    ', P_RAD_AD(30) 
 PRINT*, 'Pgaz =    ', P_GAZ_AD(30) * P_GAZ_0
-PRINT*, 'Ptot =    ', P_AD(30) * P_0
 PRINT*, 'Kff =     ', KAPPA_FF(30)
-
 PRINT*, 'TAU_EFF=  ', TAU_EFF(30)
 PRINT*, 'Fz =      ', F_Z(30)
 PRINT*, 'Q+ =      ', Q_PLUS_AD(30) * Q_PLUS_0 * 1e-11_xp  ! 1 J/s/m² = 10-7 erg/s/m² = 10e-11 erg/s/cm²
