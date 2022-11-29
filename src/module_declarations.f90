@@ -230,7 +230,7 @@ SUBROUTINE CALCUL_CONSTANTES()
     Q_PLUS_0    = 3.0_XP * R_S**2.0_XP * OMEGA_MAX**3.0_XP
     Q_ADV_0     = OMEGA_MAX * T_0 * R / MU
     B_0         = 2.0_XP * A_RADIATION * T_0**4.0_XP / (3.0_XP * R_S * S_0 * OMEGA_MAX**2.0_XP)
-    C_0         = R * T_0 / (R_S**2.0_XP / MU / OMEGA_MAX**2.0_XP)
+    C_0         = R * T_0 / (R_S**2.0_XP * MU * OMEGA_MAX**2.0_XP)
 
     WRITE(*,"(48('-'))")
     WRITE(*,"('------------CONSTANTES DE SIMULATION------------')")
