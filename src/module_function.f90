@@ -81,6 +81,9 @@ SUBROUTINE COMPUTE_EQS()
     ! TAU_EFF
     TAU_EFF = 0.5_XP * S_AD / X_AD * KAPPA_FF * KAPPA_E * S_0
     
+    !EPSILON_FF
+    EPSILON_FF = (RHO_AD*RHO_0) ** 2.0_XP * (TEMP_AD*T_0) ** 0.5_XP * 6.22E13_XP
+    
     ! FZ
     WHERE (TAU_EFF >= 1.0_XP)
         F_Z = F_Z_DIFF_0 * X_AD * TEMP_AD**4.0_XP / ((KAPPA_FF + KAPPA_E) * S_AD)
