@@ -12,13 +12,13 @@ USE MODULE_SCHEMAS_T
 IMPLICIT NONE
 
 INTEGER :: I,J
-real(kind=xp) :: t_cur
 
 !-----------------------------------------------------------------------
 !-- INITIALISATION
 !-----------------------------------------------------------------------
 CALL APPEL_PARAM_INPUT()
 CALL CALCUL_CONSTANTES()
+CALL INIT_FILES()
 
 !-----------------------------------------------------------------------
 !-- CONDITIONS INITIALES
@@ -68,26 +68,24 @@ DELTA_T_TH=0.001*DELTA_T_VISQ
 
 DO I=1,4
     
-    
     !---APPEL DU SCHEMA NUMÉRIQUES
     CALL SCHEMA_IMPLICITE_S(NU_AD)
     
     DO J=1,1000
     
-        CALL ITERATION_TEMP_AD()
+    	CALL ITERATION_TEMP_AD()
         
-	CALL COMPUTE_EQS()
+		CALL COMPUTE_EQS()
 	
-	!--- SORTIE ADIMENSIONNEES
-	IF (MOD(J,100)==1) THEN
-	T_cur = REAL(I,KIND=XP)+REAL(J,KIND=XP)*DELTA_T_TH
-	CALL ECRITURE_AD_2(101,T_cur)
+		!--- SORTIE ADIMENSIONNEES
+		T_AD = T_AD + REAL(J, KIND=XP) * DELTA_T_TH
+
+		CALL ECRITURE_ADIM()
 	
-	ENDIF
-		
     ENDDO
-    
 ENDDO
+
+CALL CLOSE_OUTPUT()
 
 !========================================================================
 END PROGRAM MAIN 

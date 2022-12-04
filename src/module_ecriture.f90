@@ -1,693 +1,225 @@
-!--------------------------------------------------------------------------------------------------
-                                  MODULE MODULE_ECRITURE
-!--------------------------------------------------------------------------------------------------
-! Ce module écrit dans des fichiers .dat les tableaux de variables qu'on veut pouvoir étudier
-! Mettre en argument le nombres de valeurs qu'on veut à chaque pas de temps (finissant par 01) et le temps t
-     ! >>>> pour choisir les variables à écrire :
-     
-          ! >>> /config/wanted_variables 
-             ! >>>> mettre 1 pour écrire une variables et 0 pour l'inverse
-             
-     USE MODULE_DECLARATIONS
-                               
-     IMPLICIT NONE
-             
+!===================================================================================================
+            MODULE MODULE_ECRITURE
+!===================================================================================================
+!> Ce module écrit dans des fichiers .dat les tableaux de variables qu'on veut pouvoir étudier
+!>  Mettre en argument le nombres de valeurs qu'on veut à chaque pas de temps (finissant par 01) et le temps t
+!>      >>>> pour choisir les variables à écrire :
+!>          >>> /config/wanted_variables
+!>              >>>> mettre 1 pour écrire une variables et 0 pour l'inverse
+!===================================================================================================
+USE MODULE_DECLARATIONS
+IMPLICIT NONE
+
+INTEGER, PRIVATE :: UNT
+INTEGER, PRIVATE :: PAS_ECRITURE_SPATIAL
+INTEGER, PRIVATE :: PAS_ECRITURE_TEMPOREL
+INTEGER, PRIVATE :: PRECISION
+
+INTEGER,PARAMETER, PRIVATE :: NB_VARIABLES = 20
+INTEGER, PRIVATE :: LIST(NB_VARIABLES)
                  
-CONTAINS
+!===================================================================================================
+            CONTAINS 
+!===================================================================================================
 
-!---------------------------------------------------
-! PARTIE DU MODULE POUR LES VARIABLES ADIMENSIONNÉES
-!---------------------------------------------------
+SUBROUTINE INIT_FILES()
+!---------------------------------------------------------------------------------------------------
+!> Subroutine qui initialise les fichiers de sortie du programme
+!> Ceux-ci sont générés à partir des fichiers de config/*.config
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+    INTEGER :: OUTPUT_CONFIG_UNT, INPUT_CONFIG_UNT, ID_WANTED_VARIABLES
+    INTEGER :: IOS
+    INTEGER :: IDX
+    CHARACTER(LEN=1024) :: LINE
+    CHARACTER(LEN=1024) :: FILENAME
+    LOGICAL :: HEADER = .FALSE.
 
-SUBROUTINE ECRITURE_AD_1(NB_VALUES,T_CUR)
+    ! LECTURE VARIABLES A AFFICHER EN SORTIE
+    NAMELIST /WANTED_VARIABLES/ LIST
+    OPEN(NEWUNIT=ID_WANTED_VARIABLES,FILE='config/wanted_variables.txt',ACTION='read',STATUS='old')
+    READ(ID_WANTED_VARIABLES,WANTED_VARIABLES)
+    CLOSE(ID_WANTED_VARIABLES)
 
-     IMPLICIT NONE
-     
-     ! cette routine écrit les variables en lignes : chaque pas de temps correspond à N
-     ! (variables) lignes avec la variations spatiale de chaque variables sur une ligne
-     
-     INTEGER,INTENT(IN) :: NB_VALUES
-     INTEGER :: PAS,I
-     INTEGER,PARAMETER :: NB_VARIABLES = 20
-     INTEGER :: ID_WANTED_VARIABLES 
-     INTEGER :: LIST(NB_VARIABLES)
-     REAL(KIND=XP),INTENT(IN) :: T_CUR
-     CHARACTER(LEN=1024),PARAMETER :: FILE_NAME = 'data_ad.dat'  
-     CHARACTER(LEN=3) :: VALUES_LINE
-     
-     
-     NAMELIST /WANTED_VARIABLES/ LIST
-     OPEN(NEWUNIT=ID_WANTED_VARIABLES,FILE='config/wanted_variables.txt',ACTION='read',STATUS='old')
-     READ(ID_WANTED_VARIABLES,WANTED_VARIABLES)
-     CLOSE(ID_WANTED_VARIABLES)
-     
-     IF (NX==NB_VALUES) THEN
-          PAS = NX/NB_VALUES
-     ELSE 
-          PAS = NX/NB_VALUES +1
-     ENDIF
-     
-     2 FORMAT(I3)
-     WRITE(VALUES_LINE,2) NB_VALUES
-     
-     OPEN(11,FILE=FILE_NAME,STATUS='UNKNOWN',POSITION='APPEND')
-     
-     WRITE(11,"('# T   =   ',1PE11.4)") T_CUR
-     
-     WRITE(11,"('X_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") X_AD(::PAS)
-     
-     IF (LIST(1)==1) THEN
-     WRITE(11,"('OMEGA_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") OMEGA_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(2)==1) THEN
-     WRITE(11,"('P_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") P_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(3)==1) THEN
-     WRITE(11,"('BETA      ',"//VALUES_LINE//"(1pE11.4,2X))") BETA(::PAS)
-     ENDIF  
-     
-     IF (LIST(4)==1) THEN
-     WRITE(11,"('C_S_AD    ',"//VALUES_LINE//"(1pE11.4,2X))") C_S_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(5)==1) THEN
-     WRITE(11,"('H_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") H_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(6)==1) THEN
-     WRITE(11,"('RHO_AD    ',"//VALUES_LINE//"(1pE11.4,2X))") RHO_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(7)==1) THEN
-     WRITE(11,"('NU_AD     ',"//VALUES_LINE//"(1pE11.4,2X))") NU_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(8)==1) THEN
-     WRITE(11,"('S_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") S_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(9)==1) THEN
-     WRITE(11,"('V_AD      ',"//VALUES_LINE//"(1pE11.4,2X))") V_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(10)==1) THEN
-     WRITE(11,"('TEMP_AD   ',"//VALUES_LINE//"(1pE11.4,2X))") TEMP_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(11)==1) THEN
-     WRITE(11,"('M_DOT_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") M_DOT_AD(::PAS)
-     ENDIF
-     
-     IF (LIST(12)==1) THEN
-     WRITE(11,"('F_Z       ',"//VALUES_LINE//"(1pE11.4,2X))") F_Z(::PAS)
-     ENDIF
-     
-     IF(LIST(13)==1) THEN
-     WRITE(11,"('P_GAZ_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") P_GAZ_AD(::PAS)
-     ENDIF
-     
-     IF(LIST(14)==1) THEN
-     WRITE(11,"('P_RAD_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") P_RAD_AD(::PAS)
-     ENDIF
-     
-     IF(LIST(15)==1) THEN
-     WRITE(11,"('Q_PLUS_AD ',"//VALUES_LINE//"(1pE11.4,2X))") Q_PLUS_AD(::PAS)
-     ENDIF
-     
-     IF(LIST(16)==1) THEN
-     WRITE(11,"('Q_ADV_AD  ',"//VALUES_LINE//"(1pE11.4,2X))") Q_ADV_AD(::PAS)
-     ENDIF
-     
-     IF(LIST(17)==1) THEN
-     WRITE(11,"('Q_MOINS   ',"//VALUES_LINE//"(1pE11.4,2X))") Q_MOINS(::PAS)
-     ENDIF
-     
-     IF(LIST(18)==1) THEN
-     WRITE(11,"('TAU_EFF   ',"//VALUES_LINE//"(1pE11.4,2X))") TAU_EFF(::PAS)
-     ENDIF
-     
-     IF(LIST(19)==1) THEN
-     WRITE(11,"('K_FF      ',"//VALUES_LINE//"(1pE11.4,2X))") KAPPA_FF(::PAS)
-     ENDIF
-     
-     IF(LIST(20)==1) THEN
-     WRITE(11,"('E_FF      ',"//VALUES_LINE//"(1pE11.4,2X))") EPSILON_FF(::PAS)
-     ENDIF
-     
-     WRITE(11,*)
-     CLOSE(11)
-     
-END SUBROUTINE ECRITURE_AD_1
+    ! LECTURE DES PARAMETRES DU HEADER
+    OPEN(newunit=OUTPUT_CONFIG_UNT, file="config/output.config", action="read", status="old")
+    DO
+        ! Lecture ligne par ligne et sortie à la fin du fichier
+        READ(OUTPUT_CONFIG_UNT, "(A)", iostat=IOS) LINE
+        IF (IOS /= 0) EXIT 
 
-!------------------------------------------------------------------------------
+        ! Fichier de sortie
+        IF (INDEX(LINE, "@output") /= 0) THEN
+            IDX = INDEX(LINE, "=", back=.TRUE.)
+            FILENAME = LINE(IDX+1:)
+            CYCLE
+        END IF
 
-SUBROUTINE ECRITURE_AD_2(NB_VALUES,T_CUR)
+        ! Pas d'écriture & précision
+        PAS_ECRITURE_SPATIAL  = parse_int(LINE, "dx", PAS_ECRITURE_SPATIAL)
+        PAS_ECRITURE_TEMPOREL = parse_int(LINE, "dt", PAS_ECRITURE_TEMPOREL)
+        PRECISION             = parse_int(LINE, "prec", PRECISION)
 
-     IMPLICIT NONE
-     
-     ! cette routine écrit les variables en colonne
-     ! variations spatiale d'une variable en colonne
-     
-     INTEGER,INTENT(IN) :: NB_VALUES
-     REAL(KIND=XP),INTENT(IN) :: T_CUR
-     INTEGER :: PAS,I
-     INTEGER,PARAMETER :: NB_VARIABLES = 20
-     INTEGER :: ID_WANTED_VARIABLES 
-     INTEGER :: LIST(NB_VARIABLES)
-     CHARACTER(LEN=1024),PARAMETER :: FILE_NAME = 'data_ad_1.dat' 
-     CHARACTER(LEN=3) :: VALUES_LINE
-     
-     
-     NAMELIST /WANTED_VARIABLES/ LIST
-     OPEN(NEWUNIT=ID_WANTED_VARIABLES,FILE='config/wanted_variables.txt',ACTION='read',STATUS='old')
-     READ(ID_WANTED_VARIABLES,WANTED_VARIABLES)
-     CLOSE(ID_WANTED_VARIABLES)
-     
-     IF (NX==NB_VALUES) THEN
-          PAS = NX/NB_VALUES
-     ELSE 
-          PAS = NX/NB_VALUES +1
-     ENDIF
-     
-     OPEN(11,FILE=FILE_NAME,STATUS='UNKNOWN',POSITION='APPEND')
-     
-     WRITE(11,"('# T  =  ',1PE12.3)") T_CUR
-     
-     WRITE(11,"('#    X_AD    ')",ADVANCE="NO")
-     
-     IF (LIST(1)==1) THEN
-     WRITE(11,"('  OMEGA_AD   ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(2)==1) THEN
-     WRITE(11,"('     P_AD    ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(3)==1) THEN
-     WRITE(11,"('     BETA    ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(4)==1) THEN
-     WRITE(11,"('    C_S_AD   ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(5)==1) THEN
-     WRITE(11,"('     H_AD    ')",ADVANCE="NO")
-     ENDIF 
-     
-     IF (LIST(6)==1) THEN
-     WRITE(11,"('    RHO_AD   ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(7)==1) THEN
-     WRITE(11,"('    NU_AD    ')",ADVANCE="NO")
-     ENDIF 
-     
-     IF (LIST(8)==1) THEN
-     WRITE(11,"('    S_AD     ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(9)==1) THEN
-     WRITE(11,"('    V_AD     ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(10)==1) THEN
-     WRITE(11,"('   TEMP_AD   ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(11)==1) THEN
-     WRITE(11,"('   M_DOT_AD  ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(12)==1) THEN
-     WRITE(11,"('     F_Z     ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(13)==1) THEN
-     WRITE(11,"('   P_GAZ_AD  ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(14)==1) THEN
-     WRITE(11,"('   P_RAD_AD  ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(15)==1) THEN
-     WRITE(11,"('  Q_PLUS_AD  ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(16)==1) THEN
-     WRITE(11,"('   Q_ADV_AD  ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(17)==1) THEN
-     WRITE(11,"('   Q_MOINS   ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(18)==1) THEN
-     WRITE(11,"('   TAU_EFF   ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(19)==1) THEN
-     WRITE(11,"('   KAPPA_FF  ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(20)==1) THEN
-     WRITE(11,"('  EPSILON_FF ')",ADVANCE="NO")
-     ENDIF
-     
-     WRITE(11,*)
-     WRITE(11,*)
-     
-     DO I=1,NX,PAS
-          
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") X_AD(I)
-          
-          IF (LIST(1)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") OMEGA_AD(I)
-          ENDIF
-          
-          IF (LIST(2)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") P_AD(I)
-          ENDIF
-          
-          IF (LIST(3)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") BETA(I)
-          ENDIF
-          
-          IF (LIST(4)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") C_S_AD(I)
-          ENDIF
-          
-          IF (LIST(5)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") H_AD(I)
-          ENDIF
-          
-          IF (LIST(6)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") RHO_AD(I)
-          ENDIF
-          
-          IF (LIST(7)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") NU_AD(I)
-          ENDIF
-          
-          IF (LIST(8)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") S_AD(I)
-          ENDIF
-          
-          IF (LIST(9)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") V_AD(I)
-          ENDIF
-          
-          IF (LIST(10)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") TEMP_AD(I)
-          ENDIF
-          
-          IF (LIST(11)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") M_DOT_AD(I)
-          ENDIF
-          
-          IF (LIST(12)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") F_Z(I)
-          ENDIF
-          
-          IF(LIST(13)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") P_GAZ_AD(I)
-          ENDIF
-          
-          IF(LIST(14)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") P_RAD_AD(I)
-          ENDIF
-          
-          IF(LIST(15)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") Q_PLUS_AD(I)
-          ENDIF
-          
-          IF(LIST(16)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") Q_ADV_AD(I)
-          ENDIF
-          
-          IF(LIST(17)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") Q_MOINS(I)
-          ENDIF
-          
-          IF(LIST(18)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") TAU_EFF(I)
-          ENDIF
-          
-          IF(LIST(19)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") KAPPA_FF(I)
-          ENDIF
-          
-          IF(LIST(20)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") EPSILON_FF(I)
-          ENDIF
-          
-          WRITE(11,*)
-          
-     ENDDO
-     WRITE(11,*)
-     CLOSE(11)
-          
-END SUBROUTINE ECRITURE_AD_2
+        ! Ajout du header au fichier de sortie
+        IF (HEADER) THEN
+            IF (INDEX(LINE, "@input") /= 0) THEN
+                OPEN(newunit=INPUT_CONFIG_UNT, file="config/input.config", action="read", status="old")
+                DO 
+                    READ(INPUT_CONFIG_UNT, "(A)", iostat=IOS) LINE
+                    IF (IOS /= 0) EXIT 
+                    WRITE(UNT, "(A)") LINE
+                END DO
+                CLOSE(INPUT_CONFIG_UNT)
+            ELSE 
+                WRITE(UNT, "(A)") TRIM(LINE)
+            END IF
+        END IF
 
-!--------------------------------------------------------------------------------------------------
-!--------------------------------------------------------------------------------------------------
+        IF (INDEX(LINE, "@header") /= 0) THEN
+            HEADER = .TRUE.
+            OPEN(newunit=UNT, file="output/"//TRIM(ADJUSTL(FILENAME)), action="write")
+        END IF
 
-!--------------------------------------------------
-! PARTIE DU MODULE POUR LES VARIABLES DIMENSIONNÉES
-!--------------------------------------------------
-SUBROUTINE ECRITURE_1(NB_VALUES,T_CUR)
+    END DO
 
-     IMPLICIT NONE
-     
-     ! cette routine écrit les variables en lignes : chaque pas de temps correspond à N
-     ! (variables) lignes avec la variations spatiale de chaque variables sur une ligne
-     
-     INTEGER,INTENT(IN) :: NB_VALUES
-     INTEGER :: PAS,I
-     REAL(KIND=XP),INTENT(IN) :: T_CUR
-     INTEGER,PARAMETER :: NB_VARIABLES = 20
-     INTEGER :: ID_WANTED_VARIABLES 
-     INTEGER :: LIST(NB_VARIABLES)
-     CHARACTER(LEN=1024),PARAMETER :: FILE_NAME = 'data.dat'  
-     CHARACTER(LEN=3) :: VALUES_LINE
-     
-     
-     NAMELIST /WANTED_VARIABLES/ LIST
-     OPEN(NEWUNIT=ID_WANTED_VARIABLES,FILE='config/wanted_variables.txt',ACTION='read',STATUS='old')
-     READ(ID_WANTED_VARIABLES,WANTED_VARIABLES)
-     CLOSE(ID_WANTED_VARIABLES)
-     
-     IF (NX==NB_VALUES) THEN
-          PAS = NX/NB_VALUES
-     ELSE 
-          PAS = NX/NB_VALUES +1
-     ENDIF
-     
-     2 FORMAT(I3)
-     WRITE(VALUES_LINE,2) NB_VALUES
-     
-     OPEN(11,FILE=FILE_NAME,STATUS='UNKNOWN',POSITION='APPEND')
-     
-     WRITE(11,"('# T  =  ',1PE12.3)") T_CUR
-     
-     WRITE(11,"('RAYON   ',"//VALUES_LINE//"(1pE11.4,2X))") RAYON(::PAS)
-     
-     IF (LIST(1)==1) THEN
-     WRITE(11,"('OMEGA   ',"//VALUES_LINE//"(1pE11.4,2X))") OMEGA(::PAS)
-     ENDIF
-     
-     IF (LIST(2)==1) THEN
-     WRITE(11,"('P       ',"//VALUES_LINE//"(1pE11.4,2X))") P(::PAS)
-     ENDIF
-     
-     IF (LIST(3)==1) THEN
-     WRITE(11,"('BETA    ',"//VALUES_LINE//"(1pE11.4,2X))") BETA(::PAS)
-     ENDIF
-     
-     IF (LIST(4)==1) THEN
-     WRITE(11,"('C_S     ',"//VALUES_LINE//"(1pE11.4,2X))") C_S(::PAS)
-     ENDIF
-     
-     IF (LIST(5)==1) THEN
-     WRITE(11,"('H       ',"//VALUES_LINE//"(1pE11.4,2X))") H(::PAS)
-     ENDIF
-     
-     IF (LIST(6)==1) THEN
-     WRITE(11,"('RHO     ',"//VALUES_LINE//"(1pE11.4,2X))") RHO(::PAS)
-     ENDIF
-     
-     IF (LIST(7)==1) THEN
-     WRITE(11,"('NU      ',"//VALUES_LINE//"(1pE11.4,2X))") NU(::PAS)
-     ENDIF
-     
-     IF (LIST(8)==1) THEN
-     WRITE(11,"('SIGMA   ',"//VALUES_LINE//"(1pE11.4,2X))") SIGMA(::PAS)
-     ENDIF
-     
-     IF (LIST(9)==1) THEN
-     WRITE(11,"('V       ',"//VALUES_LINE//"(1pE11.4,2X))") V(::PAS)
-     ENDIF
-     
-     IF (LIST(10)==1) THEN
-     WRITE(11,"('TEMP    ',"//VALUES_LINE//"(1pE11.4,2X))") TEMP(::PAS)
-     ENDIF
-     
-     IF (LIST(11)==1) THEN
-     WRITE(11,"('M_DOT   ',"//VALUES_LINE//"(1pE11.4,2X))") M_DOT(::PAS)
-     ENDIF
-     
-     IF (LIST(12)==1) THEN
-     WRITE(11,"('F_Z     ',"//VALUES_LINE//"(1pE11.4,2X))") F_Z(::PAS)
-     ENDIF
-     
-     IF(LIST(13)==1) THEN
-     WRITE(11,"('P_GAZ   ',"//VALUES_LINE//"(1pE11.4,2X))") P_GAZ(::PAS)
-     ENDIF
-     
-     IF(LIST(14)==1) THEN
-     WRITE(11,"('P_RAD   ',"//VALUES_LINE//"(1pE11.4,2X))") P_RAD(::PAS)
-     ENDIF
-     
-     IF(LIST(15)==1) THEN
-     WRITE(11,"('Q_PLUS  ',"//VALUES_LINE//"(1pE11.4,2X))") Q_PLUS(::PAS)
-     ENDIF
-     
-     IF(LIST(16)==1) THEN
-     WRITE(11,"('Q_ADV   ',"//VALUES_LINE//"(1pE11.4,2X))") Q_ADV(::PAS)
-     ENDIF
-     
-     IF(LIST(17)==1) THEN
-     WRITE(11,"('Q_MOINS ',"//VALUES_LINE//"(1pE11.4,2X))") Q_MOINS(::PAS)
-     ENDIF
-     
-     IF(LIST(18)==1) THEN
-     WRITE(11,"('TAU_EFF ',"//VALUES_LINE//"(1pE11.4,2X))") TAU_EFF(::PAS)
-     ENDIF
-     
-     IF(LIST(19)==1) THEN
-     WRITE(11,"('K_FF    ',"//VALUES_LINE//"(1pE11.4,2X))") KAPPA_FF(::PAS)
-     ENDIF
-     
-     IF(LIST(20)==1) THEN
-     WRITE(11,"('E_FF    ',"//VALUES_LINE//"(1pE11.4,2X))") EPSILON_FF(::PAS)
-     ENDIF
-     
-     WRITE(11,*)
-     CLOSE(11)
-     
-END SUBROUTINE ECRITURE_1
+    CLOSE(OUTPUT_CONFIG_UNT)
 
-SUBROUTINE ECRITURE_2(NB_VALUES,T_CUR)
+    ! Format
+    WRITE(FMT, "('(A,', I0, '(1pE', I0, '.', I0, ',2X))')") NX / PAS_ECRITURE_SPATIAL, PRECISION + 7, PRECISION
 
-     IMPLICIT NONE
-     
-     ! cette routine écrit les variables en colonne
-     ! variations spatiale d'une variable en colonne
-     
-     INTEGER,INTENT(IN) :: NB_VALUES
-     REAL(KIND=XP),INTENT(IN) :: T_CUR
-     INTEGER :: PAS,I
-     INTEGER,PARAMETER :: NB_VARIABLES = 20
-     INTEGER :: ID_WANTED_VARIABLES 
-     INTEGER :: LIST(NB_VARIABLES)
-     CHARACTER(LEN=1024),PARAMETER :: FILE_NAME = 'data1.dat' 
-     CHARACTER(LEN=3) :: VALUES_LINE
-     
-     
-     NAMELIST /WANTED_VARIABLES/ LIST
-     OPEN(NEWUNIT=ID_WANTED_VARIABLES,FILE='config/wanted_variables.txt',ACTION='read',STATUS='old')
-     READ(ID_WANTED_VARIABLES,WANTED_VARIABLES)
-     CLOSE(ID_WANTED_VARIABLES)
-     
-     IF (NX==NB_VALUES) THEN
-          PAS = NX/NB_VALUES
-     ELSE 
-          PAS = NX/NB_VALUES +1
-     ENDIF
-     
-     OPEN(11,FILE=FILE_NAME,STATUS='UNKNOWN',POSITION='APPEND')
-     
-     WRITE(11,"('# T = ',1PE12.3)") T_CUR
-     
-     WRITE(11,"('#   RAYON    ')",ADVANCE="NO")
-     
-     IF (LIST(1)==1) THEN
-     WRITE(11,"('    OMEGA    ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(2)==1) THEN
-     WRITE(11,"('      P      ')",ADVANCE="NO")
-     ENDIF
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE INIT_FILES
+!---------------------------------------------------------------------------------------------------
 
-     IF (LIST(3)==1) THEN
-     WRITE(11,"('     BETA    ')",ADVANCE="NO")
-     ENDIF      
+SUBROUTINE ECRITURE_ADIM()
+!---------------------------------------------------------------------------------------------------
+!> Subroutine qui écrit les variables en sortie, au format :
+!> [temps] x.xxxxx
+!> [var1] x.xxxxx x.xxxxx x.xxxxx...
+!> [var2] x.xxxxx x.xxxxx x.xxxxx...
+!> [...]
+!>
+!> Les variables sont sans dimension lorsque c'est possible
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
      
-     IF (LIST(4)==1) THEN
-     WRITE(11,"('     C_S     ')",ADVANCE="NO")
-     ENDIF 
+    ! TEMPS
+    IF (MODULO(II_TIME, PAS_ECRITURE_TEMPOREL) /= 0) RETURN
+    WRITE(UNT, "('# T   =   ',1PE11.4)") T_AD
+
+    ! ESPACE
+    WRITE(UNT, FMT) "X_AD      ", X_AD(::PAS_ECRITURE_SPATIAL)
+
+    ! VARIABLES
+    IF (LIST(1)==1)  WRITE(UNT, FMT) "OMEGA_AD  ", OMEGA_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(2)==1)  WRITE(UNT, FMT) "P_AD      ", P_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(3)==1)  WRITE(UNT, FMT) "BETA      ", BETA(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(4)==1)  WRITE(UNT, FMT) "C_S_AD    ", C_S_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(5)==1)  WRITE(UNT, FMT) "H_AD      ", H_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(6)==1)  WRITE(UNT, FMT) "RHO_AD    ", RHO_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(7)==1)  WRITE(UNT, FMT) "NU_AD     ", NU_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(8)==1)  WRITE(UNT, FMT) "S_AD      ", S_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(9)==1)  WRITE(UNT, FMT) "V_AD      ", V_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(10)==1) WRITE(UNT, FMT) "TEMP_AD   ", TEMP_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(11)==1) WRITE(UNT, FMT) "M_DOT_AD  ", M_DOT_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(12)==1) WRITE(UNT, FMT) "F_Z_AD    ", F_Z_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(13)==1) WRITE(UNT, FMT) "P_GAZ_AD  ", P_GAZ_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(14)==1) WRITE(UNT, FMT) "P_RAD_AD  ", P_RAD_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(15)==1) WRITE(UNT, FMT) "Q_PLUS_AD ", Q_PLUS_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(16)==1) WRITE(UNT, FMT) "Q_ADV_AD  ", Q_ADV_AD(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(17)==1) WRITE(UNT, FMT) "Q_MOINS   ", Q_MOINS(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(18)==1) WRITE(UNT, FMT) "TAU_EFF   ", TAU_EFF(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(19)==1) WRITE(UNT, FMT) "K_FF      ", KAPPA_FF(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(20)==1) WRITE(UNT, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL)
+ 
+    WRITE(UNT,*)
+
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE ECRITURE_ADIM
+!---------------------------------------------------------------------------------------------------
+
+SUBROUTINE ECRITURE_DIM()
+!---------------------------------------------------------------------------------------------------
+!> Subroutine qui écrit les variables en sortie, au format :
+!> [temps] x.xxxxx
+!> [var1] x.xxxxx x.xxxxx x.xxxxx...
+!> [var2] x.xxxxx x.xxxxx x.xxxxx...
+!> [...]
+!>
+!> Les variables sont dimensionnés (unités SI)
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
      
-     IF (LIST(5)==1) THEN
-     WRITE(11,"('      H      ')",ADVANCE="NO")
-     ENDIF 
-     
-     IF (LIST(6)==1) THEN
-     WRITE(11,"('     RHO     ')",ADVANCE="NO")
-     ENDIF 
-     
-     IF (LIST(7)==1) THEN
-     WRITE(11,"('     NU      ')",ADVANCE="NO")
-     ENDIF 
-     
-     IF (LIST(8)==1) THEN
-     WRITE(11,"('    SIGMA    ')",ADVANCE="NO")
-     ENDIF 
-     
-     IF (LIST(9)==1) THEN
-     WRITE(11,"('      V      ')",ADVANCE="NO")
-     ENDIF 
-     
-     IF (LIST(10)==1) THEN
-     WRITE(11,"('      T      ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(11)==1) THEN
-     WRITE(11,"('    M_DOT    ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(12)==1) THEN
-     WRITE(11,"('     F_Z     ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(13)==1) THEN
-     WRITE(11,"('    P_GAZ    ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(14)==1) THEN
-     WRITE(11,"('    P_RAD    ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(15)==1) THEN
-     WRITE(11,"('    Q_PLUS   ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(16)==1) THEN
-     WRITE(11,"('    Q_ADV    ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(17)==1) THEN
-     WRITE(11,"('   Q_MOINS   ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(18)==1) THEN
-     WRITE(11,"('   TAU_EFF   ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(19)==1) THEN
-     WRITE(11,"('   KAPPA_FF  ')",ADVANCE="NO")
-     ENDIF
-     
-     IF (LIST(20)==1) THEN
-     WRITE(11,"('  EPSILON_FF ')",ADVANCE="NO")
-     ENDIF
-     
-     WRITE(11,*)
-     WRITE(11,*)
-     
-     DO I=1,NX,PAS
-          
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") RAYON(I)
-          
-          IF (LIST(1)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") OMEGA(I)
-          ENDIF
-          
-          IF (LIST(2)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") P(I)
-          ENDIF
-          
-          IF (LIST(3)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") BETA(I)
-          ENDIF
-          
-          IF (LIST(4)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") C_S(I)
-          ENDIF
-          
-          IF (LIST(5)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") H(I)
-          ENDIF
-          
-          IF (LIST(6)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") RHO(I)
-          ENDIF
-          
-          IF (LIST(7)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") NU(I)
-          ENDIF
-          
-          IF (LIST(8)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") SIGMA(I)
-          ENDIF
-          
-          IF (LIST(9)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") V(I)
-          ENDIF
-          
-          IF (LIST(10)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") TEMP(I)
-          ENDIF
-          
-          IF (LIST(11)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") M_DOT(I)
-          ENDIF
-          
-          IF (LIST(12)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") F_Z(I)
-          ENDIF
-          
-          IF(LIST(13)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") P_GAZ(I)
-          ENDIF
-          
-          IF(LIST(14)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") P_RAD(I)
-          ENDIF
-          
-          IF(LIST(15)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") Q_PLUS(I)
-          ENDIF
-          
-          IF(LIST(16)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") Q_ADV(I)
-          ENDIF
-          
-          IF(LIST(17)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") Q_MOINS(I)
-          ENDIF
-          
-          IF(LIST(18)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") TAU_EFF(I)
-          ENDIF
-          
-          IF(LIST(19)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") KAPPA_FF(I)
-          ENDIF
-          
-          IF(LIST(20)==1) THEN
-          WRITE(11,"(1pE11.4,2X)",ADVANCE="NO") EPSILON_FF(I)
-          ENDIF
-          
-          WRITE(11,*)
-          
-     ENDDO
-     WRITE(11,*)
-     CLOSE(11)
-          
-END SUBROUTINE ECRITURE_2
+    ! TEMPS
+    IF (MODULO(II_TIME, PAS_ECRITURE_TEMPOREL) /= 0) RETURN
+    WRITE(UNT, "('# T   =   ',1PE11.4)") T
+
+    ! ESPACE
+    WRITE(UNT, FMT) "X_AD      ", RAYON(::PAS_ECRITURE_SPATIAL)
+
+    ! VARIABLES
+    IF (LIST(1)==1)  WRITE(UNT, FMT) "OMEGA     ", OMEGA   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(2)==1)  WRITE(UNT, FMT) "P         ", P   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(3)==1)  WRITE(UNT, FMT) "BETA      ", BETA(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(4)==1)  WRITE(UNT, FMT) "C_S       ", C_S   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(5)==1)  WRITE(UNT, FMT) "H         ", H   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(6)==1)  WRITE(UNT, FMT) "RHO       ", RHO   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(7)==1)  WRITE(UNT, FMT) "NU        ", NU   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(8)==1)  WRITE(UNT, FMT) "SIGMA     ", SIGMA   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(9)==1)  WRITE(UNT, FMT) "V         ", V   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(10)==1) WRITE(UNT, FMT) "TEMP      ", TEMP   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(11)==1) WRITE(UNT, FMT) "M_DOT     ", M_DOT   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(12)==1) WRITE(UNT, FMT) "F_Z       ", F_Z   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(13)==1) WRITE(UNT, FMT) "P_GAZ     ", P_GAZ   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(14)==1) WRITE(UNT, FMT) "P_RAD     ", P_RAD   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(15)==1) WRITE(UNT, FMT) "Q_PLUS    ", Q_PLUS   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(16)==1) WRITE(UNT, FMT) "Q_ADV     ", Q_ADV   (::PAS_ECRITURE_SPATIAL)
+    IF (LIST(17)==1) WRITE(UNT, FMT) "Q_MOINS   ", Q_MOINS(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(18)==1) WRITE(UNT, FMT) "TAU_EFF   ", TAU_EFF(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(19)==1) WRITE(UNT, FMT) "K_FF      ", KAPPA_FF(::PAS_ECRITURE_SPATIAL)
+    IF (LIST(20)==1) WRITE(UNT, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL)
+ 
+    WRITE(UNT,*)
+
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE ECRITURE_DIM
+!---------------------------------------------------------------------------------------------------
+
+SUBROUTINE CLOSE_OUTPUT()
+!---------------------------------------------------------------------------------------------------
+!> Subroutine qui ferme le fichier de sortie généré par le programme.
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+
+    CLOSE(UNT)
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE CLOSE_OUTPUT
+!---------------------------------------------------------------------------------------------------
+
+FUNCTION parse_int(STRING, KEY, CURRENT_VALUE) result(VALUE)
+!---------------------------------------------------------------------------------------------------
+!> Parseur d'une ligne pour déterminer la valeur d'un integer
+!> La ligne (STRING) est de la forme:
+!> (A) = value
+!>       avec (KEY) dans (STRING)
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+
+    CHARACTER(LEN=*), INTENT(IN) :: STRING, KEY
+    CHARACTER(LEN=1024) :: SUBSTRING
+    INTEGER :: VALUE, CURRENT_VALUE
+    INTEGER :: IDX
+    IF (INDEX(STRING, TRIM(KEY)) /= 0) THEN
+        IDX = INDEX(STRING, "=", back=.TRUE.)
+        SUBSTRING = STRING(IDX+1:)
+        READ(SUBSTRING, *) VALUE
+    ELSE 
+        VALUE = CURRENT_VALUE
+    END IF
+
+!---------------------------------------------------------------------------------------------------
+END FUNCTION
+!---------------------------------------------------------------------------------------------------
 
 !--------------------------------------------------------------------------------------------------
                                   END MODULE MODULE_ECRITURE
