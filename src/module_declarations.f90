@@ -82,7 +82,7 @@ REAL(KIND=XP)  :: B_0           !! Coefficient b du trinôme pour le calcul de H
 REAL(KIND=XP)  :: C_0           !! Coefficient c du trinôme pour le calcul de H
 
 !! VARIABLES ADIMENSIONNÉES
-REAL(KIND=XP) :: T_AD(NX)            !! Temps Adimensionné
+REAL(KIND=XP) :: T_AD                !! Temps Adimensionné
 REAL(KIND=XP) :: X_AD(NX)            !! Rayon Adimensionné
 REAL(KIND=XP) :: OMEGA_AD(NX)        !! Vitesse De Rotation Adimensionnée
 REAL(KIND=XP) :: P_AD(NX)            !! Pression totale adimensionnée
@@ -111,7 +111,7 @@ REAL(KIND=XP) :: KAPPA_FF(NX)    !! Opacité Free-Free
 REAL(KIND=XP) :: EPSILON_FF(NX)  !! Emissivité Free-Free
 
 !! VARIABLES 
-REAL(KIND=XP) :: T(NX)            !! Temps
+REAL(KIND=XP) :: T                !! Temps
 REAL(KIND=XP) :: RAYON(NX)        !! Rayon
 REAL(KIND=XP) :: OMEGA(NX)        !! Vitesse De Rotation
 REAL(KIND=XP) :: P(NX)            !! Pression totale
@@ -211,7 +211,7 @@ SUBROUTINE CALCUL_CONSTANTES()
     T_MIN = 0.0_XP * OMEGA_MAX
     
     DT = ( T_MAX - T_MIN ) / (NT-1)
-    T_AD = T_MIN + DT * (/(I,I=0,NT-1)/)
+    T_AD = T_MIN
     
     ! CONSTANTES DE NORMALISATION
     V_0         = R_S * OMEGA_MAX
