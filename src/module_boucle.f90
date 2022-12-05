@@ -2,7 +2,7 @@
                                MODULE MODULE_BOUCLE 
 !---------------------------------------------------------------------------------------------------
 USE MODULE_DECLARATIONS
-USE MODULE_DIMENSIONNEMENT
+USE DIMENSIONNEMENT
 USE MODULE_FUNCTION
 USE MODULE_SCHEMAS_SIGMA
 USE MODULE_ECRITURE
@@ -39,7 +39,7 @@ SUBROUTINE SCHEMA_VISQ_TIME()
      
      DELTA_T_VISQ = MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
      
-     CALL SCHEMA_IMPLICIT_S(NU_AD)
+     CALL SCHEMA_IMPLICITE_S(NU_AD)
      TIME_AD = TIME_AD + DELTA_T_VISQ
      CALL SCHEMA_TH_TIME()
      
