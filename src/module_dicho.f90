@@ -121,9 +121,9 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
       ENDDO
    ELSE                                                                                                  !Calculs pour la branche épais
 
-      Kffa = 6.13E18 *rho_a * T ** (-7._xp/2._xp) *rho_0 * T_0 ** (-7._xp/2._xp)
+      Kffa = 6.13E18 *rho_a * T ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
       PRINT*, "Kff= ", Kffa
-      Kffb = 6.13E18 *rho_b * T ** (-7._xp/2._xp) *rho_0 * T_0 ** (-7._xp/2._xp)
+      Kffb = 6.13E18 *rho_b * T ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
       Fza = F_Z_DIFF_0 * X_AD(p) * T**4._xp /( (KAPPA_E + Kffa) *Sa )
       PRINT*, "Fz= ", Fza
       Fzb = F_Z_DIFF_0 * X_AD(p) * T**4._xp /( (KAPPA_E + Kffb) *Sb ) 
@@ -148,7 +148,7 @@ SUBROUTINE dichotomie(T, Sa, Sb, p, mince, Sc)
          Pgaz_c = T * rho_c
          Pc=( P_gaz_0 / P_0 ) * Pgaz_c+ ( P_rad_0 / P_0 ) * Prad
          nuc = 0.5_xp * Omega * Hc * Hc
-         Kffc = 6.13E18 *rho_c * T ** (-7._xp/2._xp) *rho_0 * T_0 ** (-7._xp/2._xp)
+         Kffc = 6.13E18 *rho_c * T ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
          Fzc = F_Z_DIFF_0 * X_AD(p) * T**4._xp /( (KAPPA_E + Kffc) *Sc )
          Q_plus_c = nuc * Omega**2._xp *Q_PLUS_0
          !PRINT*, "Q+c= ", Q_plus_c

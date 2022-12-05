@@ -28,7 +28,7 @@ INTEGER, PRIVATE :: LIST(NB_VARIABLES)
 SUBROUTINE INIT_FILES()
 !---------------------------------------------------------------------------------------------------
 !> Subroutine qui initialise les fichiers de sortie du programme
-!> Ceux-ci sont générés à partir des fichiers de config/*.config
+!> Ceux-ci sont générés à partir des fichiers de config/.config
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: OUTPUT_CONFIG_UNT, INPUT_CONFIG_UNT, ID_WANTED_VARIABLES

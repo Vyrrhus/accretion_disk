@@ -36,7 +36,7 @@
         
         REAL(kind=xp), dimension(NX)                     :: DTEMP_AD_DT
 
-        DTEMP_AD_DT = MU/(R*OMEGA_MAX*T_0*C_V_AD) * (Q_PLUS_0*Q_PLUS_AD - Q_MOINS)
+        DTEMP_AD_DT = MU/(R_BOLTZ*OMEGA_MAX*TEMP_0*C_V_AD) * (Q_PLUS_0*Q_PLUS_AD - Q_MOINS)
         CALL SCHEMA_EULER(TEMP_AD, DTEMP_AD_DT, DELTA_T_TH)
 
     END SUBROUTINE ITERATION_TEMP_AD
