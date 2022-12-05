@@ -55,10 +55,10 @@ SUBROUTINE COMPUTE_EQS()
 
     ! Vitesse d'accrétion
     CONDITION_EXT_V = -1.0_XP / (X_MAX * S_AD(NX))
-    V_AD            = -2.0_XP / (X_AD * S_AD) * EULER_SPATIAL(NU_AD * S_AD, CONDITION_EXT_V)
+    SPEED_AD            = -2.0_XP / (X_AD * S_AD) * EULER_SPATIAL(NU_AD * S_AD, CONDITION_EXT_V)
 
     ! Taux d'accrétion
-    M_DOT_AD = - V_AD * S_AD * X_AD
+    M_DOT_AD = - SPEED_AD * S_AD * X_AD
     
     ! Pression gazeuse
     P_GAZ_AD = RHO_AD * TEMP_AD
@@ -76,13 +76,13 @@ SUBROUTINE COMPUTE_EQS()
     GAMMA_3 = (4.0_XP - 3.0_XP * BETA) / (BETA * C_V_AD) + 1.0_XP
     
     ! KAPPA_FF
-    KAPPA_FF = RHO_AD * TEMP_AD**(-3.5_XP) * (RHO_0 * T_0**(-3.5_XP) * 6.13E18_XP)
+    KAPPA_FF = RHO_AD * TEMP_AD**(-3.5_XP) * (RHO_0 * TEMP_0**(-3.5_XP) * 6.13E18_XP)
     
     ! TAU_EFF
     TAU_EFF = 0.5_XP * S_AD / X_AD * KAPPA_FF * KAPPA_E * S_0
     
     !EPSILON_FF
-    EPSILON_FF = (RHO_AD*RHO_0) ** 2.0_XP * (TEMP_AD*T_0) ** 0.5_XP * 6.22E13_XP
+    EPSILON_FF = (RHO_AD*RHO_0) ** 2.0_XP * (TEMP_AD*TEMP_0) ** 0.5_XP * 6.22E13_XP
     
     ! FZ
     WHERE (TAU_EFF >= 1.0_XP)
