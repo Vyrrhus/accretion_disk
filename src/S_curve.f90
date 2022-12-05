@@ -12,7 +12,7 @@ REAL(KIND=xp), DIMENSION(n)   :: Temp_mince
 REAL(KIND=xp), DIMENSION(n)   :: S_epais
 REAL(KIND=xp), DIMENSION(n)   :: S_mince
 INTEGER                       :: j, i
-REAL(KIND=xp)                 :: Tmin, Tmax
+REAL(KIND=xp)                 :: Temp_min, Temp_max
 REAL(KIND=xp)                 :: Sa, Sb, Sc 
 LOGICAL                       :: mince=.false.
 
@@ -53,8 +53,8 @@ PRINT*, "Branche mince"
 
 Temp_min=4.09_xp
 Temp_max=10.28_xp
-Sa=1E-20
-Sb=1E20
+Sa=1E1
+Sb=1E4
 j=30
 mince=.true.
 
