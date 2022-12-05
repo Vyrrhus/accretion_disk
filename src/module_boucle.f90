@@ -33,7 +33,7 @@ SUBROUTINE SCHEMA_TH_TIME()
 
 END SUBROUTINE SCHEMA_TH_TIME
 !---------------------------------------------------------------------------------------------------
-SUBROUTINE SCHEMA_TH_VISQ()
+SUBROUTINE SCHEMA_VISQ_TIME()
 
      IMPLICIT NONE
      
@@ -43,7 +43,7 @@ SUBROUTINE SCHEMA_TH_VISQ()
      TIME_AD = TIME_AD + DELTA_T_VISQ
      CALL SCHEMA_TH_TIME()
      
-END SUBROUTINE SCHEMA_TH_VISQ
+END SUBROUTINE SCHEMA_VISQ_TIME
 !---------------------------------------------------------------------------------------------------
 
 !---------------------------------------------------------------------------------------------------
