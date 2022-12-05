@@ -63,7 +63,7 @@ $(MAIN_EXE): $(MODULE_OBJ) $(MAIN_OBJ)
 	$(F90) $(FFLAGS) $^ -o $@ $(LIB)
 
 $(SCURVE_EXE): $(MODULE_OBJ) $(SCURVE_OBJ)
-	$(F90) $(FFLAGS) $^ -o $@ 
+	$(F90) $(FFLAGS) $^ -o $@ $(LIB)
 
 $(SCHEMA_EXE): $(MODULE_OBJ) $(SCHEMA_OBJ) 
 	$(F90) $(FFLAGS) $^ -o $@ $(LIB)
