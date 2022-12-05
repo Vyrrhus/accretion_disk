@@ -52,7 +52,7 @@ PRINT*, 'X =       ', X_AD(30)
 PRINT*, 'B =       ', B_AD(30) * B_0
 PRINT*, 'C =       ', C_AD(30) * C_0
 PRINT*, 'Prad =    ', P_RAD_AD(30) 
-PRINT*, 'Pgaz =    ', P_GAZ_AD(30) * P_GAZ_0
+PRINT*, 'Pgaz =    ', P_GAZ_AD(30) * P_GAZ_0 
 PRINT*, 'Kff =     ', KAPPA_FF(30)
 PRINT*, 'TAU_EFF=  ', TAU_EFF(30)
 PRINT*, 'Fz =      ', F_Z(30)
@@ -78,7 +78,7 @@ DO I=1,4
 		CALL COMPUTE_EQS()
 	
 		!--- SORTIE ADIMENSIONNEES
-		TEMP_AD = TEMP_AD + REAL(J, KIND=XP) * DELTA_T_TH
+		TIME_AD = TIME_AD + REAL(J, KIND=XP) * DELTA_T_TH
 
 		CALL ECRITURE_ADIM()
 	
