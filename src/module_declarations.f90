@@ -19,16 +19,16 @@ IMPLICIT NONE
 INTEGER,PARAMETER :: XP =  SELECTED_REAL_KIND(15) !! Précision des calculs
 
 !! CONSTANTES PHYSIQUES 
-REAL(KIND=XP),PARAMETER :: K_B             = 1.380649E-23_XP                   !! Constante de Boltzmann
-REAL(KIND=XP),PARAMETER :: PI              = 3.1415926535897932384626433_XP    !! \(\pi\)
-REAL(KIND=XP),PARAMETER :: C_SPEED         = 2.99792458E8_XP                   !! Vitesse de la lumière
-REAL(KIND=XP),PARAMETER :: M_P             = 1.67262192369E-27_XP              !! Masse du proton
-REAL(KIND=XP),PARAMETER :: G_CONST         = 6.6743E-11_XP                     !! Constante de gravitation
-REAL(KIND=XP),PARAMETER :: SIGMA_STEFAN    = 5.670374419E-8_XP                 !! Constante de Stefan-Boltzmann
-REAL(KIND=XP),PARAMETER :: A_RADIATION     = 7.56573085E-16_XP                 !! Constante de radiation
+REAL(KIND=XP),PARAMETER :: K_B             = 1.380649E-23_xp                   !! Constante de Boltzmann
+REAL(KIND=XP),PARAMETER :: PI              = 3.1415926535897932384626433_xp    !! \(\pi\)
+REAL(KIND=XP),PARAMETER :: C_SPEED         = 2.99792458E8_xp                   !! Vitesse de la lumière
+REAL(KIND=XP),PARAMETER :: M_P             = 1.67262192369E-27_xp              !! Masse du proton
+REAL(KIND=XP),PARAMETER :: G_CONST         = 6.6743E-11_xp                     !! Constante de gravitation
+REAL(KIND=XP),PARAMETER :: SIGMA_STEFAN    = 5.670374419E-8_xp                 !! Constante de Stefan-Boltzmann
+REAL(KIND=XP),PARAMETER :: A_RADIATION     = 7.56573085E-16_xp                 !! Constante de radiation
 REAL(KIND=XP),PARAMETER :: M_O             = 1.989e30_xp                       !! Masse du Soleil
-REAL(KIND=XP),PARAMETER :: GAMMA_G         = 1.6666666666666666667_XP          !! Indice polytropique
-REAL(KIND=XP),PARAMETER :: SIGMA_E         = 6.6524587321E-29_XP               !! Section efficace de Thomson
+REAL(KIND=XP),PARAMETER :: GAMMA_G         = 1.6666666666666666667_xp          !! Indice polytropique
+REAL(KIND=XP),PARAMETER :: SIGMA_E         = 6.6524587321E-29_xp               !! Section efficace de Thomson
 
 !! PARAMETRES MODELE
 REAL(KIND=XP)  :: MASS               !! Masse trou noir de Schwarzschild
@@ -185,19 +185,19 @@ SUBROUTINE CALCUL_CONSTANTES()
     INTEGER :: I
 
     ! TAUX D'ACCRETION
-    L_EDD       = 4._XP * PI * G_CONST * MASS * M_P * C_SPEED / SIGMA_E
-    M_CRIT_DOT  = 12._XP * L_EDD / C_SPEED**2._XP
+    L_EDD       = 4._xp * PI * G_CONST * MASS * M_P * C_SPEED / SIGMA_E
+    M_CRIT_DOT  = 12._xp * L_EDD / C_SPEED**2._xp
     M_0_DOT     = F_ACCRETION * M_CRIT_DOT
 
     ! CONSTANTES DU SYSTEME
-    Z_FRAC     = 1.0_XP - X_FRAC - Y_FRAC
-    MU         = 1.0_XP / (2.0_XP * X_FRAC + 3.0_XP/4.0_XP * Y_FRAC + Z_FRAC/2.0_XP)
+    Z_FRAC     = 1.0_xp - X_FRAC - Y_FRAC
+    MU         = 1.0_xp / (2.0_xp * X_FRAC + 3.0_xp/4.0_xp * Y_FRAC + Z_FRAC/2.0_xp)
     R_BOLTZ    = K_B / M_P 
-    R_S        = 2.0_XP * G_CONST * MASS / C_SPEED**2.0_XP
-    R_MIN      = 3.0_XP * R_S
+    R_S        = 2.0_xp * G_CONST * MASS / C_SPEED**2.0_xp
+    R_MIN      = 3.0_xp * R_S
     R_MAX      = R_MAX * R_S
-    OMEGA_MAX  = (G_CONST * MASS / R_MIN**3.0_XP)**(0.5_XP) 
-    L_TOT      = M_0_DOT * C_SPEED**2.0_XP / 12.0_XP 
+    OMEGA_MAX  = (G_CONST * MASS / R_MIN**3.0_xp)**(0.5_xp) 
+    L_TOT      = M_0_DOT * C_SPEED**2.0_xp / 12.0_xp 
     
     ! DECLARATION DES VARIABLES SPATIALES 
     X_MAX = SQRT(R_MAX/R_S)
@@ -207,30 +207,30 @@ SUBROUTINE CALCUL_CONSTANTES()
     X_AD = X_MIN + DX * (/(I,I=1,NX)/)
     
     ! DECLARATION DES VARIABLES TEMPORELLES
-    TIME_MAX = 1.0E10_XP * OMEGA_MAX
-    TIME_MIN = 0.0_XP * OMEGA_MAX
+    TIME_MAX = 1.0E10_xp * OMEGA_MAX
+    TIME_MIN = 0.0_xp * OMEGA_MAX
     
     DT = ( TIME_MAX - TIME_MIN ) / (NT-1)
     TIME_AD = TIME_MIN
     
     ! CONSTANTES DE NORMALISATION
     SPEED_0     = R_S * OMEGA_MAX
-    NU_0        = 4.0_XP/3.0_XP * R_S**2.0_XP * OMEGA_MAX
-    SIGMA_0     = M_0_DOT / (OMEGA_MAX * 2.0_XP * PI * R_S**2.0_XP)
+    NU_0        = 4.0_xp/3.0_xp * R_S**2.0_xp * OMEGA_MAX
+    SIGMA_0     = M_0_DOT / (OMEGA_MAX * 2.0_xp * PI * R_S**2.0_xp)
     S_0         = SIGMA_0
-    RHO_0       = SIGMA_0 / (2._XP * R_S)
-    TEMP_0      = (L_TOT / (9.0_XP * 4.0_XP * PI * R_S**2.0_XP * SIGMA_STEFAN))**(0.25_XP)
-    P_0         = M_0_DOT * OMEGA_MAX / (4.0_XP * PI * R_S)
-    P_RAD_0     = A_RADIATION * TEMP_0**4.0_XP / 3.0_XP
+    RHO_0       = SIGMA_0 / (2._xp * R_S)
+    TEMP_0      = (L_TOT / (9.0_xp * 4.0_xp * PI * R_S**2.0_xp * SIGMA_STEFAN))**(0.25_xp)
+    P_0         = M_0_DOT * OMEGA_MAX / (4.0_xp * PI * R_S)
+    P_RAD_0     = A_RADIATION * TEMP_0**4.0_xp / 3.0_xp
     P_GAZ_0     = R_BOLTZ * RHO_0 * TEMP_0 / MU
     C_V_0       = R_BOLTZ/ MU
-    F_Z_DIFF_0  = 2.0_XP * A_RADIATION * C_SPEED * TEMP_0**4.0_XP / (3.0_XP * S_0)
-    F_Z_RAD_0   = R_S * RHO_0**2._XP * TEMP_0**(0.5_XP) * 6.22E13_XP
-    KAPPA_E     = 0.02_XP * (1.0_XP + X_FRAC) 
-    Q_PLUS_0    = 3.0_XP * R_S**2.0_XP * OMEGA_MAX**3.0_XP
+    F_Z_DIFF_0  = 2.0_xp * A_RADIATION * C_SPEED * TEMP_0**4.0_xp / (3.0_xp * S_0)
+    F_Z_RAD_0   = R_S * RHO_0**2._xp * TEMP_0**(0.5_xp) * 6.22E13_xp
+    KAPPA_E     = 0.02_xp * (1.0_xp + X_FRAC) 
+    Q_PLUS_0    = 3.0_xp * R_S**2.0_xp * OMEGA_MAX**3.0_xp
     Q_ADV_0     = OMEGA_MAX * TEMP_0 * R_BOLTZ/ MU
-    B_0         = 2.0_XP * A_RADIATION * TEMP_0**4.0_XP / (3.0_XP * R_S * S_0 * OMEGA_MAX**2.0_XP)
-    C_0         = R_BOLTZ* TEMP_0 / (R_S**2.0_XP * MU * OMEGA_MAX**2.0_XP)
+    B_0         = 2.0_xp * A_RADIATION * TEMP_0**4.0_xp / (3.0_xp * R_S * S_0 * OMEGA_MAX**2.0_xp)
+    C_0         = R_BOLTZ* TEMP_0 / (R_S**2.0_xp * MU * OMEGA_MAX**2.0_xp)
 
     WRITE(*,"(48('-'))")
     WRITE(*,"('------------CONSTANTES DE SIMULATION------------')")

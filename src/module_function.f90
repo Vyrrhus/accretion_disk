@@ -31,15 +31,15 @@ SUBROUTINE COMPUTE_EQS()
     REAL(KIND=XP) :: CONDITION_EXT_V           !! Condition au bord extérieur sur la vitesse d'accrétion
     
     ! Vitesse de rotation
-    OMEGA_AD = 3.0_XP**(1.5_XP) * X_AD**(-3.0_XP)
+    OMEGA_AD = 3.0_xp**(1.5_xp) * X_AD**(-3.0_xp)
 
     ! Pression de radiation
-    P_RAD_AD = TEMP_AD**4.0_XP
+    P_RAD_AD = TEMP_AD**4.0_xp
 
     ! Demi-hauteur du disque (calcul coefficients d'un trinôme du 2nd degré dont H est la solution positive)
-    B_AD = (TEMP_AD**4._XP * X_AD) / (OMEGA_AD**2._XP * S_AD)
-    C_AD = TEMP_AD / (OMEGA_AD**2._XP)
-    H_AD = (B_0 * B_AD + ((B_0 * B_AD)**2._XP + 4._XP * C_0 * C_AD)**0.5_XP) / 2._XP
+    B_AD = (TEMP_AD**4._xp * X_AD) / (OMEGA_AD**2._xp * S_AD)
+    C_AD = TEMP_AD / (OMEGA_AD**2._xp)
+    H_AD = (B_0 * B_AD + ((B_0 * B_AD)**2._xp + 4._xp * C_0 * C_AD)**0.5_xp) / 2._xp
 
     ! Vitesse du son
     C_S_AD = OMEGA_AD * H_AD
@@ -48,14 +48,14 @@ SUBROUTINE COMPUTE_EQS()
     RHO_AD = S_AD / (X_AD * H_AD)
     
     ! Viscosité
-    NU_AD = 0.5_XP * ALPHA * C_S_AD * H_AD
+    NU_AD = 0.5_xp * ALPHA * C_S_AD * H_AD
 
     ! Q+ (chaleur apportée)
-    Q_PLUS_AD = NU_AD * OMEGA_AD**2.0_XP
+    Q_PLUS_AD = NU_AD * OMEGA_AD**2.0_xp
 
     ! Vitesse d'accrétion
-    CONDITION_EXT_V = -1.0_XP / (X_MAX * S_AD(NX))
-    SPEED_AD            = -2.0_XP / (X_AD * S_AD) * EULER_SPATIAL(NU_AD * S_AD, CONDITION_EXT_V)
+    CONDITION_EXT_V = -1.0_xp / (X_MAX * S_AD(NX))
+    SPEED_AD            = -2.0_xp / (X_AD * S_AD) * EULER_SPATIAL(NU_AD * S_AD, CONDITION_EXT_V)
 
     ! Taux d'accrétion
     M_DOT_AD = - SPEED_AD * S_AD * X_AD
@@ -70,29 +70,29 @@ SUBROUTINE COMPUTE_EQS()
     BETA = P_GAZ_0 * P_GAZ_AD / (P_0 * P_AD)
     
     ! C_v
-    C_V_AD = (12.0_XP * (GAMMA_G - 1.0_XP) * (1.0_XP - BETA) + BETA) / (( GAMMA_G - 1.0_XP ) * BETA)
+    C_V_AD = (12.0_xp * (GAMMA_G - 1.0_xp) * (1.0_xp - BETA) + BETA) / (( GAMMA_G - 1.0_xp ) * BETA)
 
     ! Gamma_3
-    GAMMA_3 = (4.0_XP - 3.0_XP * BETA) / (BETA * C_V_AD) + 1.0_XP
+    GAMMA_3 = (4.0_xp - 3.0_xp * BETA) / (BETA * C_V_AD) + 1.0_xp
     
     ! KAPPA_FF
-    KAPPA_FF = RHO_AD * TEMP_AD**(-3.5_XP) * (RHO_0 * TEMP_0**(-3.5_XP) * 6.13E18_XP)
+    KAPPA_FF = RHO_AD * TEMP_AD**(-3.5_xp) * (RHO_0 * TEMP_0**(-3.5_xp) * 6.13E18_xp)
     
     ! TAU_EFF
-    TAU_EFF = 0.5_XP * S_AD / X_AD * KAPPA_FF * KAPPA_E * S_0
+    TAU_EFF = 0.5_xp * S_AD / X_AD * ( KAPPA_FF * KAPPA_E ) ** (0.5_xp) * S_0
     
     !EPSILON_FF
-    EPSILON_FF = (RHO_AD*RHO_0) ** 2.0_XP * (TEMP_AD*TEMP_0) ** 0.5_XP * 6.22E13_XP
+    EPSILON_FF = (RHO_AD*RHO_0) ** 2.0_xp * (TEMP_AD*TEMP_0) ** 0.5_xp * 6.22E13_xp
     
     ! FZ
-    WHERE (TAU_EFF >= 1.0_XP)
-        F_Z = F_Z_DIFF_0 * X_AD * TEMP_AD**4.0_XP / ((KAPPA_FF + KAPPA_E) * S_AD)
+    WHERE (TAU_EFF >= 1.0_xp)
+        F_Z = F_Z_DIFF_0 * X_AD * TEMP_AD**4.0_xp / ((KAPPA_FF + KAPPA_E) * S_AD)
     ELSEWHERE
-        F_Z = F_Z_RAD_0 * RHO_AD**2.0_XP * TEMP_AD**0.5_XP * H_AD
+        F_Z = F_Z_RAD_0 * RHO_AD**2.0_xp * TEMP_AD**0.5_xp * H_AD
     END WHERE
     
     ! Q- (chaleur dissipée)
-    Q_MOINS = 2.0_XP * X_AD * F_Z / (S_AD * S_0)
+    Q_MOINS = 2.0_xp * X_AD * F_Z / (S_AD * S_0)
       
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE COMPUTE_EQS

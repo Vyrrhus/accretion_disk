@@ -20,6 +20,7 @@ SUBROUTINE SCHEMA_TH_TIME()
     
     REAL(KIND=XP) :: SWITCH
     
+    SWITCH = 1.0E-3_xp
     DELTA_T_TH = FRACTION_DT / MAXVAL(OMEGA_AD)
     
     DO WHILE(MAXVAL(ABS(Q_PLUS_AD*Q_PLUS_0 - Q_MOINS)) > SWITCH)
@@ -30,20 +31,28 @@ SUBROUTINE SCHEMA_TH_TIME()
               CALL ECRITURE_DIM() 
               
     ENDDO
+    WRITE(*,"('BOUCLE TEMPS THERMIQUE DONE')")
 
 END SUBROUTINE SCHEMA_TH_TIME
 !---------------------------------------------------------------------------------------------------
-SUBROUTINE SCHEMA_VISQ_TIME()
+SUBROUTINE SCHEMA_FIRST()
 
      IMPLICIT NONE
+     INTEGER :: I
      
      DELTA_T_VISQ = MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
      
-     CALL SCHEMA_IMPLICITE_S(NU_AD)
-     TIME_AD = TIME_AD + DELTA_T_VISQ
      CALL SCHEMA_TH_TIME()
      
-END SUBROUTINE SCHEMA_VISQ_TIME
+     DO I=1,4
+     
+	     CALL SCHEMA_IMPLICITE_S(NU_AD)
+	     TIME_AD = TIME_AD + DELTA_T_VISQ
+	     CALL SCHEMA_TH_TIME()
+
+     ENDDO
+     
+END SUBROUTINE SCHEMA_FIRST
 !---------------------------------------------------------------------------------------------------
 
 !---------------------------------------------------------------------------------------------------
