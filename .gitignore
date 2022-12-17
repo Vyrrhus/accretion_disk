@@ -1,9 +1,17 @@
-*.out 
+# Extensions
+*.out
+*.txt
+*.dat
+*.config
+*.png
 *.dSYM
+*.ipynb
 .DS_Store
-doc/
+
+# Executables
 disk
 scurve
 schema
-data.txt
-lec.ipynb
+
+# Folders
+doc/
