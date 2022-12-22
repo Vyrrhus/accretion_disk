@@ -119,7 +119,7 @@ SUBROUTINE SI_TO_CGS()
     IMPLICIT NONE
 
     ! Longueurs & vitesses
-    RADIUS  = RADIUS * 1e2_xp
+    RADIUS = RADIUS * 1e2_xp
     H      = H * 1e2_xp
     C_S    = C_S * 1e2_xp
     SPEED  = SPEED * 1e2_xp
@@ -132,7 +132,7 @@ SUBROUTINE SI_TO_CGS()
 
     ! Pression & viscosité
     P  = P * 1e1_xp
-    NU = NU * 1e1_xp
+    NU = NU * 1e4_xp
 
     ! Densité de surface
     SIGMA = SIGMA * 1e-1_xp
@@ -162,7 +162,7 @@ SUBROUTINE CGS_TO_SI()
 
     ! Pression & viscosité
     P  = P * 1e-1_xp
-    NU = NU * 1e-1_xp
+    NU = NU * 1e-4_xp
 
     ! Densité de surface
     SIGMA = SIGMA * 1e1_xp
