@@ -155,7 +155,9 @@ SUBROUTINE APPEL_PARAM_INPUT()
     OPEN(newunit=file_id,file='config/input.config',action='read',status='old')
     READ(file_id,input)
     CLOSE(file_id)
-
+    
+    OPEN(99,FILE='output/constantes.out',action='write')
+    
     ! AFFICHAGE PARAMETRES D'ENTREE
     WRITE(*,"(48('-'))")
     WRITE(*,"('-----------------INITIALISATION-----------------')")
@@ -169,7 +171,19 @@ SUBROUTINE APPEL_PARAM_INPUT()
     WRITE(*,"('X                                              = ',F12.2)") X_FRAC
     WRITE(*,"('Y                                              = ',F12.2)") Y_FRAC
     WRITE(*,"('NB POINTS DE DISCRETISATION SPATIALE           = ',I12)") NX
-
+    
+    WRITE(99,"(48('-'))")
+    WRITE(99,"('------------VALEURS PARAMETRES EN INPUT---------')")
+    WRITE(99,"(48('-'))")
+    
+    WRITE(99,"('MASSE DU TROU NOIR [MASSE SOLAIRE]             = ',F12.1)") MASS
+    WRITE(99,"('RAPPORT TAUX D ACCRETION / TAUX CRITIQUE       = ',F12.3)") f_accretion  
+    WRITE(99,"('R_MAX [RAYON DE SCHWARZSCHILD]                 = ',F12.1)") r_max
+    WRITE(99,"('ALPHA                                          = ',F12.2)") ALPHA
+    WRITE(99,"('X                                              = ',F12.2)") X_FRAC
+    WRITE(99,"('Y                                              = ',F12.2)") Y_FRAC
+    WRITE(99,"('NB POINTS DE DISCRETISATION SPATIALE           = ',I12)") NX
+    
     ! CONVERSION UNITES SI
     MASS = MASS * M_o
     
@@ -231,7 +245,8 @@ SUBROUTINE CALCUL_CONSTANTES()
     Q_ADV_0     = OMEGA_MAX * TEMP_0 * R_BOLTZ/ MU
     B_0         = 2.0_xp * A_RADIATION * TEMP_0**4.0_xp / (3.0_xp * R_S * S_0 * OMEGA_MAX**2.0_xp)
     C_0         = R_BOLTZ* TEMP_0 / (R_S**2.0_xp * MU * OMEGA_MAX**2.0_xp)
-
+    
+   
     WRITE(*,"(48('-'))")
     WRITE(*,"('------------CONSTANTES DE SIMULATION------------')")
     WRITE(*,"(48('-'))")
@@ -283,6 +298,62 @@ SUBROUTINE CALCUL_CONSTANTES()
     
     WRITE(*,"(48('-'))")
 
+    !-------------------------------------------------------------------------------------------
+    !-------------------------------------------------------------------------------------------
+
+    WRITE(99,"(48('-'))")
+    WRITE(99,"('------------CONSTANTES DE SIMULATION------------')")
+    WRITE(99,"(48('-'))")
+    
+    WRITE(99,"('MASSE DU TROU NOIR                        MASS = ',1pE12.4)") MASS
+    WRITE(99,"('TAUX D ACCRETION                       M_0_DOT = ',1pE12.4)") M_0_DOT
+    WRITE(99,"('TAUX D ACCRETION CRITIQUE           M_CRIT_DOT = ',1pE12.4)") M_CRIT_DOT
+    WRITE(99,"('LUMINOSITÉ D EDDINGTON                   L_EDD = ',1pE12.4)") L_EDD
+    
+    WRITE(99,"(48('-'))")
+    
+    WRITE(99,"('FRACTION D ELEMENTS LOURDS                   Z = ',F12.2)") Z_FRAC
+    WRITE(99,"('POID MOLECULAIRE MOYEN                      MU = ',F12.4)") MU
+    WRITE(99,"('RAYONS DE SCHWARZSCHILD                    R_S = ',1pE12.4)") R_S
+    WRITE(99,"('RAYON MIN DISQUE ACCRETION               R_MIN = ',1pE12.4)") R_MIN
+    WRITE(99,"('RAYON MAXIMAL DU DISQUE                  R_MAX = ',1pE12.4)") R_MAX
+    WRITE(99,"('VITESSE ROTATION MAX                 OMEGA_MAX = ',F12.4)") OMEGA_MAX
+    WRITE(99,"('LUMINOSITE TOTALE                        L_TOT = ',1pE12.4)") L_TOT
+    
+    WRITE(99,"(48('-'))")
+    WRITE(99,"('------------VARIABLES SPATIALES-----------------')")
+    WRITE(99,"(48('-'))")
+    
+    WRITE(99,"('PAS DE DISCRETISATION DX                    DX = ',1pE12.3)") DX
+    WRITE(99,"('RAYON NORMALISÉ MINIMAL                  X_MIN = ',F12.3)") X_MIN
+    WRITE(99,"('RAYON NORMALISÉ MAXIMAL                  X_MAX = ',F12.1)") X_MAX
+    
+    WRITE(99,"(48('-'))")
+    WRITE(99,"('--------CONSTANTES DE NORMALISATION-------------')")
+    WRITE(99,"(48('-'))")
+    
+    WRITE(99,"('CONSTANTE DE VITESSE                   SPEED_0 = ',1pE12.4)") SPEED_0
+    WRITE(99,"('CONSTANTE DE VISCOSITE                    NU_0 = ',1pE12.4)") NU_0
+    WRITE(99,"('CONSTANTE DE DENSITE                     RHO_0 = ',1pE12.4)") RHO_0
+    WRITE(99,"('CONSTANTE DE TEMPERATURE                   T_0 = ',1pE12.4)") TEMP_0
+    WRITE(99,"('CONSTANTE DE DENSITE SURFACIQUE        SIGMA_0 = ',1pE12.4)") SIGMA_0
+    WRITE(99,"('CONSTANTE DE DENSITE                       S_0 = ',1pE12.4)") S_0
+    WRITE(99,"('CONSTANTE DE PRESSION                      P_0 = ',1pE12.4)") P_0
+    WRITE(99,"('CONSTANTE DE PRESSON RAD               P_RAD_0 = ',1pE12.4)") P_RAD_0
+    WRITE(99,"('CONSTANTE DE PRESSION GAZ              P_GAZ_0 = ',1pE12.4)") P_GAZ_0
+    WRITE(99,"('CONSTANTE DE CAPACITE CALORIFIQUE        C_V_0 = ',1pE12.4)") C_V_0
+    WRITE(99,"('CONSTANTE DE FLUX DIFFUSIF          F_Z_DIFF_0 = ',1pE12.4)") F_Z_DIFF_0
+    WRITE(99,"('CONSTANTE DE FLUX RADIATIF           F_Z_RAD_0 = ',1pE12.4)") F_Z_RAD_0
+    WRITE(99,"('CONSTANTE OPACITÉ DE THOMPSON          KAPPA_E = ',1pE12.4)") KAPPA_E
+    WRITE(99,"('CONSTANTE DE CHALEURE APPORTÉE        Q_PLUS_0 = ',1pE12.4)") Q_PLUS_0
+    WRITE(99,"('CONSTANTE DE CHALEURE ADVECTÉE         Q_ADV_0 = ',1pE12.4)") Q_ADV_0
+    WRITE(99,"('COEFFICIENT B DU POLYNOME DE H             B_0 = ',1pE12.4)") B_0
+    WRITE(99,"('COEFFICIENT C DU POLYNOME DE H             C_0 = ',1pE12.4)") C_0  
+    
+    WRITE(99,"(48('-'))")
+    
+    CLOSE(99)
+    
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE CALCUL_CONSTANTES
 !---------------------------------------------------------------------------------------------------
