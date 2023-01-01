@@ -7,3 +7,6 @@ scurve
 schema
 data.txt
 lec.ipynb
+run
+cleanup
+.bashrc
