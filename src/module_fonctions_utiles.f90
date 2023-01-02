@@ -52,7 +52,36 @@ MODULE module_fonctions_utiles
         H_AD=trinome(1._xp, -B_0 * B_AD, -C_0 * C_AD)
     
     END SUBROUTINE
-    
+
+    SUBROUTINE calc_H2 (TEMP_AD, X_AD, OMEGA_AD, S_AD, H_AD)
+       REAL(KIND=xp), INTENT(IN)  :: TEMP_AD, OMEGA_AD, S_AD, X_AD
+       REAL(KIND=xp), INTENT(INOUT):: H_AD
+       REAL(KIND=xp)               :: A2, B2, C2, DELTA
+       REAL(KIND=xp)               :: TEMP, OMEGA, S
+
+       TEMP = TEMP_AD*TEMP_0
+       OMEGA = OMEGA_AD*OMEGA_MAX
+       S=S_AD*S_0/X_AD
+
+       A2= 0.5_xp * OMEGA**2._xp * S
+       B2= -(1._xp/3._xp) * A_RADIATION * TEMP**4._xp 
+       C2= - R_BOLTZ * TEMP * S   / (2._xp * MU)
+
+       DELTA= B2**2._xp - 4._xp * A2 * C2
+
+       H_AD=-0.5_xp * (B2 + SIGN(SQRT(DELTA),B2))/A2
+       H_AD= H_AD/R_S
+
+    END SUBROUTINE
+
+
+    SUBROUTINE signeQ(Temp,S,X_AD)
+    !-------------------------------------------------------------------------------------------------------------
+    !Calcul du signe de Q+-Q-
+    !---------------------------------------------------------------------------------------------------------------------
+       REAL(KIND=xp), INTENT(IN)           :: Temp, S, X_AD
+
+    END SUBROUTINE
     !SUBROUTINE calc_rho(S_AD, X_AD, H_AD, RHO_AD)
 
     ! --------------------------------------------------------------------------------------------------------------------------------------
