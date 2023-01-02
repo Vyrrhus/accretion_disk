@@ -6,7 +6,7 @@ IMPLICIT NONE
 
 !Déclarations
 
-INTEGER,       PARAMETER      :: n=100                                        !! Nombre de points pour la courbe en S
+INTEGER,       PARAMETER      :: n=1000                                        !! Nombre de points pour la courbe en S
 REAL(KIND=xp), DIMENSION(n)   :: Temp_epais                                   !! Tableau des températures pour la branche épaise
 REAL(KIND=xp), DIMENSION(n)   :: Temp_mince                                   !! Tableau des températures pour la branche mince
 REAL(KIND=xp), DIMENSION(n)   :: S_epais                                      !! Tableau des densités pour la branche épaise
@@ -16,75 +16,102 @@ REAL(KIND=xp)                 :: Temp_min, Temp_max                           !!
 REAL(KIND=xp)                 :: Sa, Sb, Sc                                   !! Trois densités pour la dicho
 LOGICAL                       :: mince                                        !! Booléen pour changer de branche
 LOGICAL                       :: ecriture
+CHARACTER(LEN=20)             :: message = "no_sig"
 
 
 CALL APPEL_PARAM_INPUT()
 CALL CALCUL_CONSTANTES()
 
-DO j=1,NX
-   
-   OPEN (unit=10,file="results_epais.out",status="unknown")
-   !OPEN (unit=11,file="results_mince.out",status="unknown")
+OPEN (unit=10,file="results_epais.out",status="unknown")
+OPEN (unit=11,file="results_mince.out",status="unknown")
+
+!DO j=1,1
 
    PRINT*, "Position = ", X_AD(j)
    PRINT*, "j = ", j
 
    PRINT*, "Branche épaisse"
 
-   Temp_min=0.6_xp
-   Temp_max=1.82_xp
+   Temp_min=1E-1_xp
+   Temp_max=5E1_xp
    Sa=1E0
    Sb=1E4
+   j=53
    mince=.false.
 
    Temp_epais(1)=Temp_min
-   !PRINT*, "T= ", Temp_epais(1)
    CALL dichotomie(Temp_epais(1),Sa,Sb,j,mince,Sc,ecriture)
    IF (ecriture .eqv. .true.) THEN
-   WRITE(10,*) Temp_epais(1)*Temp_0, Sc*S_0/x_ad(j)*1E-1
+      WRITE(10,*) Temp_epais(1)*Temp_0, Sc*S_0/x_ad(j)*1E-1, X_AD(j)
+   ELSE
+         !WRITE(10,*) Temp_epais(i)*Temp_0, message, X_AD(j)
    ENDIF
    S_epais(1)=Sc
 
    DO i=2,n
-      Sa=1E1
+      Sa=1E0
       Sb=1E4
       Temp_epais(i)=Temp_epais(i-1)+(Temp_max-Temp_min)/n
-      !PRINT*, "T= ", Temp_epais(i)
       CALL dichotomie(Temp_epais(i),Sa,Sb,j,mince,Sc,ecriture)
       IF (ecriture .eqv. .true.) THEN
-      WRITE(10,*) Temp_epais(i)*Temp_0, Sc*S_0/x_ad(j)*1E-1
+         WRITE(10,*) Temp_epais(i)*Temp_0, Sc*S_0/x_ad(j)*1E-1, X_AD(j)
+      ELSE
+         !WRITE(10,*) Temp_epais(i)*Temp_0, message, X_AD(j)
       ENDIF
       S_epais(i)=Sc
    ENDDO
 
-   CLOSE(10)
+!   PRINT*, "Branche mince"
+!
+!   Sa=1E0
+!   Sb=1E4
+!   mince=.true.
 
-   !PRINT*, "Branche mince"
+!   Temp_mince(1)=Temp_min
+!   CALL dichotomie(Temp_mince(1),Sa,Sb,j,mince,Sc,ecriture)
+!   IF (ecriture .eqv. .true.) THEN
+!      WRITE(11,*) Temp_mince(1)*Temp_0, Sc*S_0/x_ad(j)*1E-1, X_AD(j)
+!   ELSE
+!      !WRITE(11,*) Temp_mince(1)*Temp_0, message, X_AD(j)
+!   ENDIF
+!   S_mince(1)=Sc
 
-   !Temp_min=1.7_xp
-   !Temp_max=2.5_xp
-   !Sa=1E0
-   !Sb=1E4
-   !mince=.true.
+!   DO i=2,n
+!      Sa=1E0
+!      Sb=1E4
+!      Temp_mince(i)=Temp_mince(i-1)+(Temp_max-Temp_min)/n
+!      CALL dichotomie(Temp_mince(1),Sa,Sb,j,mince,Sc,ecriture)
+!      IF (ecriture .eqv. .true.) THEN
+!         WRITE(11,*) Temp_mince(i)*Temp_0, Sc*S_0/x_ad(j)*1E-1, X_AD(j)
+!      ELSE
+!         !WRITE(11,*) Temp_mince(i)*Temp_0, message, X_AD(j)
+!      ENDIF
+!      S_mince(i)=Sc
+!   ENDDO
+!
+!ENDDO
 
-   !Temp_mince(1)=Temp_min
-   !PRINT*, "T= ", Temp_mince(1)
-   !CALL dichotomie(Temp_mince(1),Sa,Sb,j,mince,Sc)
-   !WRITE(11,*) Temp_mince(1)*Temp_0, Sc*S_0/x_ad(j)*1E-1
-   !S_mince(1)=Sc
+CLOSE(10)
+CLOSE(11)
 
-   !DO i=2,n
-   !   Sa=1E0
-   !   Sb=1E4
-   !   Temp_mince(i)=Temp_mince(i-1)+(Temp_max-Temp_min)/n
-   !   !PRINT*, "T= ", Temp_mince(i)
-   !   CALL dichotomie(Temp_mince(i),Sa,Sb,j,mince,Sc)
-   !   WRITE(11,*) Temp_mince(i)*Temp_0, Sc*S_0/x_ad(j)*1E-1
-   !   S_mince(i)=Sc
-   !ENDDO
+!DO i=1,NX
+!   PRINT*, X_AD(i)
+!ENDDO
 
-ENDDO
+!j=5
+!Temp_min=1E7/Temp_0
+!Sa=845.456*10_xp/S_0*X_AD(j)
+!Sa=1E0
+!Sb=1E5
+!mince=.false.
 
-!CLOSE(11)
+
+!PRINT*, "Position =", X_AD(j)
+!PRINT*, "T = ", Temp_min*Temp_0
+!PRINT*, "S = ", Sa*S_0/X_AD(j)
+
+!CALL dichotomie(Temp_min, Sa, Sb,j,  mince,Sc,ecriture)
+
+!PRINT*, "Sc = ", Sc*S_0/X_AD(j)
 
 END PROGRAM courbe_S
