@@ -51,11 +51,11 @@ SUBROUTINE COMPUTE_EQS()
     NU_AD = 0.5_xp * ALPHA * C_S_AD * H_AD
 
     ! Q+ (chaleur apportée)
-    Q_PLUS_AD = NU_AD * OMEGA_AD**2.0_xp
+    Q_PLUS_AD       = NU_AD * OMEGA_AD**2.0_xp
 
     ! Vitesse d'accrétion
-    CONDITION_EXT_V = -1.0_xp / (X_MAX * S_AD(NX))
-    SPEED_AD            = -2.0_xp / (X_AD * S_AD) * EULER_SPATIAL(NU_AD * S_AD, CONDITION_EXT_V)
+    CONDITION_EXT_V = 0.5_xp
+    SPEED_AD        = -2.0_xp / (X_AD * S_AD) * EULER_SPATIAL(NU_AD * S_AD, CONDITION_EXT_V)
 
     ! Taux d'accrétion
     M_DOT_AD = - SPEED_AD * S_AD * X_AD
@@ -92,7 +92,7 @@ SUBROUTINE COMPUTE_EQS()
     END WHERE
     
     ! Q- (chaleur dissipée)
-    Q_MOINS = 2.0_xp * X_AD * F_Z / (S_AD * S_0)
+    Q_MOINS_AD = 2.0_xp * X_AD * F_Z / (S_AD * S_0)  / Q_PLUS_0
       
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE COMPUTE_EQS
@@ -112,7 +112,7 @@ FUNCTION EULER_SPATIAL(VECTOR,CONDITION_LIMITE) RESULT(DERIVEE)
     REAL(KIND=XP) :: DERIVEE(NX)
     REAL(KIND=XP) :: CONDITION_LIMITE
 
-    DERIVEE(1:NX-1) = (VECTOR(1:NX-1) - VECTOR(2:NX)) / DX
+    DERIVEE(1:NX-1) = (VECTOR(2:NX)-VECTOR(1:NX-1)) / DX
     DERIVEE(NX) = CONDITION_LIMITE 
 
 !---------------------------------------------------------------------------------------------------

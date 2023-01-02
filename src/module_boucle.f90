@@ -10,7 +10,8 @@ USE MODULE_SCHEMAS_T
                                
                                IMPLICIT NONE
 
-REAL(KIND=xp),PARAMETER, PRIVATE :: FRACTION_DT = 1.0E-2_xp
+REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH = 1.0E-2_xp
+REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 1000.0_XP 
                                 CONTAINS
                                 
 !---------------------------------------------------------------------------------------------------
@@ -21,19 +22,20 @@ SUBROUTINE SCHEMA_TH_TIME()
     REAL(KIND=XP) :: SWITCH
     
     
-    SWITCH = 1.0E-3_xp
-    DELTA_T_TH = FRACTION_DT / MAXVAL(OMEGA_AD)
+    SWITCH = 1.0e-17_xp
+    DELTA_T_TH = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
     
     WRITE(*,"(40('-'))")
-    WRITE(*,"('Q+ - Q- = ',1pe12.4)") MAXVAL(ABS(Q_PLUS_AD*Q_PLUS_0 - Q_MOINS)*1.0e-11_xp)
+    WRITE(*,"('Q+ - Q- = ',1pe12.4)") MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD))
     
-    DO WHILE(MAXVAL(ABS(Q_PLUS_AD*Q_PLUS_0 - Q_MOINS)*1.0e-11_xp) > SWITCH)
+    DO WHILE(MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH)
               
+              WRITE(11,"(2(1pE20.7,2X))") TEMP_AD(30),Q_PLUS_AD(30)-Q_MOINS_AD(30)
               CALL ITERATION_TEMP_AD()
               CALL COMPUTE_EQS()
-              TIME_AD = TIME_AD + DELTA_T_TH 
-              CALL ADIM_TO_PHYSIQUE()
-              CALL ECRITURE_DIM()
+              !CALL ADIM_TO_PHYSIQUE()
+              !CALL SI_TO_CGS()
+              CALL ECRITURE_ADIM()
               
     ENDDO
     
@@ -47,10 +49,10 @@ SUBROUTINE SCHEMA_FIRST()
      IMPLICIT NONE
      INTEGER :: I
      
-     DELTA_T_VISQ = FRACTION_DT * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
+     DELTA_T_VISQ = FRACTION_DT_VISQ * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
      CALL SCHEMA_TH_TIME()
      
-     DO I=1,10
+     DO WHILE(MINVAL(M_DOT_AD-1.0_xp)<=0.01_xp)
      
 	     CALL SCHEMA_IMPLICITE_S(NU_AD)
 	     CALL COMPUTE_EQS()
