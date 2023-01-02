@@ -22,19 +22,19 @@ SUBROUTINE SCHEMA_TH_TIME()
     REAL(KIND=XP) :: SWITCH
     
     
-    SWITCH = 5.0e4_xp
+    SWITCH = 1.0e-17_xp
     DELTA_T_TH = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
     
     WRITE(*,"(40('-'))")
-    WRITE(*,"('Q+ - Q- = ',1pe12.4)") MAXVAL(ABS(Q_PLUS - Q_MOINS))
+    WRITE(*,"('Q+ - Q- = ',1pe12.4)") MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD))
     
-    DO WHILE(MAXVAL(ABS(Q_PLUS - Q_MOINS)) > SWITCH)
+    DO WHILE(MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH)
               
-              WRITE(11,"(2(1Pe15.7,2X)))") TEMP_AD(30),Q_PLUS(30) - Q_MOINS(30)
+              WRITE(11,"(2(1pE20.7,2X))") TEMP_AD(30),Q_PLUS_AD(30)-Q_MOINS_AD(30)
               CALL ITERATION_TEMP_AD()
               CALL COMPUTE_EQS()
               CALL ADIM_TO_PHYSIQUE()
-              CALL SI_TO_CGS
+              CALL SI_TO_CGS()
               CALL ECRITURE_DIM()
               
     ENDDO
