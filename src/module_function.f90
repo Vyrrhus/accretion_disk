@@ -92,7 +92,7 @@ SUBROUTINE COMPUTE_EQS()
     END WHERE
     
     ! Q- (chaleur dissipée)
-    Q_MOINS = 2.0_xp * X_AD * F_Z / (S_AD * S_0)
+    Q_MOINS_AD = 2.0_xp * X_AD * F_Z / (S_AD * S_0)  / Q_PLUS_0
       
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE COMPUTE_EQS

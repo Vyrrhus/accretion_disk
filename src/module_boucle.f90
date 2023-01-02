@@ -22,7 +22,7 @@ SUBROUTINE SCHEMA_TH_TIME()
     REAL(KIND=XP) :: SWITCH
     
     
-    SWITCH = 1.0e4_xp
+    SWITCH = 5.0e4_xp
     DELTA_T_TH = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
     
     WRITE(*,"(40('-'))")
