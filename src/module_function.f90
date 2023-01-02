@@ -112,7 +112,7 @@ FUNCTION EULER_SPATIAL(VECTOR,CONDITION_LIMITE) RESULT(DERIVEE)
     REAL(KIND=XP) :: DERIVEE(NX)
     REAL(KIND=XP) :: CONDITION_LIMITE
 
-    DERIVEE(1:NX-1) = (VECTOR(1:NX-1) - VECTOR(2:NX)) / DX
+    DERIVEE(1:NX-1) = (VECTOR(2:NX)-VECTOR(1:NX-1)) / DX
     DERIVEE(NX) = CONDITION_LIMITE 
 
 !---------------------------------------------------------------------------------------------------
