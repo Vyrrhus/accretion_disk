@@ -130,6 +130,8 @@ REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V(NX)          !! Capacité Calorifique
 
+!! VARIABLES DE CALCULS ET BOUCLES
+REAL(KIND=XP) :: DELTA_T_VISQ
 !===================================================================================================
             CONTAINS 
 !===================================================================================================
