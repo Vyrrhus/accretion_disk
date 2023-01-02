@@ -24,8 +24,8 @@ OPEN (unit=11,file="results_mince.out",status="unknown")
 
 PRINT*, "Branche épaisse"
 
-Temp_min=0.8_xp
-Temp_max=1.7_xp
+Temp_min=0.6_xp
+Temp_max=1.82_xp
 Sa=1E0
 Sb=1E4
 j=53
@@ -34,7 +34,7 @@ mince=.false.
 Temp_epais(1)=Temp_min
 PRINT*, "T= ", Temp_epais(1)
 CALL dichotomie(Temp_epais(1),Sa,Sb,j,mince,Sc)
-WRITE(10,*) Temp_epais(1)*Temp_0, Sc*S_0/x_ad(j)
+WRITE(10,*) Temp_epais(1)*Temp_0, Sc*S_0/x_ad(j)*1E-1
 S_epais(1)=Sc
 
 DO i=2,n
@@ -43,42 +43,42 @@ DO i=2,n
    Temp_epais(i)=Temp_epais(i-1)+(Temp_max-Temp_min)/n
    PRINT*, "T= ", Temp_epais(i)
    CALL dichotomie(Temp_epais(i),Sa,Sb,j,mince,Sc)
-   WRITE(10,*) Temp_epais(i)*Temp_0, Sc*S_0/x_ad(j)
+   WRITE(10,*) Temp_epais(i)*Temp_0, Sc*S_0/x_ad(j)*1E-1
    S_epais(i)=Sc
 ENDDO
 
 PRINT*, Temp_epais
-PRINT*, S_epais
+PRINT*, S_epais*1E-1
 
-!CLOSE(10)
+CLOSE(10)
 
 PRINT*, "Branche mince"
 
-!Temp_min=5.15_xp
-!Temp_max=6._xp
-!Sa=800._xp
-!Sb=1E7
-!mince=.true.
+Temp_min=1.7_xp
+Temp_max=2.5_xp
+Sa=1E0
+Sb=1E4
+mince=.true.
 
-!Temp_mince(1)=Temp_min
-!PRINT*, "T= ", Temp_mince(1)
-!CALL dichotomie(Temp_mince(1),Sa,Sb,j,mince,Sc)
-!WRITE(11,*) Temp_mince(1)*Temp_0, Sc*S_0/x_ad(j)
-!S_mince(1)=Sc
+Temp_mince(1)=Temp_min
+PRINT*, "T= ", Temp_mince(1)
+CALL dichotomie(Temp_mince(1),Sa,Sb,j,mince,Sc)
+WRITE(11,*) Temp_mince(1)*Temp_0, Sc*S_0/x_ad(j)*1E-1
+S_mince(1)=Sc
 
-!DO i=2,n
-!   Sa=1E0
-!   Sb=1E7
-!   Temp_mince(i)=Temp_mince(i-1)+(Temp_max-Temp_min)/n
-!   PRINT*, "T= ", Temp_mince(i)
-!   CALL dichotomie(Temp_mince(i),Sa,Sb,j,mince,Sc)
-!   WRITE(11,*) Temp_mince(i)*Temp_0, Sc*S_0/x_ad(j)
-!   S_mince(i)=Sc
-!ENDDO
+DO i=2,n
+   Sa=1E0
+   Sb=1E4
+   Temp_mince(i)=Temp_mince(i-1)+(Temp_max-Temp_min)/n
+   PRINT*, "T= ", Temp_mince(i)
+   CALL dichotomie(Temp_mince(i),Sa,Sb,j,mince,Sc)
+   WRITE(11,*) Temp_mince(i)*Temp_0, Sc*S_0/x_ad(j)*1E-1
+   S_mince(i)=Sc
+ENDDO
 
 
-!PRINT*, Temp_mince
-!PRINT*, S_mince
+PRINT*, Temp_mince
+PRINT*, S_mince*1E-1
 
 
 
