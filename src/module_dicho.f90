@@ -141,7 +141,6 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, p, mince, Sc)
          ENDIF
 
          eps=ABS(Fc)                                                                                     !Calcul de l'erreur
-         PRINT*, "erreur= ", eps
 
       ENDDO
    ELSE                                                                                                  !Calculs pour la branche épais

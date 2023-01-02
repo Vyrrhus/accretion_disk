@@ -12,6 +12,14 @@
 disk
 scurve
 schema
+<<<<<<< HEAD
+data.txt
+lec.ipynb
+run
+cleanup
+.bashrc
+=======
 
 # Folders
 doc/
+>>>>>>> 705656d9951b1240951e0222039574fc35df3221
