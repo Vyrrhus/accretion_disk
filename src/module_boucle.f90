@@ -11,7 +11,7 @@ USE MODULE_SCHEMAS_T
                                IMPLICIT NONE
 
 REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH = 1.0E-2_xp
-REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 1.0_XP 
+REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 1.0E-3_XP 
                                 CONTAINS
                                 
 !---------------------------------------------------------------------------------------------------
@@ -30,7 +30,8 @@ SUBROUTINE SCHEMA_TH_TIME()
     
     DO WHILE(MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH)
               
-              WRITE(11,"(2(1pE20.7,2X))") TEMP_AD(30),Q_PLUS_AD(30)-Q_MOINS_AD(30)
+              !WRITE(11,"(2(1pE20.7,2X))") TEMP_AD(30),Q_PLUS_AD(30)-Q_MOINS_AD(30)
+              
               CALL ITERATION_TEMP_AD()
               CALL COMPUTE_EQS()
               CALL ECRITURE_ADIM()
@@ -48,7 +49,7 @@ SUBROUTINE SCHEMA_FIRST()
      IMPLICIT NONE
      
      DELTA_T_VISQ = FRACTION_DT_VISQ * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
-     
+     print*,delta_t_visq
      CALL CREER_LAMBDA()
      CALL SCHEMA_TH_TIME()
      
