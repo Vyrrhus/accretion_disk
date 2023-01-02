@@ -130,9 +130,17 @@ SUBROUTINE SI_TO_CGS()
     ! Masse volumique
     RHO = RHO * 1e-3_xp
 
-    ! Pression & viscosité
-    P  = P * 1e1_xp
-    NU = NU * 1e4_xp
+    ! Pressions
+    P     = P * 1e1_xp
+    P_RAD = P_RAD * 1e1_xp
+    P_GAZ = P_GAZ * 1e1_xp
+
+    ! Viscosité
+    NU     = NU * 1e4_xp
+    Q_PLUS = Q_PLUS * 1e4_xp
+    KAPPA_FF = KAPPA_FF * 1e1_xp
+    EPSILON_FF = EPSILON_FF * 1e1_xp
+    F_Z = F_Z * 1e3_xp
 
     ! Densité de surface
     SIGMA = SIGMA * 1e-1_xp
@@ -160,9 +168,15 @@ SUBROUTINE CGS_TO_SI()
     ! Masse SPEEDolumique
     RHO = RHO * 1e3_xp
 
-    ! Pression & viscosité
-    P  = P * 1e-1_xp
-    NU = NU * 1e-4_xp
+    ! Pressions
+    P     = P * 1e-1_xp
+    P_RAD = P_RAD * 1e-1_xp
+    P_GAZ = P_GAZ * 1e-1_xp
+
+    ! Viscosité
+    NU     = NU * 1e-4_xp
+    Q_PLUS = Q_PLUS * 1e-4_xp
+
 
     ! Densité de surface
     SIGMA = SIGMA * 1e1_xp
