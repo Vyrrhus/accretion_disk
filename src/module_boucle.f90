@@ -11,7 +11,7 @@ USE MODULE_SCHEMAS_T
                                IMPLICIT NONE
 
 REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH = 1.0E-2_xp
-REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 1.0E-1_XP 
+REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 1000.0_XP 
                                 CONTAINS
                                 
 !---------------------------------------------------------------------------------------------------

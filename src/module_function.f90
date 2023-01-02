@@ -51,11 +51,11 @@ SUBROUTINE COMPUTE_EQS()
     NU_AD = 0.5_xp * ALPHA * C_S_AD * H_AD
 
     ! Q+ (chaleur apportée)
-    Q_PLUS_AD = NU_AD * OMEGA_AD**2.0_xp
+    Q_PLUS_AD       = NU_AD * OMEGA_AD**2.0_xp
 
     ! Vitesse d'accrétion
-    CONDITION_EXT_V = -1.0_xp / (X_MAX * S_AD(NX))
-    SPEED_AD            = -2.0_xp / (X_AD * S_AD) * EULER_SPATIAL(NU_AD * S_AD, CONDITION_EXT_V)
+    CONDITION_EXT_V = 0.5_xp
+    SPEED_AD        = -2.0_xp / (X_AD * S_AD) * EULER_SPATIAL(NU_AD * S_AD, CONDITION_EXT_V)
 
     ! Taux d'accrétion
     M_DOT_AD = - SPEED_AD * S_AD * X_AD
