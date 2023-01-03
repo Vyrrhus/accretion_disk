@@ -9,7 +9,7 @@ USE module_declarations
 IMPLICIT NONE
 
 !!REELS
-REAL(KIND=xp) :: DELTA_T_visq=1 ! pas de temps visqueux
+!REAL(KIND=xp) :: DELTA_T_VISQ ! pas de temps visqueux
 
 !!TABLEAUX
 REAL(KIND=xp), DIMENSION(Nx) :: LAMBDA             !! Tableaux des lambda_i

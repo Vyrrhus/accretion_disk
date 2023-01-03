@@ -40,7 +40,7 @@ REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
 
 !! PARAMÈTRES SPATIAUX
-INTEGER,PARAMETER :: NX = 500        !! Nombre de points de discrétisation spatiale
+INTEGER,PARAMETER :: NX = 100        !! Nombre de points de discrétisation spatiale
 REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
 REAL(KIND=XP)     :: X_MIN           !! Rayon minimal adimensionné
 REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
@@ -98,13 +98,14 @@ REAL(KIND=XP) :: SPEED_AD(NX)            !! Vitese D'Accrétion
 REAL(KIND=XP) :: M_DOT_AD(NX)        !! Taux D'Accrétion
 REAL(KIND=XP) :: TEMP_AD(NX)         !! Température
 REAL(KIND=XP) :: Q_PLUS_AD(NX)       !! Chaleur Apportée
+REAL(KIND=XP) :: Q_MOINS_AD(NX)      !! Chaleur dissipée adimensionnée
 REAL(KIND=XP) :: Q_ADV_AD(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V_AD(NX)          !! Capacité Calorifique
 REAL(KIND=XP) :: B_AD(NX)            !! Coefficient b du trinôme pour le calcul de H
 REAL(KIND=XP) :: C_AD(NX)            !! Coefficient c du trinôme pour le calcul de H
 
 !! VARIABLES AVEC CONDITIONS
-REAL(KIND=XP) :: Q_MOINS(NX)     !! Chaleur Dissipée Adimensionnée
+REAL(KIND=XP) :: Q_MOINS(NX)     !! Chaleur Dissipée
 REAL(KIND=XP) :: F_Z(NX)         !! Flux Adimensionnée
 REAL(KIND=XP) :: TAU_EFF(NX)     !! Profondeur Optique Effective
 REAL(KIND=XP) :: KAPPA_FF(NX)    !! Opacité Free-Free
@@ -129,6 +130,8 @@ REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V(NX)          !! Capacité Calorifique
 
+!! VARIABLES DE CALCULS ET BOUCLES
+REAL(KIND=XP) :: DELTA_T_VISQ
 !===================================================================================================
             CONTAINS 
 !===================================================================================================
