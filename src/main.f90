@@ -12,8 +12,6 @@ USE MODULE_BOUCLE
 
 IMPLICIT NONE
 
-INTEGER :: I,J
-
 !-----------------------------------------------------------------------
 !-- INITIALISATION
 !-----------------------------------------------------------------------
@@ -35,10 +33,12 @@ CALL ADIM_TO_PHYSIQUE()
 
 !-- BOUCLES DE CALCULS
 TIME_AD = 0.0_xp
+OPEN(22,FILE='test1.out',status='unknown')
 OPEN(11,FILE='test.out',status='unknown')
 CALL SCHEMA_FIRST()
 CALL CLOSE_OUTPUT()
  close(11)
+ close(22)
 !========================================================================
 END PROGRAM MAIN 
 !========================================================================
