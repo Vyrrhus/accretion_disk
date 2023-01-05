@@ -2,15 +2,47 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
-import matplotlib.backends.backend_tkagg as tkagg
 
 import tkinter
 from tkinter import ttk
 import pandas as pd
-from xarray import Dataset
 
+
+from time import time
+import io
+
+# DECORATORS
+def timer(func):
+    """Get runtime of decorated function"""
+    def wrapper(*args, **kwargs):
+        tIni = time()
+        result = func(*args, **kwargs)
+        tEnd = time()
+        print(f"Fonction {func.__name__} exécutée en {tEnd-tIni:.4f}s")
+        return result
+    return wrapper
+
+class SkipWrapper(io.TextIOWrapper):
+    """ io.TextIOWrapper pour skip les premières lignes des fichiers .out jusqu'à match:
+        ## OUTPUT
+        ## 
+    """
+    def __init__(self, file):
+        super().__init__(file, line_buffering=True)
+        self.f = file
+        self.has_matched = False
+
+    def read(self, size=None):
+        while not self.has_matched:
+            line = self.readline()
+            if "OUTPUT" in line:
+                self.has_matched = True
+                self.readline()
+        
+        return super().read(size)
 
 class DataHandler():
+    @timer
     def __init__(self, filename):
         """
             Extract data from an output file from file : [filename]
@@ -21,65 +53,51 @@ class DataHandler():
             .var   : <list> list of variable names (including space variable at index 0)
             .time  : <numpy.array> of time values
             .space : <numpy.array> of space values
+
+            .time_label  : name of the time variable
+            .space_label : name of the space variable
         """
         # Path
         self.path = "output/" + filename
 
+        # Find amount of variables and time array
+        with open(self.path, 'rb') as file:
+            with SkipWrapper(file) as datafile:
+                data = pd.read_csv(datafile, header=None)
+                length = len(data[0].iat[1].split())
+
+        with open(self.path, 'rb') as file:
+            with SkipWrapper(file) as datafile:
+                data = pd.read_csv(datafile, header=None, delim_whitespace=True, names=range(length))
+        
+        # Time array
+        self.time_label = data[0].iat[0]
+        data_time  = data.loc[data[0] == self.time_label][1]
+        self.time  = data_time.to_numpy()
+        data.drop(data_time.index, axis=0, inplace=True)
+
+        # Space array
+        self.space_label = data[0].iat[0]
+        data_space       = data.loc[data[0] == self.space_label]
+        self.space       = data.iloc[0][1:].to_numpy()
+        data.drop(data_space.index, axis=0, inplace=True)
+
+        # Multi-index
+        self.var = list(data[0].unique())
+        data.columns = ["variables"] + list(self.space)
+        data[self.time_label] = np.repeat(self.time, len(self.var))
+        data.set_index(["T", "variables"], inplace=True)
+        data = data.stack()
+        data.index.set_names(self.space_label, level=2, inplace=True)
+
         # Dataframe
-        data = pd.read_csv(self.path, header=None, on_bad_lines='skip', dtype="string")
-
-        # Skip the first rows of the dataframe
-        start_index = 0
-        for index, row in data.iterrows():
-            if "OUTPUT" in row[0]:
-                start_index = index+2
-                break
-        data = data.iloc[start_index:, :]
-        data = data.reset_index(drop=True)
-        data[0] = data[0].apply(lambda x: x.split())
-
-        # Numpy array of the time
-        time_array = data[data[0].apply(lambda x: len(x)) == 2][0].apply(pd.Series).rename(columns={1:"Time"}).drop(0, axis=1).reset_index(drop=True).to_numpy()
-
-        # Other variables
-        data      = data[data[0].apply(lambda x: len(x)) != 2][0].apply(pd.Series).reset_index(drop=True)
-        name_var  = data[0].unique()
-
-        # Numpy array of space
-        space_array = data.iloc[0].drop(0).to_frame(name=name_var[0]).reset_index(drop=True).to_numpy()
-
-        # Numpy array of every other variables
-        var_array = {}
-        for name in name_var[1:]:
-            var_array[name] = data[data[0] == name].drop(0, axis=1).to_numpy()
-        
-        # Data qui contient la valeur pour chaque variable dans un tableau de dimension (TEMPS * SPACE * NB_VARIABLES)
-        data_array = np.zeros((time_array.shape[0], space_array.shape[0], len(name_var[1::])))
-        for ii, (_, array) in enumerate(var_array.items()):
-            data_array[:,:,ii] = array
-        
-        data_vars = dict()
-        coords = ["temps", "variables"]
-        for ii, dx in enumerate(space_array.flatten()):
-            dict_value = dict(((dx, (coords, data_array[:,ii,:])),))
-            data_vars.update(dict_value)
-
-        # Dataset => dataframe
-        dataset = Dataset(
-            data_vars=data_vars,
-            coords={
-                "temps": time_array[:,0],
-                "variables": name_var[1:]
-            },
-        )
-
-        self.df    = dataset.to_dataframe()
-        self.var   = name_var
-        self.time  = time_array.astype(float).flatten()
-        self.space = space_array.astype(float).flatten()
+        data = data.to_frame()
+        data.rename(columns={0: "value"}, inplace=True)
+        self.df = data
 
     def get(self, variable, space_idx=None, time_idx=None):
         array = self.df.query(f"variables=='{variable}'").to_numpy()
+        array = np.reshape(array, (self.time.shape[0], self.space.shape[0]))
 
         if time_idx is None and space_idx is None:
             return array
@@ -141,7 +159,7 @@ class FigureGUI():
             self.optionsMenu  = ttk.Combobox(
                 self.footer,
                 textvariable=self.optionsList,
-                values=tuple(self.data.var[1:]),
+                values=tuple(self.data.var),
                 state="readonly",
                 width=20)
             self.optionsMenu.bind("<<ComboboxSelected>>", self.set_variable_event)
@@ -202,14 +220,14 @@ class FigureGUI():
         if self.isTimeBool.get():
             # Slider : Space
             self.Slider["to"] = self.data.space.shape[0] - 1
-            self.SliderLabel.configure(text=self.data.var[0])
+            self.SliderLabel.configure(text=self.data.space_label)
             label  = "Time"
             array  = self.data.time
         else:
             # Slider : Time
             self.Slider["to"] = self.data.time.shape[0] - 1
             self.SliderLabel.configure(text="Time")
-            label = self.data.var[0]
+            label = self.data.space_label
             array = self.data.space
         
         self.Slider.set(0)
@@ -223,7 +241,7 @@ class FigureGUI():
     # START & UPDATE
     def start(self, variable=None):
         if not variable:
-            variable = self.data.var[1]
+            variable = self.data.var[0]
         
         self.optionsMenu.set(variable)
         self.set_variable(variable)
@@ -254,7 +272,6 @@ class FigureGUI():
         self.canvas.draw()
 
 # Récupérer le fichier de sortie
-# !!! 
 data = DataHandler("data_py.out")
 
 # Numpy array :
