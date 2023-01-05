@@ -95,7 +95,7 @@ SUBROUTINE INIT_FILES()
     ENDIF
 
     ! Initialisation compteur de pas de temps
-    COUNT = 0
+    COUNT = -1
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE INIT_FILES
@@ -172,6 +172,7 @@ SUBROUTINE ECRITURE_ADIM()
     
     ENDIF
     WRITE(UNT,*)
+    COUNT = -1
     
 
 !---------------------------------------------------------------------------------------------------
@@ -249,6 +250,7 @@ SUBROUTINE ECRITURE_DIM()
     
     ENDIF
     WRITE(UNT,*)
+    COUNT = -1
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE ECRITURE_DIM
