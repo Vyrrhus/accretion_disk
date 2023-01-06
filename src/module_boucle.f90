@@ -10,8 +10,8 @@ USE MODULE_SCHEMAS_T
                                
                                IMPLICIT NONE
 
-REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH = 1.0E-3_xp
-REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 1.0E-2_XP 
+REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH     = 1.0E-3_xp
+REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ   = 1.0E-3_XP 
                                 CONTAINS
                                 
 !---------------------------------------------------------------------------------------------------
@@ -20,24 +20,26 @@ SUBROUTINE SCHEMA_TH_TIME()
     IMPLICIT NONE
     
     REAL(KIND=XP) :: SWITCH
-    INTEGER :: I,ITE
-    
+    INTEGER :: I
     SWITCH = 1.0e-17_xp
     DELTA_T_TH = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
     
     WRITE(*,"('Q+ - Q- = ',1pe12.4,'          Temperature AD = ',1pE12.4)") &
     & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) , &
     & TEMP_AD(50)
-    
+     
+    I=0
     DO WHILE(MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH)
               
               CALL ITERATION_TEMP_AD()
               CALL COMPUTE_EQS()
-              IF (MODULO(I,1000)==1) THEN
-              WRITE (22,"(2(1pE12.4,2x))") TEMP_AD(30),S_AD(30)
+              IF (MODULO(I,10000)==1) THEN
+              WRITE (*,"('Q+-Q- = ',1pE12.4,'  M_DOT = ',1pE12.4)")&
+              & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)), &
+              & ABS(MINVAL(M_DOT_AD-1.0_xp))
               ENDIF
-              CALL ADIM_TO_PHYSIQUE()
-              CALL ECRITURE_DIM()
+              !CALL ADIM_TO_PHYSIQUE()
+              CALL ECRITURE_ADIM()
               I=I+1
               
     ENDDO
