@@ -51,7 +51,7 @@ SUBROUTINE COMPUTE_EQS()
     NU_AD = 0.5_xp * ALPHA * C_S_AD * H_AD
 
     ! Q+ (chaleur apportée)
-    Q_PLUS_AD       = NU_AD * OMEGA_AD**2.0_xp
+    Q_PLUS_AD = NU_AD * OMEGA_AD**2.0_xp
 
     ! Vitesse d'accrétion
     CONDITION_EXT_V = 0.5_xp

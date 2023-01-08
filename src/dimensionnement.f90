@@ -56,6 +56,7 @@ SUBROUTINE ADIM_TO_PHYSIQUE()
     M_DOT  = M_DOT_AD * M_0_DOT
     TEMP   = TEMP_AD * TEMP_0
     Q_PLUS = Q_PLUS_AD * Q_PLUS_0
+    Q_MOINS = Q_MOINS_AD * Q_PLUS_0
     Q_ADV  = Q_ADV_AD * Q_ADV_0
     C_V    = C_V_AD * C_V_0
     
@@ -104,6 +105,7 @@ SUBROUTINE PHYSIQUE_TO_ADIM()
     M_DOT_AD  = M_DOT / M_0_DOT
     TEMP_AD   = TEMP / TEMP_0
     Q_PLUS_AD = Q_PLUS / Q_PLUS_0
+    Q_PLUS_AD = Q_MOINS / Q_PLUS_0
     Q_ADV_AD  = Q_ADV / Q_ADV_0
     C_V_AD    = C_V / C_V_0
     
@@ -137,13 +139,16 @@ SUBROUTINE SI_TO_CGS()
 
     ! Viscosité
     NU     = NU * 1e4_xp
-    Q_PLUS = Q_PLUS * 1e4_xp
-    KAPPA_FF = KAPPA_FF * 1e1_xp
-    EPSILON_FF = EPSILON_FF * 1e1_xp
+    Q_PLUS = Q_PLUS * 1.0E4_xp
+    Q_MOINS = Q_MOINS * 1.0E4_XP
+ 
+ 
     F_Z = F_Z * 1e3_xp
 
     ! Densité de surface
     SIGMA = SIGMA * 1e-1_xp
+    
+    
     
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SI_TO_CGS
