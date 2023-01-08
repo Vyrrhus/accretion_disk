@@ -25,7 +25,7 @@ CALL CALCUL_CONSTANTES()
 OPEN (unit=10,file="results_epais.out",status="unknown")
 OPEN (unit=11,file="results_mince.out",status="unknown")
 
-!DO j=1,1
+DO j=1,NX
 
    PRINT*, "Position = ", X_AD(j)
    PRINT*, "j = ", j
@@ -36,7 +36,6 @@ OPEN (unit=11,file="results_mince.out",status="unknown")
    Temp_max=5E1_xp
    Sa=1E0
    Sb=1E4
-   j=53
    mince=.false.
 
    Temp_epais(1)=Temp_min
@@ -89,7 +88,7 @@ OPEN (unit=11,file="results_mince.out",status="unknown")
 !      S_mince(i)=Sc
 !   ENDDO
 !
-!ENDDO
+ENDDO
 
 CLOSE(10)
 CLOSE(11)

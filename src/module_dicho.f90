@@ -43,34 +43,34 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
    !PRINT*, "x= ", X_AD(ipos)
 
    Prad =  Temp_S ** 4._xp                                                                               !Calcul de Prad
-   PRINT*, "Prad= ", Prad
+   !PRINT*, "Prad= ", Prad
 
    Omega_S = 3._xp ** (3._xp/2._xp) * X_AD(ipos) ** (-3._xp)
-   PRINT*, "Omega= ", Omega_S * OMEGA_MAX
-   PRINT*, "x_ad = ", X_AD(ipos)
+   !PRINT*, "Omega= ", Omega_S * OMEGA_MAX
+   !PRINT*, "x_ad = ", X_AD(ipos)
 
    CALL calc_H2(Temp_S,x_ad(ipos),Omega_S,Sa,Ha)                                                                    !calcul de H au point a
-   PRINT*, "H= ", Ha * R_S
+   !PRINT*, "H= ", Ha * R_S
    
    CALL calc_H2(Temp_S,x_ad(ipos),Omega_S,Sb,Hb)                                                                    !calcul de H au point b
 
    rho_a = Sa / ( x_ad(ipos) * Ha )                                                                      !calcul de rho au point a
-   PRINT*, "rho= ", rho_a * rho_0
+   !PRINT*, "rho= ", rho_a * rho_0
 
    rho_b = Sb / ( x_ad(ipos) * Hb )                                                                       !calcul de rho au point b
 
    Pgaz_a = Temp_S * rho_a                                                                             !calcul de Pgaz au point a
-   PRINT*, "Pgaz= ", Pgaz_a
+   !PRINT*, "Pgaz= ", Pgaz_a
 
    Pa=( P_gaz_0 / P_0 ) * Pgaz_a+ ( P_rad_0 / P_0 ) * Prad
-   PRINT*, "Ptot= ", Pa * P_0
+   !PRINT*, "Ptot= ", Pa * P_0
 
    Pgaz_b = Temp_S * rho_b                                                                            !calcul de Pgaz au point b
 
    Pb=( P_gaz_0 / P_0 ) * Pgaz_b+ ( P_rad_0 / P_0 ) * Prad
 
    nua = 0.5_xp * Omega_S * Ha * Ha
-   PRINT*, "nu= ", nua * NU_0
+   !PRINT*, "nu= ", nua * NU_0
 
    nub = 0.5_xp *Omega_S * Hb * Hb
 
@@ -100,7 +100,7 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
       DO WHILE(eps>prec .and. counter<limit)
 
          Sc=Sa+(Sb-Sa)/2._xp
-         CALL calc_H(Temp_S,x_ad(ipos),Omega_S,Sc,Hc)                                                              !calcul de H au point c
+         CALL calc_H2(Temp_S,x_ad(ipos),Omega_S,Sc,Hc)                                                              !calcul de H au point c
 
          rho_c = Sc / ( x_ad(ipos) * Hc )                                                                             !calcul de rho au point c
 
@@ -153,12 +153,12 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
    ELSE                                                                                                  !Calculs pour la branche épais
 
       Kffa = 6.13E18 *rho_a * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
-      PRINT*, "Kff= ", Kffa
+      !PRINT*, "Kff= ", Kffa
 
       Kffb = 6.13E18 *rho_b * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
 
       Fza = F_Z_DIFF_0 * X_AD(ipos) * Temp_S**4._xp /( (KAPPA_E + Kffa) *Sa )
-      PRINT*, "Fz= ", Fza
+      !PRINT*, "Fz= ", Fza
 
       Fzb = F_Z_DIFF_0 * X_AD(ipos) * Temp_S**4._xp /( (KAPPA_E + Kffb) *Sb ) 
 
@@ -171,11 +171,11 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
       Fa = Q_plus_a - Q_moins_a
       Fb = Q_plus_b - Q_moins_b
 
-      PRINT*, "Q+a= ", Q_plus_a
-      PRINT*, "Q-a epais=", Q_moins_a
+      !PRINT*, "Q+a= ", Q_plus_a
+      !PRINT*, "Q-a epais=", Q_moins_a
       !PRINT*, "Q+b= ", Q_plus_b
       !PRINT*, "Q-b= ", Q_moins_b
-      PRINT*, "Q+ - Q-= ", Fa
+      !PRINT*, "Q+ - Q-= ", Fa
 
       DO WHILE(eps>prec .and. counter<limit)
 
@@ -242,9 +242,9 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
    ENDIF
 
    !PRINT*, "Sc= ", Sc
-   PRINT*, "Q+ = ", Q_plus_c
-   PRINT*, "Q- = ", Q_moins_c
-   PRINT*, "Q+ - Q- = ", Fc
+   !PRINT*, "Q+ = ", Q_plus_c
+   !PRINT*, "Q- = ", Q_moins_c
+   !PRINT*, "Q+ - Q- = ", Fc
 
    IF (counter < limit) THEN
       ecriture = .true.
