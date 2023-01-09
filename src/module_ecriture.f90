@@ -10,15 +10,15 @@
 USE MODULE_DECLARATIONS
 IMPLICIT NONE
 
-INTEGER, PRIVATE :: UNT
+INTEGER, PRIVATE :: UNT,UNT_AD
 INTEGER, PRIVATE :: PAS_ECRITURE_SPATIAL
 INTEGER, PRIVATE :: PAS_ECRITURE_TEMPOREL
 INTEGER, PRIVATE :: PRECISION
 
 CHARACTER(LEN=30), PRIVATE :: FMT
-INTEGER, PRIVATE :: COUNT
+INTEGER, PRIVATE :: COUNT,COUNT_AD
 
-INTEGER,PARAMETER, PRIVATE :: NB_VARIABLES = 20
+INTEGER,PARAMETER, PRIVATE :: NB_VARIABLES = 21
 INTEGER, PRIVATE :: LIST(NB_VARIABLES)
                  
 !===================================================================================================
@@ -35,7 +35,7 @@ SUBROUTINE INIT_FILES()
     INTEGER :: IOS
     INTEGER :: IDX
     CHARACTER(LEN=1024) :: LINE
-    CHARACTER(LEN=1024) :: FILENAME
+    CHARACTER(LEN=1024) :: FILENAME,FILENAME_2
     LOGICAL :: HEADER = .FALSE.
 
     ! LECTURE VARIABLES A AFFICHER EN SORTIE
@@ -52,9 +52,15 @@ SUBROUTINE INIT_FILES()
         IF (IOS /= 0) EXIT 
 
         ! Fichier de sortie
-        IF (INDEX(LINE, "@output") /= 0) THEN
+        IF (INDEX(LINE, "@output_dim") /= 0) THEN
             IDX = INDEX(LINE, "=", back=.TRUE.)
             FILENAME = LINE(IDX+1:)
+            CYCLE
+        END IF
+        
+        IF (INDEX(LINE, "@output_ad") /=0) THEN
+            IDX = INDEX(LINE, "=", back=.TRUE.)
+            FILENAME_2 = LINE(IDX+1:)
             CYCLE
         END IF
 
@@ -71,10 +77,12 @@ SUBROUTINE INIT_FILES()
                     READ(INPUT_CONFIG_UNT, "(A)", iostat=IOS) LINE
                     IF (IOS /= 0) EXIT 
                     WRITE(UNT, "(A)") LINE
+                    WRITE(UNT_AD,"(A)") LINE
                 END DO
                 CLOSE(INPUT_CONFIG_UNT)
             ELSE 
                 WRITE(UNT, "(A)") TRIM(LINE)
+                WRITE(UNT_AD, "(A)") TRIM(LINE)
             END IF
         END IF
 
@@ -82,6 +90,11 @@ SUBROUTINE INIT_FILES()
             HEADER = .TRUE.
             OPEN(newunit=UNT, file="output/"//TRIM(ADJUSTL(FILENAME)), action="write")
         END IF
+        
+        IF (INDEX(LINE, "@header") /= 0) THEN
+            HEADER = .TRUE.
+            OPEN(newunit=UNT_AD, file="output/"//TRIM(ADJUSTL(FILENAME_2)), action="write")
+        ENDIF
 
     END DO
 
@@ -96,7 +109,8 @@ SUBROUTINE INIT_FILES()
 
     ! Initialisation compteur de pas de temps
     COUNT = -1
-
+    COUNT_AD = -1
+    
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE INIT_FILES
 !---------------------------------------------------------------------------------------------------
@@ -114,66 +128,68 @@ SUBROUTINE ECRITURE_ADIM()
     IMPLICIT NONE
      
     ! TEMPS
-    COUNT = COUNT + 1
-    IF (MODULO(COUNT, PAS_ECRITURE_TEMPOREL) /= 0) RETURN
-    WRITE(UNT, "('T         ',1PE11.4)") TIME_AD
+    COUNT_AD = COUNT_AD + 1
+    !print*,count
+    IF (MODULO(COUNT_AD, PAS_ECRITURE_TEMPOREL) /= 0) RETURN
+    WRITE(UNT_AD, "('T         ',1PE11.4)") TIME_AD
     
     IF(MODULO(NX,PAS_ECRITURE_SPATIAL) == 1) THEN
         ! ESPACE
-        WRITE(UNT, FMT) "X_AD      ", X_AD(::PAS_ECRITURE_SPATIAL)
+        WRITE(UNT_AD, FMT) "X_AD      ", X_AD(::PAS_ECRITURE_SPATIAL)
 
         ! VARIABLES
-        IF (LIST(1)==1)  WRITE(UNT, FMT) "OMEGA_AD  ", OMEGA_AD  (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(2)==1)  WRITE(UNT, FMT) "P_AD      ", P_AD      (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(3)==1)  WRITE(UNT, FMT) "BETA      ", BETA      (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(4)==1)  WRITE(UNT, FMT) "C_S_AD    ", C_S_AD    (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(5)==1)  WRITE(UNT, FMT) "H_AD      ", H_AD      (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(6)==1)  WRITE(UNT, FMT) "RHO_AD    ", RHO_AD    (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(7)==1)  WRITE(UNT, FMT) "NU_AD     ", NU_AD     (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(8)==1)  WRITE(UNT, FMT) "S_AD      ", S_AD      (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(9)==1)  WRITE(UNT, FMT) "SPEED_AD  ", SPEED_AD  (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(10)==1) WRITE(UNT, FMT) "TEMP_AD   ", TEMP_AD   (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(11)==1) WRITE(UNT, FMT) "M_DOT_AD  ", M_DOT_AD  (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(12)==1) WRITE(UNT, FMT) "F_Z       ", F_Z       (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(13)==1) WRITE(UNT, FMT) "P_GAZ_AD  ", P_GAZ_AD  (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(14)==1) WRITE(UNT, FMT) "P_RAD_AD  ", P_RAD_AD  (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(15)==1) WRITE(UNT, FMT) "Q_PLUS_AD ", Q_PLUS_AD (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(16)==1) WRITE(UNT, FMT) "Q_ADV_AD  ", Q_ADV_AD  (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(17)==1) WRITE(UNT, FMT) "Q_MOINS_AD", Q_MOINS_AD(::PAS_ECRITURE_SPATIAL)
-        IF (LIST(18)==1) WRITE(UNT, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(19)==1) WRITE(UNT, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL)
-        IF (LIST(20)==1) WRITE(UNT, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL)
-    
+        IF (LIST(1)==1)  WRITE(UNT_AD, FMT) "OMEGA_AD  ", OMEGA_AD  (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(2)==1)  WRITE(UNT_AD, FMT) "P_AD      ", P_AD      (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(3)==1)  WRITE(UNT_AD, FMT) "BETA      ", BETA      (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(4)==1)  WRITE(UNT_AD, FMT) "C_S_AD    ", C_S_AD    (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(5)==1)  WRITE(UNT_AD, FMT) "H_AD      ", H_AD      (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(6)==1)  WRITE(UNT_AD, FMT) "RHO_AD    ", RHO_AD    (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(7)==1)  WRITE(UNT_AD, FMT) "NU_AD     ", NU_AD     (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(8)==1)  WRITE(UNT_AD, FMT) "S_AD      ", S_AD      (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(9)==1)  WRITE(UNT_AD, FMT) "SPEED_AD  ", SPEED_AD  (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(10)==1) WRITE(UNT_AD, FMT) "TEMP_AD   ", TEMP_AD   (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(11)==1) WRITE(UNT_AD, FMT) "M_DOT_AD  ", M_DOT_AD  (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(12)==1) WRITE(UNT_AD, FMT) "F_Z       ", F_Z       (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(13)==1) WRITE(UNT_AD, FMT) "P_GAZ_AD  ", P_GAZ_AD  (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(14)==1) WRITE(UNT_AD, FMT) "P_RAD_AD  ", P_RAD_AD  (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(15)==1) WRITE(UNT_AD, FMT) "Q_PLUS_AD ", Q_PLUS_AD (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(16)==1) WRITE(UNT_AD, FMT) "Q_ADV_AD  ", Q_ADV_AD  (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(17)==1) WRITE(UNT_AD, FMT) "Q_MOINS_AD", Q_MOINS_AD(::PAS_ECRITURE_SPATIAL)
+        IF (LIST(18)==1) WRITE(UNT_AD, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(19)==1) WRITE(UNT_AD, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(20)==1) WRITE(UNT_AD, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL)
+        IF (LIST(21)==1) WRITE(UNT_AD,"('L_STEFAN_AD  ',1pE12.4)") L_STEFAN_AD
+        
     ELSE
         ! ESPACE
-        WRITE(UNT, FMT) "X_AD      ", X_AD(::PAS_ECRITURE_SPATIAL), X_AD(NX)
+        WRITE(UNT_AD, FMT) "X_AD      ", X_AD(::PAS_ECRITURE_SPATIAL), X_AD(NX)
 
         ! VARIABLES
-        IF (LIST(1)==1)  WRITE(UNT, FMT) "OMEGA_AD  ", OMEGA_AD  (::PAS_ECRITURE_SPATIAL), OMEGA_AD(NX)
-        IF (LIST(2)==1)  WRITE(UNT, FMT) "P_AD      ", P_AD      (::PAS_ECRITURE_SPATIAL), P_AD(NX)
-        IF (LIST(3)==1)  WRITE(UNT, FMT) "BETA      ", BETA      (::PAS_ECRITURE_SPATIAL), BETA(NX)
-        IF (LIST(4)==1)  WRITE(UNT, FMT) "C_S_AD    ", C_S_AD    (::PAS_ECRITURE_SPATIAL), C_S_AD(NX)
-        IF (LIST(5)==1)  WRITE(UNT, FMT) "H_AD      ", H_AD      (::PAS_ECRITURE_SPATIAL), H_AD(NX)
-        IF (LIST(6)==1)  WRITE(UNT, FMT) "RHO_AD    ", RHO_AD    (::PAS_ECRITURE_SPATIAL), RHO_AD(NX)
-        IF (LIST(7)==1)  WRITE(UNT, FMT) "NU_AD     ", NU_AD     (::PAS_ECRITURE_SPATIAL), NU_AD(NX)
-        IF (LIST(8)==1)  WRITE(UNT, FMT) "S_AD      ", S_AD      (::PAS_ECRITURE_SPATIAL), S_AD(NX)
-        IF (LIST(9)==1)  WRITE(UNT, FMT) "SPEED_AD  ", SPEED_AD  (::PAS_ECRITURE_SPATIAL), SPEED_AD(NX)
-        IF (LIST(10)==1) WRITE(UNT, FMT) "TEMP_AD   ", TEMP_AD   (::PAS_ECRITURE_SPATIAL), TEMP_AD(NX)
-        IF (LIST(11)==1) WRITE(UNT, FMT) "M_DOT_AD  ", M_DOT_AD  (::PAS_ECRITURE_SPATIAL), M_DOT_AD(NX)
-        IF (LIST(12)==1) WRITE(UNT, FMT) "F_Z       ", F_Z       (::PAS_ECRITURE_SPATIAL), F_Z(NX)
-        IF (LIST(13)==1) WRITE(UNT, FMT) "P_GAZ_AD  ", P_GAZ_AD  (::PAS_ECRITURE_SPATIAL), P_GAZ_AD(NX)
-        IF (LIST(14)==1) WRITE(UNT, FMT) "P_RAD_AD  ", P_RAD_AD  (::PAS_ECRITURE_SPATIAL), P_RAD_AD(NX)
-        IF (LIST(15)==1) WRITE(UNT, FMT) "Q_PLUS_AD ", Q_PLUS_AD (::PAS_ECRITURE_SPATIAL), Q_PLUS_AD(NX)
-        IF (LIST(16)==1) WRITE(UNT, FMT) "Q_ADV_AD  ", Q_ADV_AD  (::PAS_ECRITURE_SPATIAL), Q_ADV_AD(NX)
-        IF (LIST(17)==1) WRITE(UNT, FMT) "Q_MOINS_AD", Q_MOINS_AD(::PAS_ECRITURE_SPATIAL), Q_MOINS_AD(NX)
-        IF (LIST(18)==1) WRITE(UNT, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL), TAU_EFF(NX)
-        IF (LIST(19)==1) WRITE(UNT, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL), KAPPA_FF(NX)
-        IF (LIST(20)==1) WRITE(UNT, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL), EPSILON_FF(NX)
-    
+        IF (LIST(1)==1)  WRITE(UNT_AD, FMT) "OMEGA_AD  ", OMEGA_AD  (::PAS_ECRITURE_SPATIAL), OMEGA_AD(NX)
+        IF (LIST(2)==1)  WRITE(UNT_AD, FMT) "P_AD      ", P_AD      (::PAS_ECRITURE_SPATIAL), P_AD(NX)
+        IF (LIST(3)==1)  WRITE(UNT_AD, FMT) "BETA      ", BETA      (::PAS_ECRITURE_SPATIAL), BETA(NX)
+        IF (LIST(4)==1)  WRITE(UNT_AD, FMT) "C_S_AD    ", C_S_AD    (::PAS_ECRITURE_SPATIAL), C_S_AD(NX)
+        IF (LIST(5)==1)  WRITE(UNT_AD, FMT) "H_AD      ", H_AD      (::PAS_ECRITURE_SPATIAL), H_AD(NX)
+        IF (LIST(6)==1)  WRITE(UNT_AD, FMT) "RHO_AD    ", RHO_AD    (::PAS_ECRITURE_SPATIAL), RHO_AD(NX)
+        IF (LIST(7)==1)  WRITE(UNT_AD, FMT) "NU_AD     ", NU_AD     (::PAS_ECRITURE_SPATIAL), NU_AD(NX)
+        IF (LIST(8)==1)  WRITE(UNT_AD, FMT) "S_AD      ", S_AD      (::PAS_ECRITURE_SPATIAL), S_AD(NX)
+        IF (LIST(9)==1)  WRITE(UNT_AD, FMT) "SPEED_AD  ", SPEED_AD  (::PAS_ECRITURE_SPATIAL), SPEED_AD(NX)
+        IF (LIST(10)==1) WRITE(UNT_AD, FMT) "TEMP_AD   ", TEMP_AD   (::PAS_ECRITURE_SPATIAL), TEMP_AD(NX)
+        IF (LIST(11)==1) WRITE(UNT_AD, FMT) "M_DOT_AD  ", M_DOT_AD  (::PAS_ECRITURE_SPATIAL), M_DOT_AD(NX)
+        IF (LIST(12)==1) WRITE(UNT_AD, FMT) "F_Z       ", F_Z       (::PAS_ECRITURE_SPATIAL), F_Z(NX)
+        IF (LIST(13)==1) WRITE(UNT_AD, FMT) "P_GAZ_AD  ", P_GAZ_AD  (::PAS_ECRITURE_SPATIAL), P_GAZ_AD(NX)
+        IF (LIST(14)==1) WRITE(UNT_AD, FMT) "P_RAD_AD  ", P_RAD_AD  (::PAS_ECRITURE_SPATIAL), P_RAD_AD(NX)
+        IF (LIST(15)==1) WRITE(UNT_AD, FMT) "Q_PLUS_AD ", Q_PLUS_AD (::PAS_ECRITURE_SPATIAL), Q_PLUS_AD(NX)
+        IF (LIST(16)==1) WRITE(UNT_AD, FMT) "Q_ADV_AD  ", Q_ADV_AD  (::PAS_ECRITURE_SPATIAL), Q_ADV_AD(NX)
+        IF (LIST(17)==1) WRITE(UNT_AD, FMT) "Q_MOINS_AD", Q_MOINS_AD(::PAS_ECRITURE_SPATIAL), Q_MOINS_AD(NX)
+        IF (LIST(18)==1) WRITE(UNT_AD, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL), TAU_EFF(NX)
+        IF (LIST(19)==1) WRITE(UNT_AD, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL), KAPPA_FF(NX)
+        IF (LIST(20)==1) WRITE(UNT_AD, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL), EPSILON_FF(NX)
+        IF (LIST(21)==1) WRITE(UNT_AD,"('L_STEFAN_AD  ',1pE12.4)") L_STEFAN_AD
+        
     ENDIF
-    WRITE(UNT,*)
-    COUNT = -1
-    
+    WRITE(UNT_AD,*)
+    COUNT_AD=0
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE ECRITURE_ADIM
@@ -221,6 +237,7 @@ SUBROUTINE ECRITURE_DIM()
         IF (LIST(18)==1) WRITE(UNT, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL)
         IF (LIST(19)==1) WRITE(UNT, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL)
         IF (LIST(20)==1) WRITE(UNT, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL)
+        IF (LIST(21)==1) WRITE(UNT,"('L_STEFAN  ',1pE12.4)") L_STEFAN
     
     ELSE
         ! ESPACE
@@ -247,10 +264,11 @@ SUBROUTINE ECRITURE_DIM()
         IF (LIST(18)==1) WRITE(UNT, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL), TAU_EFF(NX)
         IF (LIST(19)==1) WRITE(UNT, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL), KAPPA_FF(NX)
         IF (LIST(20)==1) WRITE(UNT, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL), EPSILON_FF(NX)
+        IF (LIST(21)==1) WRITE(UNT,"('L_STEFAN  ',1pE12.4)") L_STEFAN
     
     ENDIF
     WRITE(UNT,*)
-    COUNT = -1
+    COUNT=0
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE ECRITURE_DIM
@@ -263,6 +281,7 @@ SUBROUTINE CLOSE_OUTPUT()
     IMPLICIT NONE
 
     CLOSE(UNT)
+    CLOSE(UNT_AD)
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE CLOSE_OUTPUT
 !---------------------------------------------------------------------------------------------------

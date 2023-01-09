@@ -40,7 +40,7 @@ REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
 
 !! PARAMÈTRES SPATIAUX
-INTEGER,PARAMETER :: NX = 100        !! Nombre de points de discrétisation spatiale
+INTEGER,PARAMETER :: NX = 100         !! Nombre de points de discrétisation spatiale
 REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
 REAL(KIND=XP)     :: X_MIN           !! Rayon minimal adimensionné
 REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
@@ -63,12 +63,13 @@ REAL(KIND=XP)  :: L_EDD         !! Luminosité d'Eddington
 REAL(KIND=XP)  :: M_CRIT_DOT    !! Taux d'acrétion critique
 
 !! CONSTANTES DE NORMALISATION
-REAL(KIND=XP)  :: SPEED_0           !! Vitesse d'accrétion
+REAL(KIND=XP)  :: SPEED_0       !! Vitesse d'accrétion
 REAL(KIND=XP)  :: NU_0          !! Viscosité
+REAL(KIND=XP)  :: L_STEFAN_0    !! Luminosié  
 REAL(KIND=XP)  :: SIGMA_0       !! Densité de surface
 REAL(KIND=XP)  :: S_0           !! \(S_0 = \Sigma_0\)
 REAL(KIND=XP)  :: RHO_0         !! Densité volumique
-REAL(KIND=XP)  :: TEMP_0           !! Température
+REAL(KIND=XP)  :: TEMP_0        !! Température
 REAL(KIND=XP)  :: P_0           !! Pression totale
 REAL(KIND=XP)  :: P_RAD_0       !! Pression de radiation
 REAL(KIND=XP)  :: P_GAZ_0       !! Pression gazeuse
@@ -85,6 +86,7 @@ REAL(KIND=XP)  :: C_0           !! Coefficient c du trinôme pour le calcul de H
 REAL(KIND=XP) :: TIME_AD             !! Temps Adimensionné
 REAL(KIND=XP) :: X_AD(NX)            !! Rayon Adimensionné
 REAL(KIND=XP) :: OMEGA_AD(NX)        !! Vitesse De Rotation Adimensionnée
+
 REAL(KIND=XP) :: P_AD(NX)            !! Pression totale adimensionnée
 REAL(KIND=XP) :: P_GAZ_AD(NX)        !! Pression gazeuse adimensionnée
 REAL(KIND=XP) :: P_RAD_AD(NX)        !! Pression de radiation adimensionnée
@@ -94,7 +96,7 @@ REAL(KIND=XP) :: H_AD(NX)            !! Demi-Hauteur Du Disque Adimensionnée
 REAL(KIND=XP) :: RHO_AD(NX)          !! Densité Volumique
 REAL(KIND=XP) :: NU_AD(NX)           !! Viscosité
 REAL(KIND=XP) :: S_AD(NX)            !! Densité De Surface
-REAL(KIND=XP) :: SPEED_AD(NX)            !! Vitese D'Accrétion
+REAL(KIND=XP) :: SPEED_AD(NX)        !! Vitese D'Accrétion
 REAL(KIND=XP) :: M_DOT_AD(NX)        !! Taux D'Accrétion
 REAL(KIND=XP) :: TEMP_AD(NX)         !! Température
 REAL(KIND=XP) :: Q_PLUS_AD(NX)       !! Chaleur Apportée
@@ -103,6 +105,8 @@ REAL(KIND=XP) :: Q_ADV_AD(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V_AD(NX)          !! Capacité Calorifique
 REAL(KIND=XP) :: B_AD(NX)            !! Coefficient b du trinôme pour le calcul de H
 REAL(KIND=XP) :: C_AD(NX)            !! Coefficient c du trinôme pour le calcul de H
+
+REAL(KIND=XP) :: L_STEFAN_AD         !! Luminosité Adimensionnée
 
 !! VARIABLES AVEC CONDITIONS
 REAL(KIND=XP) :: Q_MOINS(NX)     !! Chaleur Dissipée
@@ -113,7 +117,7 @@ REAL(KIND=XP) :: EPSILON_FF(NX)  !! Emissivité Free-Free
 
 !! VARIABLES 
 REAL(KIND=XP) :: TIME             !! Temps
-REAL(KIND=XP) :: RADIUS(NX)        !! Rayon
+REAL(KIND=XP) :: RADIUS(NX)       !! Rayon
 REAL(KIND=XP) :: OMEGA(NX)        !! Vitesse De Rotation
 REAL(KIND=XP) :: P(NX)            !! Pression totale
 REAL(KIND=XP) :: P_GAZ(NX)        !! Pression gazeuse
@@ -130,8 +134,13 @@ REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V(NX)          !! Capacité Calorifique
 
-!! VARIABLES DE CALCULS ET BOUCLES
+REAL(KIND=XP) :: L_STEFAN         !! Luminosité
+
+! VARIABLES ET CALCUL
 REAL(KIND=XP) :: DELTA_T_VISQ
+!REAL(KIND=XP) :: DELTA_T_TH
+
+
 !===================================================================================================
             CONTAINS 
 !===================================================================================================
@@ -201,7 +210,7 @@ SUBROUTINE CALCUL_CONSTANTES()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: I
-
+   
     ! TAUX D'ACCRETION
     L_EDD       = 4._xp * PI * G_CONST * MASS * M_P * C_SPEED / SIGMA_E
     M_CRIT_DOT  = 12._xp * L_EDD / C_SPEED**2._xp
@@ -224,6 +233,9 @@ SUBROUTINE CALCUL_CONSTANTES()
     DX = ( X_MAX - X_MIN ) / (NX)
     X_AD = X_MIN + DX * (/(I,I=1,NX)/)
     
+    ! OMEGA_AD
+    OMEGA_AD = 3.0_xp**(1.5_xp) * X_AD**(-3.0_xp)
+    
     ! DECLARATION DES VARIABLES TEMPORELLES
     TIME_MAX = 1.0E10_xp * OMEGA_MAX
     TIME_MIN = 0.0_xp * OMEGA_MAX
@@ -238,6 +250,7 @@ SUBROUTINE CALCUL_CONSTANTES()
     S_0         = SIGMA_0
     RHO_0       = SIGMA_0 / (2._xp * R_S)
     TEMP_0      = (L_TOT / (9.0_xp * 4.0_xp * PI * R_S**2.0_xp * SIGMA_STEFAN))**(0.25_xp)
+    L_STEFAN_0  = 4.0_XP * PI *R_S**2.0_xp * SIGMA_STEFAN * TEMP_0**4_xp
     P_0         = M_0_DOT * OMEGA_MAX / (4.0_xp * PI * R_S)
     P_RAD_0     = A_RADIATION * TEMP_0**4.0_xp / 3.0_xp
     P_GAZ_0     = R_BOLTZ * RHO_0 * TEMP_0 / MU
@@ -285,7 +298,8 @@ SUBROUTINE CALCUL_CONSTANTES()
     WRITE(*,"('CONSTANTE DE VITESSE                   SPEED_0 = ',1pE12.4)") SPEED_0
     WRITE(*,"('CONSTANTE DE VISCOSITE                    NU_0 = ',1pE12.4)") NU_0
     WRITE(*,"('CONSTANTE DE DENSITE                     RHO_0 = ',1pE12.4)") RHO_0
-    WRITE(*,"('CONSTANTE DE TEMPERATURE                   T_0 = ',1pE12.4)") TEMP_0
+    WRITE(*,"('CONSTANTE DE TEMPERATURE                TEMP_0 = ',1pE12.4)") TEMP_0
+    WRITE(*,"('CONSTANTE DE LUMINOSITÉ             L_STEFAN_0 = ',1pE12.4)") L_STEFAN_0
     WRITE(*,"('CONSTANTE DE DENSITE SURFACIQUE        SIGMA_0 = ',1pE12.4)") SIGMA_0
     WRITE(*,"('CONSTANTE DE DENSITE                       S_0 = ',1pE12.4)") S_0
     WRITE(*,"('CONSTANTE DE PRESSION                      P_0 = ',1pE12.4)") P_0
@@ -339,7 +353,8 @@ SUBROUTINE CALCUL_CONSTANTES()
     WRITE(99,"('CONSTANTE DE VITESSE                   SPEED_0 = ',1pE12.4)") SPEED_0
     WRITE(99,"('CONSTANTE DE VISCOSITE                    NU_0 = ',1pE12.4)") NU_0
     WRITE(99,"('CONSTANTE DE DENSITE                     RHO_0 = ',1pE12.4)") RHO_0
-    WRITE(99,"('CONSTANTE DE TEMPERATURE                   T_0 = ',1pE12.4)") TEMP_0
+    WRITE(99,"('CONSTANTE DE TEMPERATURE                TEMP_0 = ',1pE12.4)") TEMP_0
+    WRITE(*,"('CONSTANTE DE LUMINOSITÉ              L_STEFAN_0 = ',1pE12.4)") L_STEFAN_0
     WRITE(99,"('CONSTANTE DE DENSITE SURFACIQUE        SIGMA_0 = ',1pE12.4)") SIGMA_0
     WRITE(99,"('CONSTANTE DE DENSITE                       S_0 = ',1pE12.4)") S_0
     WRITE(99,"('CONSTANTE DE PRESSION                      P_0 = ',1pE12.4)") P_0

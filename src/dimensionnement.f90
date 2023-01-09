@@ -41,24 +41,25 @@ SUBROUTINE ADIM_TO_PHYSIQUE()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
-    TIME   = TIME_AD / OMEGA_MAX
-    RADIUS = R_S * X_AD**2._xp
-    OMEGA  = OMEGA_AD * OMEGA_MAX
-    P      = P_AD * P_0
-    P_GAZ  = P_GAZ_AD * P_GAZ_0
-    P_RAD  = P_RAD_AD * P_RAD_0
-    C_S    = C_S_AD * SPEED_0
-    H      = H_AD * R_S
-    RHO    = RHO_AD * RHO_0
-    NU     = NU_AD * NU_0
-    SIGMA  = S_AD / X_AD * S_0
-    SPEED  = SPEED_AD * SPEED_0
-    M_DOT  = M_DOT_AD * M_0_DOT
-    TEMP   = TEMP_AD * TEMP_0
-    Q_PLUS = Q_PLUS_AD * Q_PLUS_0
+    TIME    = TIME_AD / OMEGA_MAX
+    RADIUS  = R_S * X_AD**2._xp
+    OMEGA   = OMEGA_AD * OMEGA_MAX
+    P       = P_AD * P_0
+    P_GAZ   = P_GAZ_AD * P_GAZ_0
+    P_RAD   = P_RAD_AD * P_RAD_0
+    C_S     = C_S_AD * SPEED_0
+    H       = H_AD * R_S
+    RHO     = RHO_AD * RHO_0
+    NU      = NU_AD * NU_0
+    SIGMA   = S_AD / X_AD * S_0
+    SPEED   = SPEED_AD * SPEED_0
+    M_DOT   = M_DOT_AD * M_0_DOT
+    TEMP    = TEMP_AD * TEMP_0
+    Q_PLUS  = Q_PLUS_AD * Q_PLUS_0
     Q_MOINS = Q_MOINS_AD * Q_PLUS_0
-    Q_ADV  = Q_ADV_AD * Q_ADV_0
-    C_V    = C_V_AD * C_V_0
+    Q_ADV   = Q_ADV_AD * Q_ADV_0
+    C_V     = C_V_AD * C_V_0
+    L_STEFAN = L_STEFAN_AD*L_STEFAN_0
     
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE ADIM_TO_PHYSIQUE
@@ -90,10 +91,10 @@ SUBROUTINE PHYSIQUE_TO_ADIM()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
-    TIME_AD  = TIME* OMEGA_MAX
-    X_AD = (RADIUS / R_S)**(0.5_xp)
-    OMEGA_AD = OMEGA / OMEGA_MAX
-    P_AD = P / P_0
+    TIME_AD   = TIME* OMEGA_MAX
+    X_AD      = (RADIUS / R_S)**(0.5_xp)
+    OMEGA_AD  = OMEGA / OMEGA_MAX
+    P_AD      = P / P_0
     P_GAZ_AD  = P_GAZ_AD * P_GAZ_0
     P_RAD_AD  = P_RAD / P_RAD_0
     C_S_AD    = C_S / SPEED_0
@@ -108,6 +109,7 @@ SUBROUTINE PHYSIQUE_TO_ADIM()
     Q_PLUS_AD = Q_MOINS / Q_PLUS_0
     Q_ADV_AD  = Q_ADV / Q_ADV_0
     C_V_AD    = C_V / C_V_0
+    L_STEFAN_AD = L_STEFAN / L_STEFAN_0
     
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE PHYSIQUE_TO_ADIM
