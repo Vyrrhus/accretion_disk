@@ -30,6 +30,11 @@ SUBROUTINE SCHEMA_TH_TIME()
     
     REAL(KIND=XP) :: SWITCH      !! valeur d'arrêt de boucle pour Q+ - Q-
     INTEGER :: I
+<<<<<<< HEAD
+=======
+    SWITCH = 1.0e-17_xp
+    DELTA_T_TH_AD = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
+>>>>>>> be894d54ca4db4cee59a1fd914bcc9afd96028c9
     
     SWITCH = 1.0e-17_xp
     DELTA_T_TH = FRACTION_DT_TH / MAXVAL(OMEGA_AD)       

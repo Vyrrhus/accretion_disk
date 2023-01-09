@@ -8,7 +8,7 @@
 
     IMPLICIT NONE
 
-    REAL(kind=xp)             :: DELTA_T_TH     !!Pas de temps pour l'intégration de T
+    REAL(kind=xp)             :: DELTA_T_TH_AD     !!Pas de temps pour l'intégration de T
 
     CONTAINS
 
@@ -37,7 +37,7 @@
         REAL(kind=xp), dimension(NX)                     :: DTEMP_AD_DT
 
         DTEMP_AD_DT = MU/(R_BOLTZ*OMEGA_MAX*TEMP_0*C_V_AD) * (Q_PLUS_0*Q_PLUS_AD - Q_PLUS_0*Q_MOINS_AD)
-        CALL SCHEMA_EULER(TEMP_AD, DTEMP_AD_DT, DELTA_T_TH)
+        CALL SCHEMA_EULER(TEMP_AD, DTEMP_AD_DT, DELTA_T_TH_AD)
 
     END SUBROUTINE ITERATION_TEMP_AD
 
