@@ -272,11 +272,12 @@ class FigureGUI():
         self.canvas.draw()
 
 # Récupérer le fichier de sortie
-data = DataHandler("data_py.out")
+
+data = DataHandler("data.out")
 
 # Numpy array :
-data.space # array spatial
-data.time  # array du temps
+# data.space # array spatial
+# data.time  # array du temps
 """
     data.time  => np.array 1D : valeurs temporelles
     data.space => np.array 1D: valeurs spatiales
@@ -297,4 +298,25 @@ data.time  # array du temps
 """
 
 # START MATPLOTLIB :
-data.plot()
+
+Temp=data.get("TEMP", space_idx=10) #température dimensionnée
+Sigma=data.get("SIGMA", space_idx=10) #Densité surfacique dimensionnée
+
+r_s=data.space[-1]/100
+print('x étudié=', np.sqrt(data.space[10]/r_s))
+
+Scurves=pd.read_csv('output/S_curve_data_epais_complete.csv')
+Scurves=np.array(Scurves)
+
+Scurve1=Scurves[1677:1700, 1:3] #Scurve à x=5.9487048957087492
+
+plt.loglog(Scurve1[:,1], Scurve1[:,0], color='blue')
+plt.plot(np.log(Sigma), np.log(Temp), color='orange')
+
+
+
+plt.show()
+
+
+
+
