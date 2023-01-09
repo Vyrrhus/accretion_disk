@@ -5,7 +5,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
+SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture, Tau_ff)
 ! --------------------------------------------------------------------------------------------------------------------------------------
 !Calcul du zéro de la fonction Q+=Q- pour les deux branches.
 ! --------------------------------------------------------------------------------------------------------------------------------------
@@ -16,9 +16,10 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
    LOGICAL,       INTENT(in)    :: mince                                           !! Booléen pour savoir dans quelle branche on est
    REAL(KIND=xp), INTENT(out)   :: Sc                                              !! Point milieu de la dichotomie
    INTEGER,       INTENT(in)    :: ipos                                               !! Indice de la position
+   REAL(KIND=xp), INTENT(inout) :: Tau_ff
    LOGICAL,       INTENT(inout) :: ecriture 
  
-   REAL(KIND=xp)               :: prec=1._xp                                     !! Précision de la dichotomie
+   REAL(KIND=xp)               :: prec=1E-2_xp                                     !! Précision de la dichotomie
    REAL(KIND=xp)               :: eps
    REAL(KIND=xp)               :: Ha, Hb, Hc                                      !! H aux points a, b et c
    REAL(KIND=xp)               :: rho_a, rho_b, rho_c                             !! rho aux points a, b et c
@@ -32,6 +33,7 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
    REAL(KIND=xp)               :: Fza, Fzb, Fzc                                   !! Fz aux point a, b et c 
    REAL(KIND=xp)               :: Fa, Fb, Fc                                      !! Fonction à annuler aux points a, b et c
    REAL(KIND=xp)               :: Kffa,Kffb, Kffc                                 !! Kff aux points a, b et c
+   REAL(KIND=xp)               :: tauff
    INTEGER                     :: counter
    INTEGER                     :: limit = 1000
 
@@ -95,11 +97,16 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
 
       !PRINT*, "Q+= ", Q_plus_a
       !PRINT*, "Q- mince= ", Q_moins_a
+
+      Kffa = 6.13E18 *rho_a * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
+
+      Kffb = 6.13E18 *rho_b * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
       
 
       DO WHILE(eps>prec .and. counter<limit)
 
          Sc=Sa+(Sb-Sa)/2._xp
+
          CALL calc_H2(Temp_S,x_ad(ipos),Omega_S,Sc,Hc)                                                              !calcul de H au point c
 
          rho_c = Sc / ( x_ad(ipos) * Hc )                                                                             !calcul de rho au point c
@@ -117,6 +124,11 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
          Q_moins_c = 2._xp * x_ad(ipos) * Fzc / (Sc*S_0)
 
          Fc = Q_plus_c - Q_moins_c 
+
+         !PRINT*, "T= ", Temp_S, "Sa = ", Sa*S_0/X_AD(ipos), "Sc = ", Sc*S_0/X_AD(ipos), "Sb = ", Sb*S_0/X_AD(ipos)
+         !PRINT*, "Q+ - Q-", Fa, Fc, Fb
+
+         Kffc = 6.13E18 *rho_c * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
 
          IF ((Fa*Fc)<0.0_xp) THEN                                                                         !Si f(a)*f(c)<0
 
@@ -241,16 +253,13 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture)
  
    ENDIF
 
-   !PRINT*, "Sc= ", Sc
-   !PRINT*, "Q+ = ", Q_plus_c
-   !PRINT*, "Q- = ", Q_moins_c
-   !PRINT*, "Q+ - Q- = ", Fc
-
    IF (counter < limit) THEN
       ecriture = .true.
    ELSE
       ecriture = .false.
    ENDIF
+
+   Tau_ff = 0.5_xp * SQRT(KAPPA_E * Kffc) * Sc * S_0 / X_AD(ipos)
 
 
 END SUBROUTINE
