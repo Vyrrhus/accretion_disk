@@ -22,7 +22,7 @@ SUBROUTINE SCHEMA_TH_TIME()
     REAL(KIND=XP) :: SWITCH
     INTEGER :: I
     SWITCH = 1.0e-17_xp
-    DELTA_T_TH = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
+    DELTA_T_TH_AD = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
     
     WRITE(*,"('Q+ - Q- = ',1pe12.4,'          Temperature AD = ',1pE12.4)") &
     & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) , &
