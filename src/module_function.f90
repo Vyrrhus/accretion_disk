@@ -29,13 +29,20 @@ SUBROUTINE COMPUTE_EQS()
             
     REAL(KIND=XP),DIMENSION(NX) :: GAMMA_3     !! Exposant adiabatique
     REAL(KIND=XP) :: CONDITION_EXT_V           !! Condition au bord extérieur sur la vitesse d'accrétion
+    INTEGER :: I
     
     ! Vitesse de rotation
-    OMEGA_AD = 3.0_xp**(1.5_xp) * X_AD**(-3.0_xp)
-
+    ! OMEGA_AD = 3.0_xp**(1.5_xp) * X_AD**(-3.0_xp)
+    
     ! Pression de radiation
     P_RAD_AD = TEMP_AD**4.0_xp
-
+    
+    ! Luminosiée du disque
+    L_STEFAN_AD = 0.0_xp
+    DO I=1,NX-1
+    L_STEFAN_AD = TEMP_AD(I)**4.0_xp * X_AD(I)**2.0_xp * (X_AD(I+1)-X_AD(I))
+    ENDDO
+    
     ! Demi-hauteur du disque (calcul coefficients d'un trinôme du 2nd degré dont H est la solution positive)
     B_AD = (TEMP_AD**4._xp * X_AD) / (OMEGA_AD**2._xp * S_AD)
     C_AD = TEMP_AD / (OMEGA_AD**2._xp)
