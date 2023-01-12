@@ -10,8 +10,8 @@ USE MODULE_SCHEMAS_T
                                
                                IMPLICIT NONE
 
-REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH     = 1.0E-2_xp
-REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ   = 1.0E-2_XP
+REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH     = 5.0E-3_xp
+REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ   = 5.0E-3_XP
 INTEGER, PRIVATE :: NB_IT_TH
 
                                 CONTAINS
@@ -30,18 +30,14 @@ SUBROUTINE SCHEMA_TH_TIME()
     
     REAL(KIND=XP) :: SWITCH      !! valeur d'arrêt de boucle pour Q+ - Q-
     INTEGER :: I
-<<<<<<< HEAD
-=======
-    SWITCH = 1.0e-17_xp
-    DELTA_T_TH_AD = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
->>>>>>> be894d54ca4db4cee59a1fd914bcc9afd96028c9
     
     SWITCH = 1.0e-17_xp
-    DELTA_T_TH = FRACTION_DT_TH / MAXVAL(OMEGA_AD)       
+    DELTA_T_TH_AD = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
+       
     
     !! affichage des variables d'entrée de boucle
     
-    WRITE(*,"('Pas de temps thermique               DELTA_T_TH = ',1pE12.4)") DELTA_T_TH
+    WRITE(*,"('Pas de temps thermique               DELTA_T_TH_AD = ',1pE12.4)") DELTA_T_TH_AD
     WRITE(*,"('Q+ - Q- = ',1pe12.4,'           Temperature AD = ',1pE12.4)") &
     & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) , &
     & TEMP_AD(50)
@@ -54,14 +50,14 @@ SUBROUTINE SCHEMA_TH_TIME()
               CALL COMPUTE_EQS()         !! on calcul le reste des variables
               
               
-              !! afficha pour observer l'évolution du système ( q+-q- et m_dot)
-              IF (MODULO(I,10000)==1) THEN
-              WRITE (*,"('Q+-Q- = ',1pE12.4,'  M_DOT = ',1pE12.4)")&
+              !! affichage pour observer l'évolution du système ( q+-q- et m_dot)
+              IF (MODULO(I,50000)==1) THEN
+              WRITE (*,"('Q+-Q- = ',1pE12.4,'  ABS(M_DOT-1) = ',1pE12.4)")&
               & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)), &
               & ABS(MINVAL(M_DOT_AD-1.0_xp))
               ENDIF
               
-              TIME_AD = TIME_AD + DELTA_T_TH
+              TIME_AD = TIME_AD + DELTA_T_TH_AD
               
               !! réécriture en dimensionné
               CALL ADIM_TO_PHYSIQUE()
@@ -112,7 +108,7 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
 	     
 	    WRITE (11,"(2(1pE12.4,2x))") TEMP_AD(30),S_AD(30)
 	    
-	    TIME_AD = TIME_AD + DELTA_T_VISQ - NB_IT_TH * DELTA_T_TH
+	    TIME_AD = TIME_AD + DELTA_T_VISQ - NB_IT_TH * DELTA_T_TH_AD
 	    
 	    ITE=ITE+1
              

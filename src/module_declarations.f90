@@ -40,7 +40,7 @@ REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
 
 !! PARAMÈTRES SPATIAUX
-INTEGER,PARAMETER :: NX = 100         !! Nombre de points de discrétisation spatiale
+INTEGER,PARAMETER :: NX = 500       !! Nombre de points de discrétisation spatiale
 REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
 REAL(KIND=XP)     :: X_MIN           !! Rayon minimal adimensionné
 REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
@@ -48,8 +48,6 @@ REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
 !! PARAMÈTRES TEMPORELS
 INTEGER        :: NT
 REAL(KIND=XP)  :: DT
-REAL(KIND=XP)  :: TIME_MIN
-REAL(KIND=XP)  :: TIME_MAX  
 
 !! CONSTANTES DU SYSTEME
 REAL(KIND=XP)  :: Z_FRAC        !! Abondance éléments lourds
@@ -237,11 +235,7 @@ SUBROUTINE CALCUL_CONSTANTES()
     OMEGA_AD = 3.0_xp**(1.5_xp) * X_AD**(-3.0_xp)
     
     ! DECLARATION DES VARIABLES TEMPORELLES
-    TIME_MAX = 1.0E10_xp * OMEGA_MAX
-    TIME_MIN = 0.0_xp * OMEGA_MAX
-    
-    DT = ( TIME_MAX - TIME_MIN ) / (NT-1)
-    TIME_AD = TIME_MIN
+    TIME_AD = 0.0_xp
     
     ! CONSTANTES DE NORMALISATION
     SPEED_0     = R_S * OMEGA_MAX

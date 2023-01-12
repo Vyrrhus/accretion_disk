@@ -89,11 +89,13 @@
         DTEMP_AD_DX(NX)  = (T_EXT-TEMP_AD(NX))/DX
 
         !Calculs de Q_ADV
-        Q_ADV_AD = C_V_AD((GAMMA_3-1) * TEMP_AD/S_AD * (DS_AD_DT + SPEED_AD/(2*X_AD)*DS_AD_DX - SPEED_AD/(2*X_AD**2)*S_AD)  &
-                    - SPEED_AD/(2*X_AD)*DTEMP_AD_DX)
+        Q_ADV_AD = C_V_AD((GAMMA_3-1) * TEMP_AD/S_AD *&
+        & (DS_AD_DT + SPEED_AD/(2*X_AD)*DS_AD_DX - SPEED_AD/(2*X_AD**2)*S_AD)  &
+        & - SPEED_AD/(2*X_AD)*DTEMP_AD_DX)
         
         !Calculs de la dérivée temporelle de TEMP_ADV
-        DTEMP_AD_DT = MU/(R_BOLTZ*OMEGA_MAX*TEMP_0*C_V_AD) * (Q_PLUS_0*Q_PLUS_AD - Q_PLUS_0*Q_MOINS_AD + Q_ADV_0*Q_ADV_AD)
+        DTEMP_AD_DT = MU/(R_BOLTZ*OMEGA_MAX*TEMP_0*C_V_AD) &
+        &* (Q_PLUS_0*Q_PLUS_AD - Q_PLUS_0*Q_MOINS_AD + Q_ADV_0*Q_ADV_AD)
 
         CALL SCHEMA_EULER(TEMP_AD, DTEMP_AD_DT, DELTA_T_AD)
 
