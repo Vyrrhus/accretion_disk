@@ -118,7 +118,6 @@ END SUBROUTINE PHYSIQUE_TO_ADIM
 SUBROUTINE SI_TO_CGS()
 !---------------------------------------------------------------------------------------------------
 !>    Cette routine convertit les variables physiques principales dans le système CGS
-!>    Variables concernées : 
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
@@ -150,8 +149,6 @@ SUBROUTINE SI_TO_CGS()
     ! Densité de surface
     SIGMA = SIGMA * 1e-1_xp
     
-    
-    
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SI_TO_CGS
 !---------------------------------------------------------------------------------------------------
@@ -159,7 +156,6 @@ END SUBROUTINE SI_TO_CGS
 SUBROUTINE CGS_TO_SI()
 !---------------------------------------------------------------------------------------------------
 !>    Cette routine convertit les variables physiques principales dans le système SI
-!>
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 

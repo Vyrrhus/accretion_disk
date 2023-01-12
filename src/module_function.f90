@@ -17,7 +17,7 @@ SUBROUTINE COMPUTE_EQS()
 !> On détermine chaque variable adimensionnée à partir de l'équation adéquate, en partant de la
 !> température TEMP et de la densité de surface S.
 !> La procédure de calcul se fait dans l'ordre suivant :
-!> (TEMP, S) => (OMEGA, P_RAD) 
+!> (TEMP, S) => (P_RAD) 
 !>           => H 
 !>           => (C_S, RHO)
 !>               C_S => NU => (Q+, V => M_DOT)
@@ -31,13 +31,10 @@ SUBROUTINE COMPUTE_EQS()
     REAL(KIND=XP) :: CONDITION_EXT_V           !! Condition au bord extérieur sur la vitesse d'accrétion
     INTEGER :: I
     
-    ! Vitesse de rotation
-    ! OMEGA_AD = 3.0_xp**(1.5_xp) * X_AD**(-3.0_xp)
-    
     ! Pression de radiation
     P_RAD_AD = TEMP_AD**4.0_xp
     
-    ! Luminosiée du disque
+    ! Luminosité du disque
     L_STEFAN_AD = 0.0_xp
     DO I=1,NX-1
     L_STEFAN_AD = L_STEFAN_AD + TEMP_AD(I)**4.0_xp * X_AD(I)**2.0_xp * (X_AD(I+1)-X_AD(I))
