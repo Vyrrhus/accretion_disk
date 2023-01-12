@@ -37,12 +37,8 @@ SUBROUTINE SCHEMA_TH_TIME()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     
-<<<<<<< HEAD
     REAL(KIND=XP) :: SWITCH      !! valeur d'arrêt de boucle pour Q+ - Q-
-    REAL(KIND=XP) :: MIN_Q
-=======
     REAL(KIND=XP) :: SWITCH     !! valeur d'arrêt de boucle pour Q+ - Q-
->>>>>>> 11d4c4af913c0025ddf2be0e45e039642b3b4928
     INTEGER :: I
     
     SWITCH = 1.0e-17_xp
