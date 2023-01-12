@@ -29,6 +29,7 @@ SUBROUTINE SCHEMA_TH_TIME()
     IMPLICIT NONE
     
     REAL(KIND=XP) :: SWITCH      !! valeur d'arrêt de boucle pour Q+ - Q-
+    REAL(KIND=XP) :: MIN_Q
     INTEGER :: I
     
     SWITCH = 1.0e-17_xp
@@ -44,11 +45,11 @@ SUBROUTINE SCHEMA_TH_TIME()
     
     !! lancement de la boucle qui tournera tant que Q+ - Q- est > switch
     I=0
-    DO WHILE(MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH)
+    
+    DO WHILE( MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH)
               
               CALL ITERATION_TEMP_AD()   !! on appel le schéma de l'équation de T
               CALL COMPUTE_EQS()         !! on calcul le reste des variables
-              
               
               !! affichage pour observer l'évolution du système ( q+-q- et m_dot)
               IF (MODULO(I,50000)==1) THEN
@@ -78,6 +79,8 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     IMPLICIT NONE
      
     INTEGER :: ITE,I
+    REAL(KIND=XP) :: M_DOT_MIN
+    
     DELTA_T_VISQ = FRACTION_DT_VISQ * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
     
     !! génération des grilles de calcul pour le schema implicit de S
@@ -91,9 +94,12 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
     
+    M_DOT_MIN = ABS(MINVAL(M_DOT_AD-1.0_xp))
+    
     ! lancement boucle pour arriver à m_dot = 1
     ITE=1
-    DO WHILE(ABS(MINVAL(M_DOT_AD-1.0_xp))>=0.01_xp)
+    DO WHILE(M_DOT_MIN>=0.01_xp)
+            
             
             WRITE(*,"(48('-'))")
             WRITE(*,"(I0,'e iteration de temps thermique ')") ITE 
@@ -111,12 +117,14 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
 	    TIME_AD = TIME_AD + DELTA_T_VISQ - NB_IT_TH * DELTA_T_TH_AD
 	    
 	    ITE=ITE+1
-             
+            
+            M_DOT_MIN = ABS(MINVAL(M_DOT_AD-1.0_xp))
+            !CALL NAN_MINVAL(ABS(M_DOT_AD-1.0_xp),NX,M_DOT_MIN)
+            
     ENDDO
      
 END SUBROUTINE SCHEMA_FIRST_BRANCH
 !---------------------------------------------------------------------------------------------------
-
 !---------------------------------------------------------------------------------------------------
                           END MODULE MODULE_BOUCLE
 !---------------------------------------------------------------------------------------------------

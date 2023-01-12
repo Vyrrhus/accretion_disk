@@ -36,12 +36,8 @@
 
 			!-- BOUCLES DE CALCULS
 			!----------------------------------
-			OPEN(22,FILE='test1.out',status='unknown')
-			OPEN(11,FILE='test.out',status='unknown')
 			CALL SCHEMA_FIRST_BRANCH()
 			CALL CLOSE_OUTPUT()
-			close(11)
-			close(22)
 			
 !========================================================================
 	                  END PROGRAM MAIN 
