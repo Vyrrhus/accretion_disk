@@ -105,8 +105,6 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
 	    WRITE(*,"('S_AD(50) = ',1pE12.4)") S_AD(50)
 	     
 	    CALL COMPUTE_EQS()
-	     
-	    WRITE (11,"(2(1pE12.4,2x))") TEMP_AD(30),S_AD(30)
 	    
 	    TIME_AD = TIME_AD + DELTA_T_VISQ - NB_IT_TH * DELTA_T_TH_AD
 	    
