@@ -71,6 +71,7 @@ SUBROUTINE INIT_FILES()
 
         ! Ajout du header au fichier de sortie
         IF (HEADER) THEN
+            ! Affichage paramètres d'entrée
             IF (INDEX(LINE, "@input") /= 0) THEN
                 OPEN(newunit=INPUT_CONFIG_UNT, file="config/input.config", action="read", status="old")
                 DO 
@@ -80,7 +81,12 @@ SUBROUTINE INIT_FILES()
                     WRITE(UNT_AD,"(A)") LINE
                 END DO
                 CLOSE(INPUT_CONFIG_UNT)
-            ELSE 
+
+            ! Affichage constantes de simulation et de normalisation
+            ELSE IF (INDEX(LINE, "@constantes") /=0) THEN
+                CALL WRITE_CONSTANTES(UNT)
+                CYCLE
+            ELSE
                 WRITE(UNT, "(A)") TRIM(LINE)
                 WRITE(UNT_AD, "(A)") TRIM(LINE)
             END IF
@@ -89,12 +95,8 @@ SUBROUTINE INIT_FILES()
         IF (INDEX(LINE, "@header") /= 0) THEN
             HEADER = .TRUE.
             OPEN(newunit=UNT, file="output/"//TRIM(ADJUSTL(FILENAME)), action="write")
-        END IF
-        
-        IF (INDEX(LINE, "@header") /= 0) THEN
-            HEADER = .TRUE.
             OPEN(newunit=UNT_AD, file="output/"//TRIM(ADJUSTL(FILENAME_2)), action="write")
-        ENDIF
+        END IF
 
     END DO
 
