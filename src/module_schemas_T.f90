@@ -89,7 +89,7 @@
         DTEMP_AD_DX(NX)  = (T_EXT-TEMP_AD(NX))/DX
 
         !Calculs de Q_ADV
-        Q_ADV_AD = C_V_AD((GAMMA_3-1) * TEMP_AD/S_AD *&
+        Q_ADV_AD = C_V_AD*((GAMMA_3-1) * TEMP_AD/S_AD *&
         & (DS_AD_DT + SPEED_AD/(2*X_AD)*DS_AD_DX - SPEED_AD/(2*X_AD**2)*S_AD)  &
         & - SPEED_AD/(2*X_AD)*DTEMP_AD_DX)
         
