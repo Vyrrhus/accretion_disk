@@ -157,7 +157,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: FILE_ID
-    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC,   TEMP_MIND_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S
+    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC,   TEMP_MIN_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
     MASS          = 1._xp        ! [M_{sol}]
