@@ -14,6 +14,7 @@ INTEGER, PRIVATE :: UNT,UNT_AD
 INTEGER, PRIVATE :: PAS_ECRITURE_SPATIAL
 INTEGER, PRIVATE :: PAS_ECRITURE_TEMPOREL
 INTEGER, PRIVATE :: PRECISION
+INTEGER :: COURBE_EN_S
 
 CHARACTER(LEN=30), PRIVATE :: FMT, FMT_SINGLE_VALUE
 INTEGER, PRIVATE :: COUNT,COUNT_AD
@@ -68,7 +69,10 @@ SUBROUTINE INIT_FILES()
         PAS_ECRITURE_SPATIAL  = parse_int(LINE, "dx", PAS_ECRITURE_SPATIAL)
         PAS_ECRITURE_TEMPOREL = parse_int(LINE, "dt", PAS_ECRITURE_TEMPOREL)
         PRECISION             = parse_int(LINE, "prec", PRECISION)
-
+        
+        ! Condition de calcul des courbes en S
+        COURBE_EN_S = parse_int(LINE, "s_curve", COURBE_EN_S)
+        
         ! Ajout du header au fichier de sortie
         IF (HEADER) THEN
             ! Affichage paramètres d'entrée
