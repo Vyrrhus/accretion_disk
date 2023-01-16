@@ -11,7 +11,7 @@
 
     REAL(kind=xp)             :: DELTA_T_TH_AD     !!Pas de temps pour l'intégration de T sans advection
     REAL(kind=xp)             :: DELTA_T_AD        !!Pas de temps pour l'intégration de T et S avec l'advection
-    REAL(kind=xp)             :: T_EXT             !!Temperature de la matière arivant dans le disque
+    REAL(kind=xp)             :: T_EXT_AD             !!Temperature de la matière arivant dans le disque
 
     CONTAINS
 
@@ -61,7 +61,7 @@
 
         INTEGER                                          :: i
 
-        !Pas de temps sur S_AD
+        !Evolution sur un pas de temps pour S_AD
         S_AD_SAVE = S_AD
         CALL SCHEMA_IMPLICITE_S(NU_AD)
 
@@ -86,7 +86,7 @@
             END IF
         END DO
         DTEMP_AD_DX(1)   = (TEMP_AD(2)-TEMP_AD(1))/DX
-        DTEMP_AD_DX(NX)  = (T_EXT-TEMP_AD(NX))/DX
+        DTEMP_AD_DX(NX)  = (T_EXT_AD-TEMP_AD(NX))/DX
 
         !Calculs de Q_ADV
         Q_ADV_AD = C_V_AD*((GAMMA_3-1) * TEMP_AD/S_AD *&
