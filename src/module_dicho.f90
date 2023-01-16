@@ -5,35 +5,33 @@ IMPLICIT NONE
 
 CONTAINS
 
-SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture, Tau_ff)
+SUBROUTINE dichotomie(Temp_S_AD, Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
 ! --------------------------------------------------------------------------------------------------------------------------------------
 !Calcul du zéro de la fonction Q+=Q- pour les deux branches.
 ! --------------------------------------------------------------------------------------------------------------------------------------
 
 
-   REAL(KIND=xp), INTENT(in)    :: Temp_S                                               !! Température
-   REAL(KIND=xp), INTENT(inout) :: Sa, Sb                                          !! Points de départ de la dichotomie
+   REAL(KIND=xp), INTENT(in)    :: Temp_S_AD                                               !! Température
+   REAL(KIND=xp), INTENT(inout) :: Sa_AD, Sb_AD                                          !! Points de départ de la dichotomie
    LOGICAL,       INTENT(in)    :: mince                                           !! Booléen pour savoir dans quelle branche on est
-   REAL(KIND=xp), INTENT(out)   :: Sc                                              !! Point milieu de la dichotomie
+   REAL(KIND=xp), INTENT(out)   :: Sc_AD                                              !! Point milieu de la dichotomie
    INTEGER,       INTENT(in)    :: ipos                                               !! Indice de la position
-   REAL(KIND=xp), INTENT(inout) :: Tau_ff
    LOGICAL,       INTENT(inout) :: ecriture 
  
    REAL(KIND=xp)               :: prec=1E-2_xp                                     !! Précision de la dichotomie
    REAL(KIND=xp)               :: eps
-   REAL(KIND=xp)               :: Ha, Hb, Hc                                      !! H aux points a, b et c
-   REAL(KIND=xp)               :: rho_a, rho_b, rho_c                             !! rho aux points a, b et c
-   REAL(KIND=xp)               :: Prad                                            !! Pression radiative
-   REAL(KIND=xp)               :: Pgaz_a, Pgaz_b, Pgaz_c                          !! Pression du gaz aux points a, b et c
+   REAL(KIND=xp)               :: Ha_AD, Hb_AD, Hc_AD                                      !! H aux points a, b et c
+   REAL(KIND=xp)               :: rho_a_AD, rho_b_AD, rho_c_AD                             !! rho aux points a, b et c
+   REAL(KIND=xp)               :: Prad_AD                                            !! Pression radiative
+   REAL(KIND=xp)               :: Pgaz_a_AD, Pgaz_b_AD, Pgaz_c_AD                          !! Pression du gaz aux points a, b et c
    REAL(KIND=xp)               :: Pa, Pb, Pc                                      !! Pression totale aux points a, b et c
-   REAL(KIND=xp)               :: Omega_S                                           !! Valeur de Omega_S
+   REAL(KIND=xp)               :: Omega_S_AD                                           !! Valeur de Omega_S
    REAL(KIND=xp)               :: Q_plus_a, Q_plus_b, Q_plus_c
    REAL(KIND=xp)               :: Q_moins_a, Q_moins_b, Q_moins_c 
-   REAL(KIND=xp)               :: nua, nub, nuc                                   !! Nu aux points a, b et c
+   REAL(KIND=xp)               :: nua_AD, nub_AD, nuc_AD                                   !! Nu aux points a, b et c
    REAL(KIND=xp)               :: Fza, Fzb, Fzc                                   !! Fz aux point a, b et c 
    REAL(KIND=xp)               :: Fa, Fb, Fc                                      !! Fonction à annuler aux points a, b et c
    REAL(KIND=xp)               :: Kffa,Kffb, Kffc                                 !! Kff aux points a, b et c
-   REAL(KIND=xp)               :: tauff
    INTEGER                     :: counter
    INTEGER                     :: limit = 1000
 
@@ -41,212 +39,175 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture, Tau_ff)
    eps=300._xp
 
    counter=0
+
+   Prad_AD =  Temp_S_AD ** 4._xp
+
+   Omega_S_AD = 3._xp ** (3._xp/2._xp) * X_AD(ipos) ** (-3._xp)
+
+   CALL calc_H2( Temp_S_AD, x_ad(ipos), Omega_S_AD, Sa_AD, Ha_AD )                                                                    !calcul de H au point a
    
-   !PRINT*, "x= ", X_AD(ipos)
+   CALL calc_H2( Temp_S_AD, x_ad(ipos), Omega_S_AD, Sb_AD, Hb_AD )                                                                    !calcul de H au point b
 
-   Prad =  Temp_S ** 4._xp                                                                               !Calcul de Prad
-   !PRINT*, "Prad= ", Prad
+   rho_a_AD = Sa_AD / ( x_ad(ipos) * Ha_AD )                                                                      !calcul de rho au point a
 
-   Omega_S = 3._xp ** (3._xp/2._xp) * X_AD(ipos) ** (-3._xp)
-   !PRINT*, "Omega= ", Omega_S * OMEGA_MAX
-   !PRINT*, "x_ad = ", X_AD(ipos)
+   rho_b_AD = Sb_AD / ( x_ad(ipos) * Hb_AD )                                                                       !calcul de rho au point b
 
-   CALL calc_H2(Temp_S,x_ad(ipos),Omega_S,Sa,Ha)                                                                    !calcul de H au point a
-   !PRINT*, "H= ", Ha * R_S
-   
-   CALL calc_H2(Temp_S,x_ad(ipos),Omega_S,Sb,Hb)                                                                    !calcul de H au point b
+   Pgaz_a_AD = Temp_S_AD * rho_a_AD                                                                             !calcul de Pgaz au point a
 
-   rho_a = Sa / ( x_ad(ipos) * Ha )                                                                      !calcul de rho au point a
-   !PRINT*, "rho= ", rho_a * rho_0
+   Pa = ( P_gaz_0 / P_0 ) * Pgaz_a_AD + ( P_rad_0 / P_0 ) * Prad_AD
 
-   rho_b = Sb / ( x_ad(ipos) * Hb )                                                                       !calcul de rho au point b
+   Pgaz_b_AD = Temp_S_AD * rho_b_AD                                                                            !calcul de Pgaz au point b
 
-   Pgaz_a = Temp_S * rho_a                                                                             !calcul de Pgaz au point a
-   !PRINT*, "Pgaz= ", Pgaz_a
+   Pb=( P_gaz_0 / P_0 ) * Pgaz_b_AD + ( P_rad_0 / P_0 ) * Prad_AD
 
-   Pa=( P_gaz_0 / P_0 ) * Pgaz_a+ ( P_rad_0 / P_0 ) * Prad
-   !PRINT*, "Ptot= ", Pa * P_0
+   nua_AD = 0.5_xp * Omega_S_AD * Ha_AD * Ha_AD
 
-   Pgaz_b = Temp_S * rho_b                                                                            !calcul de Pgaz au point b
-
-   Pb=( P_gaz_0 / P_0 ) * Pgaz_b+ ( P_rad_0 / P_0 ) * Prad
-
-   nua = 0.5_xp * Omega_S * Ha * Ha
-   !PRINT*, "nu= ", nua * NU_0
-
-   nub = 0.5_xp *Omega_S * Hb * Hb
+   nub_AD = 0.5_xp * Omega_S_AD * Hb_AD * Hb_AD
 
    IF (mince .eqv. .true.) THEN                                                                               !Calculs pour la branche mince
 
-      Fza=F_Z_RAD_0 * rho_a**2._xp * SQRT(Temp_S) * Ha
-      !PRINT*, "Fza= ", Fza
+      Fza = F_Z_RAD_0 * rho_a_AD**2._xp * SQRT(Temp_S_AD) * Ha_AD
 
-      Fzb=F_Z_RAD_0 * rho_b**2._xp * SQRT(Temp_S) * Hb
-      !PRINT*, "Fzb= ", Fzb
+      Fzb = F_Z_RAD_0 * rho_b_AD**2._xp * SQRT(Temp_S_AD) * Hb_AD
 
-      Q_plus_a = nua * Omega_S**2._xp *Q_PLUS_0
-      Q_plus_b = nub * Omega_S**2._xp *Q_PLUS_0
+      Q_plus_a = nua_AD * Omega_S_AD**2._xp * Q_PLUS_0
+      Q_plus_b = nub_AD * Omega_S_AD**2._xp * Q_PLUS_0
 
-      Q_moins_a = 2._xp * x_ad(ipos) * Fza / (Sa*S_0)
-      Q_moins_b = 2._xp * x_ad(ipos) * Fzb / (Sb*S_0)
+      Q_moins_a = 2._xp * x_ad(ipos) * Fza / ( Sa_AD * S_0 )
+      Q_moins_b = 2._xp * x_ad(ipos) * Fzb / ( Sb_AD * S_0 )
 
       Fa = Q_plus_a - Q_moins_a
-      !PRINT*, "Fa= ", Fa
 
       Fb = Q_plus_b - Q_moins_b
 
-      !PRINT*, "Q+= ", Q_plus_a
-      !PRINT*, "Q- mince= ", Q_moins_a
-
-      Kffa = 6.13E18 *rho_a * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
-
-      Kffb = 6.13E18 *rho_b * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
-      
-
       DO WHILE(eps>prec .and. counter<limit)
 
-         Sc=Sa+(Sb-Sa)/2._xp
+         Sc_AD = Sa_AD + (Sb_AD - Sa_AD) / 2._xp
 
-         CALL calc_H2(Temp_S,x_ad(ipos),Omega_S,Sc,Hc)                                                              !calcul de H au point c
+         CALL calc_H2( Temp_S_AD, x_ad(ipos), Omega_S_AD, Sc_AD, Hc_AD )                                                              !calcul de H au point c
 
-         rho_c = Sc / ( x_ad(ipos) * Hc )                                                                             !calcul de rho au point c
+         rho_c_AD = Sc_AD / ( x_ad(ipos) * Hc_AD )                                                                             !calcul de rho au point c
 
-         Pgaz_c = Temp_S * rho_c                                                                 !calcul de Pgaz au point c
+         Pgaz_c_AD = Temp_S_AD * rho_c_AD                                                                 !calcul de Pgaz au point c
 
-         Pc=( P_gaz_0 / P_0 ) * Pgaz_c+ ( P_rad_0 / P_0 ) * Prad
+         Pc=( P_gaz_0 / P_0 ) * Pgaz_c_AD + ( P_rad_0 / P_0 ) * Prad_AD
 
-         nuc = 0.5_xp * Omega_S * Hc * Hc
+         nuc_AD = 0.5_xp * Omega_S_AD * Hc_AD * Hc_AD
 
-         Fzc=F_Z_RAD_0 * rho_c**2._xp * SQRT(Temp_S) * Hc
+         Fzc = F_Z_RAD_0 * rho_c_AD**2._xp * SQRT(Temp_S_AD) * Hc_AD
 
-         Q_plus_c = nuc * Omega_S**2._xp *Q_PLUS_0
+         Q_plus_c = nuc_AD * Omega_S_AD**2._xp * Q_PLUS_0
 
-         Q_moins_c = 2._xp * x_ad(ipos) * Fzc / (Sc*S_0)
+         Q_moins_c = 2._xp * x_ad(ipos) * Fzc / ( Sc_AD * S_0 )
 
          Fc = Q_plus_c - Q_moins_c 
 
-         !PRINT*, "T= ", Temp_S, "Sa = ", Sa*S_0/X_AD(ipos), "Sc = ", Sc*S_0/X_AD(ipos), "Sb = ", Sb*S_0/X_AD(ipos)
-         !PRINT*, "Q+ - Q-", Fa, Fc, Fb
-
-         Kffc = 6.13E18 *rho_c * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
-
          IF ((Fa*Fc)<0.0_xp) THEN                                                                         !Si f(a)*f(c)<0
 
-            Sb=Sc
-            Hb=Hc
-            rho_b=rho_c                                                                                  !Le point c devient le nouveau point b
-            Pgaz_b=Pgaz_c
-            Pb=Pc
-            nub=nuc
-            Fzb=Fzc
-            Q_plus_b=Q_plus_c
-            Q_moins_b=Q_moins_c
-            Fb=Fc
+            Sb_AD = Sc_AD
+            Hb_AD = Hc_AD
+            rho_b_AD = rho_c_AD                                                                                  !Le point c devient le nouveau point b
+            Pgaz_b_AD = Pgaz_c_AD
+            Pb = Pc
+            nub_AD = nuc_AD
+            Fzb = Fzc
+            Q_plus_b = Q_plus_c
+            Q_moins_b = Q_moins_c
+            Fb = Fc
 
          ELSE                                                                                            !Si f(b)*f(c)<=0
 
-            Sa=Sc
-            Ha=Hc                                                                                        !Le point c devient le nouveau point a
-            rho_a=rho_c
-            Pgaz_a=Pgaz_c
-            Pa=Pc
-            nua=nuc
-            Fza=Fzc
-            Q_plus_b=Q_plus_c
-            Q_moins_b=Q_moins_c
-            Fa=Fc
+            Sa_AD = Sc_AD
+            Ha_AD = Hc_AD                                                                                        !Le point c devient le nouveau point a
+            rho_a_AD = rho_c_AD
+            Pgaz_a_AD = Pgaz_c_AD
+            Pa = Pc
+            nua_AD = nuc_AD
+            Fza = Fzc
+            Q_plus_b = Q_plus_c
+            Q_moins_b = Q_moins_c
+            Fa = Fc
 
          ENDIF
 
-         eps=ABS(Fc)                                                                                     !Calcul de l'erreur
+         eps = ABS(Fc)                                                                                     !Calcul de l'erreur
          counter = counter + 1
 
       ENDDO
    ELSE                                                                                                  !Calculs pour la branche épais
 
-      Kffa = 6.13E18 *rho_a * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
-      !PRINT*, "Kff= ", Kffa
+      Kffa = 6.13E18 *rho_a_AD * Temp_S_AD ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
 
-      Kffb = 6.13E18 *rho_b * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
+      Kffb = 6.13E18 *rho_b_AD * Temp_S_AD ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
 
-      Fza = F_Z_DIFF_0 * X_AD(ipos) * Temp_S**4._xp /( (KAPPA_E + Kffa) *Sa )
-      !PRINT*, "Fz= ", Fza
+      Fza = F_Z_DIFF_0 * X_AD(ipos) * Temp_S_AD**4._xp /( (KAPPA_E + Kffa) * Sa_AD )
 
-      Fzb = F_Z_DIFF_0 * X_AD(ipos) * Temp_S**4._xp /( (KAPPA_E + Kffb) *Sb ) 
+      Fzb = F_Z_DIFF_0 * X_AD(ipos) * Temp_S_AD**4._xp /( (KAPPA_E + Kffb) * Sb_AD ) 
 
-      Q_plus_a = nua * Omega_S**2._xp *Q_PLUS_0
-      Q_plus_b = nub * Omega_S**2._xp *Q_PLUS_0
+      Q_plus_a = nua_AD * Omega_S_AD**2._xp *Q_PLUS_0
+      Q_plus_b = nub_AD * Omega_S_AD**2._xp *Q_PLUS_0
 
-      Q_moins_a = 2._xp * x_ad(ipos) * Fza / (Sa*S_0)
-      Q_moins_b = 2._xp * x_ad(ipos) * Fzb / (Sb*S_0)
+      Q_moins_a = 2._xp * x_ad(ipos) * Fza / ( Sa_AD * S_0 )
+      Q_moins_b = 2._xp * x_ad(ipos) * Fzb / ( Sb_AD * S_0 )
 
       Fa = Q_plus_a - Q_moins_a
       Fb = Q_plus_b - Q_moins_b
 
-      !PRINT*, "Q+a= ", Q_plus_a
-      !PRINT*, "Q-a epais=", Q_moins_a
-      !PRINT*, "Q+b= ", Q_plus_b
-      !PRINT*, "Q-b= ", Q_moins_b
-      !PRINT*, "Q+ - Q-= ", Fa
-
       DO WHILE(eps>prec .and. counter<limit)
 
-         Sc=Sa+(Sb-Sa)/2._xp
+         Sc_AD = Sa_AD + ( Sb_AD - Sa_AD ) / 2._xp
          
-         CALL calc_H2(Temp_S,x_ad(ipos),Omega_S,Sc,Hc)
+         CALL calc_H2( Temp_S_AD, x_ad(ipos), Omega_S_AD, Sc_AD, Hc_AD )
 
-         rho_c = Sc / ( x_ad(ipos) * Hc )                                                                 !calcul de rho au point c
+         rho_c_AD = Sc_AD / ( x_ad(ipos) * Hc_AD )                                                                 !calcul de rho au point c
 
-         Pgaz_c = Temp_S * rho_c
+         Pgaz_c_AD = Temp_S_AD * rho_c_AD
 
-         Pc=( P_gaz_0 / P_0 ) * Pgaz_c+ ( P_rad_0 / P_0 ) * Prad
+         Pc = ( P_gaz_0 / P_0 ) * Pgaz_c_AD + ( P_rad_0 / P_0 ) * Prad_AD
 
-         nuc = 0.5_xp * Omega_S * Hc * Hc
+         nuc_AD = 0.5_xp * Omega_S_AD * Hc_AD * Hc_AD
 
-         Kffc = 6.13E18 *rho_c * Temp_S ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
+         Kffc = 6.13E18 *rho_c_AD * Temp_S_AD ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
 
-         Fzc = F_Z_DIFF_0 * X_AD(ipos) * Temp_S**4._xp /( (KAPPA_E + Kffc) *Sc )
+         Fzc = F_Z_DIFF_0 * X_AD(ipos) * Temp_S_AD**4._xp /( (KAPPA_E + Kffc) * Sc_AD )
 
-         Q_plus_c = nuc * Omega_S**2._xp *Q_PLUS_0
+         Q_plus_c = nuc_AD * Omega_S_AD**2._xp * Q_PLUS_0
          
-         Q_moins_c = 2._xp * x_ad(ipos) * Fzc / (Sc*S_0)
+         Q_moins_c = 2._xp * x_ad(ipos) * Fzc / ( Sc_AD * S_0 )
          
          Fc = Q_plus_c - Q_moins_c
 
-         !PRINT*, "T= ", Temp_S, "Sa = ", Sa*S_0/X_AD(ipos), "Sc = ", Sc*S_0/X_AD(ipos), "Sb = ", Sb*S_0/X_AD(ipos)
-         !PRINT*, "Q+ - Q-", Fa, Fc, Fb
-
          IF ((Fa*Fc)<0.0_xp) THEN
 
-            Sb=Sc
-            Hb=Hc
-            rho_b=rho_c                                                                                  !Le point c devient le nouveau point b
-            Pgaz_b=Pgaz_c
-            Pb=Pc
-            nub=nuc
-            Kffb=Kffc
-            Fzb=Fzc
-            Q_plus_b=Q_plus_c
-            Q_moins_b=Q_moins_c
-            Fb=Fc
+            Sb_AD = Sc_AD
+            Hb_AD = Hc_AD
+            rho_b_AD = rho_c_AD                                                                                  !Le point c devient le nouveau point b
+            Pgaz_b_AD = Pgaz_c_AD
+            Pb = Pc
+            nub_AD = nuc_AD
+            Kffb = Kffc
+            Fzb = Fzc
+            Q_plus_b = Q_plus_c
+            Q_moins_b = Q_moins_c
+            Fb = Fc
 
          ELSE 
 
-            Sa=Sc
-            Ha=Hc                                                                                        !Le point c devient le nouveau point a
-            rho_a=rho_c
-            Pgaz_a=Pgaz_c
-            Pa=Pc
-            nua=nuc
-            Kffa=Kffc
-            Fza=Fzc
-            Q_plus_b=Q_plus_c
-            Q_moins_b=Q_moins_c
-            Fa=Fc
+            Sa_AD = Sc_AD
+            Ha_AD = Hc_AD                                                                                        !Le point c devient le nouveau point a
+            rho_a_AD = rho_c_AD
+            Pgaz_a_AD = Pgaz_c_AD
+            Pa = Pc
+            nua_AD = nuc_AD
+            Kffa = Kffc
+            Fza = Fzc
+            Q_plus_b = Q_plus_c
+            Q_moins_b = Q_moins_c
+            Fa = Fc
 
          ENDIF
 
-         eps=ABS(Fc)
+         eps = ABS(Fc)
          counter = counter + 1
 
       ENDDO
@@ -258,8 +219,6 @@ SUBROUTINE dichotomie(Temp_S, Sa, Sb, ipos, mince, Sc, ecriture, Tau_ff)
    ELSE
       ecriture = .false.
    ENDIF
-
-   Tau_ff = 0.5_xp * SQRT(KAPPA_E * Kffc) * Sc * S_0 / X_AD(ipos)
 
 
 END SUBROUTINE
