@@ -45,7 +45,7 @@ DO j=1,NX
    CALL dichotomie( Temp_epais_AD(1), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
 
    IF (ecriture .eqv. .true.) THEN
-      WRITE(10,*) Temp_epais_AD(1) * Temp_0, Sc_AD * S_0 / x_ad(j) * 1E-1, X_AD(j)      !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
+      WRITE(10,*) Temp_epais_AD(1) * Temp_0, Sc_AD * S_0 / x_ad(j) * 1E-1, X_AD(j)**2._xp * R_S, X_AD(j)      !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
    ELSE
          !WRITE(10,*) Temp_epais(i)*Temp_0, message, X_AD(j)
    ENDIF
@@ -64,7 +64,7 @@ DO j=1,NX
       CALL dichotomie( Temp_epais_AD(i), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
 
       IF (ecriture .eqv. .true.) THEN
-         WRITE(10,*) Temp_epais_AD(i) * Temp_0, Sc_AD * S_0 / x_ad(j) * 1E-1, X_AD(j)                       !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
+         WRITE(10,*) Temp_epais_AD(i) * Temp_0, Sc_AD * S_0 / x_ad(j) * 1E-1, X_AD(j)**2._xp * R_S, X_AD(j)                       !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
       ELSE
          !WRITE(10,*) Temp_epais(i)*Temp_0, message, X_AD(j)
       ENDIF
@@ -97,7 +97,7 @@ DO j=1,NX
    CALL dichotomie( Temp_mince_AD(1), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
 
    IF (ecriture .eqv. .true.) THEN
-      WRITE(11,*) Temp_mince_AD(1)*Temp_0, Sc_AD * S_0 / x_ad(j) * 1E-1, X_AD(j)                                !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
+      WRITE(11,*) Temp_mince_AD(1)*Temp_0, Sc_AD * S_0 / x_ad(j) * 1E-1, X_AD(j)**2._xp * R_S, X_AD(j)                                !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
    ELSE
       !WRITE(11,*) Temp_mince(1)*Temp_0, message, X_AD(j)
    ENDIF
@@ -116,7 +116,7 @@ DO j=1,NX
       CALL dichotomie( Temp_mince_AD(i), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
 
       IF (ecriture .eqv. .true.) THEN
-         WRITE(11,*) Temp_mince_AD(i) * Temp_0, Sc_AD * S_0 / x_ad(j)*1E-1, X_AD(j)                     !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
+         WRITE(11,*) Temp_mince_AD(i) * Temp_0, Sc_AD * S_0 / x_ad(j)*1E-1, X_AD(j)**2._xp * R_S, X_AD(j)                     !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
       ELSE
          !WRITE(11,*) Temp_mince(i)*Temp_0, message, X_AD(j)
       ENDIF
