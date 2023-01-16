@@ -18,7 +18,7 @@ SUBROUTINE dichotomie(Temp_S_AD, Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
    INTEGER,       INTENT(in)    :: ipos                                               !! Indice de la position
    LOGICAL,       INTENT(inout) :: ecriture 
  
-   REAL(KIND=xp)               :: prec=1E-2_xp                                     !! Précision de la dichotomie
+   REAL(KIND=xp)               :: prec=1E-12_xp                                     !! Précision de la dichotomie
    REAL(KIND=xp)               :: eps
    REAL(KIND=xp)               :: Ha_AD, Hb_AD, Hc_AD                                      !! H aux points a, b et c
    REAL(KIND=xp)               :: rho_a_AD, rho_b_AD, rho_c_AD                             !! rho aux points a, b et c
