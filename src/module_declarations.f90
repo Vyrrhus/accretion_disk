@@ -45,10 +45,6 @@ REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
 REAL(KIND=XP)     :: X_MIN           !! Rayon minimal adimensionné
 REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
 
-!! PARAMÈTRES TEMPORELS
-INTEGER        :: NT
-REAL(KIND=XP)  :: DT
-
 !! CONSTANTES DU SYSTEME
 REAL(KIND=XP)  :: Z_FRAC        !! Abondance éléments lourds
 REAL(KIND=XP)  :: MU            !! Masse atomique moyenne \(\mu\)
@@ -157,7 +153,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: FILE_ID
-    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC,   TEMP_MIN_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S
+    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC,  TEMP_MIN_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S,   TEMP_AD,S_AD
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
     MASS          = 1._xp        ! [M_{sol}]
@@ -177,6 +173,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     OPEN(newunit=file_id,file='config/input.config',action='read',status='old')
     READ(file_id,input)
     CLOSE(file_id)
+    
     
     ! AFFICHAGE PARAMETRES D'ENTREE
     WRITE(*,"(48('-'))")
@@ -198,6 +195,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
 END SUBROUTINE APPEL_PARAM_INPUT
 !---------------------------------------------------------------------------------------------------
 
+!---------------------------------------------------------------------------------------------------
 SUBROUTINE CALCUL_CONSTANTES()
 !---------------------------------------------------------------------------------------------------
 !>    Cette routine calcule l'ensemble des constantes du modèle et les constantes d'adimensionnement. 

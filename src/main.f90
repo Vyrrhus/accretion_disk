@@ -24,7 +24,7 @@
               CALL APPEL_PARAM_INPUT()
               CALL CALCUL_CONSTANTES()
               CALL INIT_FILES()
-
+              
               !---------------------------------
               !-- Calcul des courbes en S
               !---------------------------------
@@ -32,15 +32,17 @@
               IF (COURBE_EN_S == 1) THEN
                  CALL S_curve(Temp_min_AD, Temp_max_AD, Sg_AD, Sd_AD, n_s)
               ENDIF
-
+              
               !---------------------------------
               !-- CONDITIONS INITIALES
               !---------------------------------
               CALL CREATION_CONDITIONS_INITIALES()
               
-              TEMP_AD = TEMP_AD_INI
-              S_AD = S_AD_INI
+              !TEMP_AD = TEMP_AD_INI
+              !S_AD = S_AD_INI
               
+              TEMP_AD = TEMP_AD/TEMP_0
+              S_AD = S_AD / S_0
               !---------------------------------
               !-- CALCUL L'ETAT DU DISQUE 
               !----------------------------------

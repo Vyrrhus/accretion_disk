@@ -141,7 +141,7 @@ SUBROUTINE ECRITURE_ADIM()
     IF (MODULO(COUNT_AD, PAS_ECRITURE_TEMPOREL) /= 0) RETURN
     WRITE(UNT_AD, "('T          ',1PE11.4)") TIME_AD
     
-    IF(MODULO(NX,PAS_ECRITURE_SPATIAL) == 1) THEN
+    IF(MODULO(NX-1,PAS_ECRITURE_SPATIAL) == 0) THEN
         ! ESPACE
         WRITE(UNT_AD, FMT) "X_AD      ", X_AD(::PAS_ECRITURE_SPATIAL)
 
@@ -218,8 +218,8 @@ SUBROUTINE ECRITURE_DIM()
     COUNT = COUNT + 1
     IF (MODULO(COUNT, PAS_ECRITURE_TEMPOREL) /= 0) RETURN
     WRITE(UNT, "('T          ',1PE11.4)") TIME
-
-    IF(MODULO(NX,PAS_ECRITURE_SPATIAL) == 1) THEN
+    
+    IF(MODULO(NX-1,PAS_ECRITURE_SPATIAL) == 0) THEN
         ! ESPACE
         WRITE(UNT, FMT) "X_AD      ", X_AD  (::PAS_ECRITURE_SPATIAL)
 
@@ -316,7 +316,7 @@ FUNCTION parse_int(STRING, KEY, CURRENT_VALUE) result(VALUE)
 
 !---------------------------------------------------------------------------------------------------
 END FUNCTION
-!---------------------------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------------------
 
 !--------------------------------------------------------------------------------------------------
                                   END MODULE MODULE_ECRITURE
