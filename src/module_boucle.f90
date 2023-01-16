@@ -19,7 +19,7 @@ USE MODULE_ECRITURE
 USE MODULE_SCHEMAS_T
 IMPLICIT NONE
 
-REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH   = 5.0E-3_xp   !! Fraction du pas de temps thermique
+REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH   = 5.0E-2_xp   !! Fraction du pas de temps thermique
 REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 5.0E-3_XP   !! Fraction du pas de temps visqueux
 
 INTEGER, PRIVATE :: NB_IT_TH    !! Nombre d'itérations réalisées dans le régime thermique
@@ -54,29 +54,36 @@ SUBROUTINE SCHEMA_TH_TIME()
     
     DO WHILE( MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH)
               
-              CALL ITERATION_TEMP_AD()   ! on appel le schéma de l'équation de T
-              CALL COMPUTE_EQS()         ! on calcul le reste des variables
-              
-              ! Affichage pour observer l'évolution du système ( q+-q- et m_dot)
-              IF (MODULO(I,50000)==1) THEN
-              WRITE (*,"('Q+-Q- = ',1pE12.4,'  ABS(M_DOT-1) = ',1pE12.4)")&
-              & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)), &
-              & ABS(MINVAL(M_DOT_AD-1.0_xp))
-              ENDIF
-              
-              TIME_AD = TIME_AD + DELTA_T_TH_AD
-              
-              ! Réécriture en dimensionné
-              CALL ADIM_TO_PHYSIQUE()
-              
-              CALL ECRITURE_DIM()
-              CALL ECRITURE_ADIM()
-              
-              I=I+1
+        CALL ITERATION_TEMP_AD()   ! on appel le schéma de l'équation de T
+        CALL COMPUTE_EQS()         ! on calcul le reste des variables
+        
+        ! Affichage pour observer l'évolution du système ( q+-q- et m_dot)
+        IF (MODULO(I,50000)==1) THEN
+            WRITE (*,"('Q+-Q- = ',1pE12.4,'  ABS(M_DOT-1) = ',1pE12.4)")&
+                & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)), &
+                & ABS(MINVAL(M_DOT_AD-1.0_xp))
+        ENDIF
+        
+        TIME_AD = TIME_AD + DELTA_T_TH_AD
+        
+        ! Réécriture en dimensionné
+        CALL ADIM_TO_PHYSIQUE()
+        
+        CALL ECRITURE_DIM()
+    !   CALL ECRITURE_ADIM()
+        
+        I=I+1
               
     ENDDO
     
     NB_IT_TH = I
+
+    ! Affichage des variables de sortie de boucle
+    PRINT*, NB_IT_TH
+    WRITE(*, "('Delta Temps thermique final = ',1pE12.4)") DELTA_T_TH_AD * I
+    WRITE(*,"('Q+ - Q- = ',1pe12.4,'           Temperature AD = ',1pE12.4)") &
+    & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) , &
+    & TEMP_AD(50)
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_TH_TIME
@@ -114,12 +121,12 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     DO WHILE(M_DOT_MIN>=0.01_xp)
             
             
-            WRITE(*,"(48('-'))")
-            WRITE(*,"(I0,'e iteration de temps thermique ')") ITE 
-            
-            CALL SCHEMA_TH_TIME()
-            
-            CALL SCHEMA_IMPLICITE_S(NU_AD)
+        WRITE(*,"(48('-'))")
+        WRITE(*,"(I0,'e iteration de temps thermique ')") ITE 
+        
+        CALL SCHEMA_TH_TIME()
+        
+        CALL SCHEMA_IMPLICITE_S(NU_AD)
 	    
 	    WRITE(*,"('S_AD(50) = ',1pE12.4)") S_AD(50)
 	     
@@ -129,7 +136,7 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
 	    
 	    ITE=ITE+1
             
-            M_DOT_MIN = ABS(MINVAL(M_DOT_AD-1.0_xp))
+        M_DOT_MIN = ABS(MINVAL(M_DOT_AD-1.0_xp))
             
     ENDDO
 
