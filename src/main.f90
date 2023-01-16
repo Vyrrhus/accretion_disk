@@ -12,6 +12,9 @@
               USE MODULE_SCHEMAS_SIGMA
               USE MODULE_SCHEMAS_T
               USE MODULE_BOUCLE
+              USE MODULE_DICHO
+              USE MODULE_FONCTIONS_UTILES
+              USE S_CURVE
               
               IMPLICIT NONE
               
@@ -21,6 +24,15 @@
               CALL APPEL_PARAM_INPUT()
               CALL CALCUL_CONSTANTES()
               CALL INIT_FILES()
+
+              !---------------------------------
+              !-- Calcul des courbes en S
+              !---------------------------------
+
+              IF (COURBE_EN_S == 1) THEN
+                 CALL S_curve(Temp_min_AD, Temp_max_AD, Sg_AD, Sd_AD, n_s)
+              ENDIF
+
               !---------------------------------
               !-- CONDITIONS INITIALES
               !---------------------------------
@@ -29,6 +41,7 @@
               TEMP_AD = TEMP_AD_INI
               S_AD = S_AD_INI
               
+              !---------------------------------
               !-- CALCUL L'ETAT DU DISQUE 
               !----------------------------------
               CALL COMPUTE_EQS()
@@ -36,6 +49,7 @@
               CALL ECRITURE_ADIM()
               CALL ECRITURE_DIM()
               
+              !----------------------------------
               !-- BOUCLES DE CALCULS
               !----------------------------------
               CALL SCHEMA_FIRST_BRANCH()
