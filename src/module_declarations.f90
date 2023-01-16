@@ -40,7 +40,7 @@ REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
 
 !! PARAMÈTRES SPATIAUX
-INTEGER,PARAMETER :: NX = 500       !! Nombre de points de discrétisation spatiale
+INTEGER,PARAMETER :: NX = 100       !! Nombre de points de discrétisation spatiale
 REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
 REAL(KIND=XP)     :: X_MIN           !! Rayon minimal adimensionné
 REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
@@ -138,6 +138,13 @@ REAL(KIND=XP) :: L_STEFAN         !! Luminosité
 REAL(KIND=XP) :: DELTA_T_VISQ
 !REAL(KIND=XP) :: DELTA_T_TH
 
+! VARIABLES COURBES EN S
+REAL(KIND=XP) :: TEMP_MIN_AD
+REAL(KIND=XP) :: TEMP_MAX_AD
+REAL(KIND=XP) :: SG_AD
+REAL(KIND=XP) :: SD_AD
+INTEGER :: N_S
+
 !===================================================================================================
             CONTAINS 
 !===================================================================================================
@@ -150,7 +157,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: FILE_ID
-    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC
+    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC,   TEMP_MIND_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
     MASS          = 1._xp        ! [M_{sol}]
@@ -159,6 +166,12 @@ SUBROUTINE APPEL_PARAM_INPUT()
     ALPHA         = 1._xp
     X_FRAC        = 0.7_xp
     Y_FRAC        = 0.28_xp
+    
+    TEMP_MIN_AD   = 5.0e-2_xp
+    TEMP_MAX_AD   = 5.0e1_xp
+    SG_AD         = 1.0_xp
+    SD_AD         = 1.0e6_xp
+    N_S           = 5000
 
     ! LECTURE DES PARAMETRES DEPUIS LE FICHIER
     OPEN(newunit=file_id,file='config/input.config',action='read',status='old')
