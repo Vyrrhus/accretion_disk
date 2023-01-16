@@ -11,6 +11,10 @@ from time import time
 import io
 
 #============================================================
+# FILENAME
+FILENAME = "data.out"
+
+#============================================================
 # MATPLOTLIB GLOBAL SETTINGS
 
 def init_plotting():
@@ -77,7 +81,7 @@ class SkipWrapper(io.TextIOWrapper):
 
 class DataHandler():
     @timer
-    def __init__(self, filename, scurve_filename="S_curve_data_epais_complete.csv"):
+    def __init__(self, filename, scurve_filename="results_epais.out"):
         """
             Extract data from an output file from file : [filename]
             -----------
@@ -155,12 +159,11 @@ class DataHandler():
 
 class DataScurve():
     def __init__(self, filename):
-        self.data = pd.read_csv(f"output/{filename}")
-        self.r = self.data["r"].unique()
+        self.data = pd.read_csv(f"output/{filename}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
     
-    def get(self, radius):
-        closest_value = min(self.r, key=lambda x:abs(x-radius))
-        scurve = self.data[self.data["r"] == closest_value]
+    def get(self, radius, radius_label):
+        closest_value = min(self.data[radius_label].unique(), key=lambda x:abs(x-radius))
+        scurve = self.data[self.data[radius_label] == closest_value]
 
         temp  = scurve["T"].to_numpy()
         sigma = scurve["Sigma"].to_numpy()
@@ -196,7 +199,7 @@ class FigureGUI():
         # Matplotlib embed
         self.figure = Figure(**fig_kw)
         self.ax     = self.figure.add_subplot()
-        line,       = self.ax.plot([], [])
+        line,       = self.ax.plot([], [], '.')
         self.line   = line
 
         self.canvas = FigureCanvasTkAgg(self.figure, self.root)
@@ -375,7 +378,7 @@ class FigureGUI():
         # S-curve
         if self.xlabel == "SIGMA" and self.ylabel == "TEMP":
             radius = self.data.space[self.spaceIdx]
-            temp, sigma = self.data.scurve.get(radius)
+            temp, sigma = self.data.scurve.get(radius, self.data.space_label)
             try:
                 self.scurve_line.set_data(sigma*10, temp)
             except:
@@ -397,7 +400,7 @@ class FigureGUI():
 # MAIN PROGRAM
 
 # Récupérer le fichier de sortie
-data = DataHandler("data.out")
+data = DataHandler(FILENAME)
 
 # Numpy array :
 data.space # array spatial

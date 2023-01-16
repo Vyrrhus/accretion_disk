@@ -71,7 +71,7 @@ SUBROUTINE INIT_FILES()
         PRECISION             = parse_int(LINE, "prec", PRECISION)
         
         ! Condition de calcul des courbes en S
-        COURBE_EN_S = parse_int(LINE, "s_curve", COURBE_EN_S)
+        COURBE_EN_S = parse_int(LINE, "COURBE_EN_S", COURBE_EN_S)
         
         ! Ajout du header au fichier de sortie
         IF (HEADER) THEN
