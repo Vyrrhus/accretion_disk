@@ -14,7 +14,7 @@
               USE MODULE_BOUCLE
               USE MODULE_DICHO
               USE MODULE_FONCTIONS_UTILES
-              USE S_CURVE
+              USE MODULE_S_CURVE
               
               IMPLICIT NONE
               
