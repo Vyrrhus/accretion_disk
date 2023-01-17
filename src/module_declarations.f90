@@ -140,6 +140,7 @@ REAL(KIND=XP) :: TEMP_MAX_AD
 REAL(KIND=XP) :: SG_AD
 REAL(KIND=XP) :: SD_AD
 INTEGER :: N_S
+INTEGER :: COURBE_EN_S
 
 !===================================================================================================
             CONTAINS 
@@ -153,15 +154,17 @@ SUBROUTINE APPEL_PARAM_INPUT()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: FILE_ID
-    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC,  TEMP_MIN_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S,   TEMP_AD,S_AD
+    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC, COURBE_EN_S, TEMP_MIN_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
-    MASS          = 1._xp        ! [M_{sol}]
+    MASS          = 1._xp      ! [M_{sol}]
     f_accretion   = 0.001_xp
     r_max         = 100._xp    ! [r_{Schwarzschild}]
     ALPHA         = 1._xp
     X_FRAC        = 0.7_xp
     Y_FRAC        = 0.28_xp
+
+    COURBE_EN_S   = 1
     
     TEMP_MIN_AD   = 5.0e-2_xp
     TEMP_MAX_AD   = 5.0e1_xp

@@ -80,19 +80,29 @@ SUBROUTINE REPRISE_CONDITIONS_INITIALES()
         WRITE(FMT, "('(A11,X,', I0, '(1pE', I0, '.', I0, ',2X))')") NX / PAS_ECRITURE_SPATIAL+1, PRECISION + 7, PRECISION
     ENDIF
 
-    OPEN(NEWUNIT=INPUT_UNT, file="output/conditions_initiales.in", ACTION="read", STATUS="old")
-    READ(INPUT_UNT, FMT, iostat=IOS) HEADER, S_INI
-    READ(INPUT_UNT, FMT, iostat=IOS) HEADER, TEMP_INI
-    CLOSE(INPUT_UNT)
+    OPEN(NEWUNIT=INPUT_UNT, file="config/conditions_initiales.config", ACTION="read", STATUS="old", IOSTAT=IOS)
+    IF (IOS /= 0) THEN
+        PRINT*, "==========================================================="
+        PRINT*, "Erreur lecture fichier : config/conditions_initiales.config"
+        PRINT*, "Initialisation des conditions initiales"
 
-    ! Variables adimensionnées
-    CALL ADIM_TO_PHYSIQUE()
-    TEMP = TEMP_INI
-    SIGMA = S_INI
-    CALL PHYSIQUE_TO_ADIM()
-    CALL COMPUTE_EQS()
-    CALL ADIM_TO_PHYSIQUE()
-    CALL ECRITURE_DIM()
+        CALL CREATION_CONDITIONS_INITIALES()
+    
+    ELSE
+        READ(INPUT_UNT, FMT, IOSTAT=IOS) HEADER, S_INI
+        READ(INPUT_UNT, FMT, IOSTAT=IOS) HEADER, TEMP_INI
+        CLOSE(INPUT_UNT)
+
+        ! Variables adimensionnées
+        CALL ADIM_TO_PHYSIQUE()
+        TEMP = TEMP_INI
+        SIGMA = S_INI
+        CALL PHYSIQUE_TO_ADIM()
+        CALL COMPUTE_EQS()
+        CALL ADIM_TO_PHYSIQUE()
+        CALL ECRITURE_DIM()
+
+    ENDIF
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE REPRISE_CONDITIONS_INITIALES
