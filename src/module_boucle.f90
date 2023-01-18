@@ -64,13 +64,7 @@ SUBROUTINE SCHEMA_TH_TIME()
                 & ABS(MINVAL(M_DOT_AD-1.0_xp))
         ENDIF
         
-        TIME_AD = TIME_AD + DELTA_T_TH_AD
-        
-        ! Réécriture en dimensionné
-        CALL ADIM_TO_PHYSIQUE()
-        
-        CALL ECRITURE_DIM()
-    !   CALL ECRITURE_ADIM()
+        TIME_AD = TIME_AD + DELTA_T_TH_A
         
         I=I+1
               
@@ -124,8 +118,16 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         WRITE(*,"(48('-'))")
         WRITE(*,"(I0,'e iteration de temps thermique ')") ITE 
         
+        ! Ecriture avant itérations du schéma numérique thermique
+        CALL ADIM_TO_PHYSIQUE()
+        CALL ECRITURE_DIM()
+
         CALL SCHEMA_TH_TIME()
-        
+
+        ! Ecriture après itérations
+        CALL ADIM_TO_PHYSIQUE()
+        CALL ECRITURE_DIM()
+
         CALL SCHEMA_IMPLICITE_S(NU_AD)
 	    
 	    WRITE(*,"('S_AD(50) = ',1pE12.4)") S_AD(50)
@@ -139,6 +141,10 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         M_DOT_MIN = ABS(MINVAL(M_DOT_AD-1.0_xp))
             
     ENDDO
+
+    ! Ecriture pas final
+    CALL ADIM_TO_PHYSIQUE()
+    CALL ECRITURE_DIM()
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_FIRST_BRANCH

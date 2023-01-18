@@ -52,8 +52,6 @@ SUBROUTINE CREATION_CONDITIONS_INITIALES()
     TEMP_AD = TEMP_AD_INI
     S_AD = S_AD_INI
     CALL COMPUTE_EQS()
-    CALL ADIM_TO_PHYSIQUE()
-    CALL ECRITURE_DIM()
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE CREATION_CONDITIONS_INITIALES
@@ -99,8 +97,6 @@ SUBROUTINE REPRISE_CONDITIONS_INITIALES()
         SIGMA = S_INI
         CALL PHYSIQUE_TO_ADIM()
         CALL COMPUTE_EQS()
-        CALL ADIM_TO_PHYSIQUE()
-        CALL ECRITURE_DIM()
 
     ENDIF
 

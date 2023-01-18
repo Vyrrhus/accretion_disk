@@ -10,13 +10,13 @@
 USE MODULE_DECLARATIONS
 IMPLICIT NONE
 
-INTEGER, PRIVATE :: UNT,UNT_AD
 INTEGER :: PAS_ECRITURE_SPATIAL
-INTEGER, PRIVATE :: PAS_ECRITURE_TEMPOREL
+INTEGER :: PAS_ECRITURE_TEMPOREL
+
+INTEGER, PRIVATE :: UNT,UNT_AD
 INTEGER, PRIVATE :: PRECISION
 
 CHARACTER(LEN=30), PRIVATE :: FMT, FMT_SINGLE_VALUE
-INTEGER, PRIVATE :: COUNT,COUNT_AD
 
 INTEGER,PARAMETER, PRIVATE :: NB_VARIABLES = 21
 INTEGER, PRIVATE :: LIST(NB_VARIABLES)
@@ -111,10 +111,6 @@ SUBROUTINE INIT_FILES()
 
     WRITE(FMT_SINGLE_VALUE, "('(A,X,(1pE', I0, '.', I0, ',2X))')") PRECISION + 7, PRECISION
 
-    ! Initialisation compteur de pas de temps
-    COUNT = -1
-    COUNT_AD = -1
-    
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE INIT_FILES
 !---------------------------------------------------------------------------------------------------
@@ -132,9 +128,6 @@ SUBROUTINE ECRITURE_ADIM()
     IMPLICIT NONE
      
     ! TEMPS
-    COUNT_AD = COUNT_AD + 1
-    !print*,count
-    IF (MODULO(COUNT_AD, PAS_ECRITURE_TEMPOREL) /= 0) RETURN
     WRITE(UNT_AD, "('T          ',1PE11.4)") TIME_AD
 
     IF(MODULO(NX-1,PAS_ECRITURE_SPATIAL) == 0) THEN
@@ -192,7 +185,6 @@ SUBROUTINE ECRITURE_ADIM()
         ! IF (LIST(21)==1) WRITE(UNT_AD, FMT_SINGLE_VALUE) "LSTEFAN_AD", L_STEFAN_AD       
     ENDIF
     WRITE(UNT_AD,*)
-    COUNT_AD=0
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE ECRITURE_ADIM
@@ -211,8 +203,6 @@ SUBROUTINE ECRITURE_DIM()
     IMPLICIT NONE
 
     ! TEMPS
-    COUNT = COUNT + 1
-    IF (MODULO(COUNT, PAS_ECRITURE_TEMPOREL) /= 0) RETURN
     WRITE(UNT, "('T          ',1PE11.4)") TIME
     
     IF(MODULO(NX-1,PAS_ECRITURE_SPATIAL) == 0) THEN
@@ -272,7 +262,6 @@ SUBROUTINE ECRITURE_DIM()
     
     ENDIF
     WRITE(UNT,*)
-    COUNT=0
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE ECRITURE_DIM
