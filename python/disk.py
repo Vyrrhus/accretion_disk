@@ -38,6 +38,7 @@ def init_plotting():
     plt.rcParams['legend.frameon'] = True
     plt.rcParams['legend.loc'] = 'upper right'
     plt.rcParams['axes.linewidth'] = 1
+    plt.rcParams['lines.markersize'] = 5
 
     # plt.gca().spines['right'].set_color('none')
     # plt.gca().spines['top'].set_color('none')
@@ -59,6 +60,18 @@ def timer(func):
 
 #============================================================
 # CLASS
+
+class DataScurve():
+    def __init__(self, filename):
+        self.data = pd.read_csv(f"output/{filename}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
+    
+    def get(self, radius, radius_label):
+        closest_value = min(self.data[radius_label].unique(), key=lambda x:abs(x-radius))
+        scurve = self.data[self.data[radius_label] == closest_value]
+
+        temp  = scurve["T"].to_numpy()
+        sigma = scurve["Sigma"].to_numpy()
+        return temp, sigma
 
 class SkipWrapper(io.TextIOWrapper):
     """ io.TextIOWrapper pour skip les premières lignes des fichiers .out jusqu'à match:
@@ -153,21 +166,28 @@ class DataHandler():
 
         return array[time_idx, space_idx]
 
-    def plot(self, **fig_kw):
+    def plot(self, radius=None, time_min=None, time_max=None, **fig_kw):
+        """ Plot toutes les données.
+            Si radius est indiqué, on limite les données au rayon considéré en fixant le rayon le plus proche de [radius]
+        """
+        if radius:
+            closest_radius = min(np.unique(self.space), key=lambda x:abs(x-radius))
+            self.space = np.array([closest_radius])
+            self.df = self.df.loc[:,:,closest_radius]
+            print(f"Données restreintes à {self.space_label} = {closest_radius}")
+
+        if not time_min or time_min <= self.time[0]:  idx_min = 0
+        else:                                         idx_min = np.arange(self.time.shape[0])[self.time > time_min][0]
+        if not time_max or time_max >= self.time[-1]: idx_max = -1
+        else:                                         idx_max = np.arange(self.time.shape[0])[self.time < time_max][-1]
+        
+        if time_min or time_max:
+            self.time = self.time[idx_min:idx_max]
+            self.df = self.df.loc[self.time[0]:self.time[-1],:,:]
+            print(f"Données restreintes à [{self.time[0]} ; {self.time[-1]}]")
+        
         GUI = FigureGUI(self, **fig_kw)
         GUI.start()
-
-class DataScurve():
-    def __init__(self, filename):
-        self.data = pd.read_csv(f"output/{filename}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
-    
-    def get(self, radius, radius_label):
-        closest_value = min(self.data[radius_label].unique(), key=lambda x:abs(x-radius))
-        scurve = self.data[self.data[radius_label] == closest_value]
-
-        temp  = scurve["T"].to_numpy()
-        sigma = scurve["Sigma"].to_numpy()
-        return temp, sigma
 
 class FigureGUI():
     # INIT
@@ -199,12 +219,11 @@ class FigureGUI():
         # Matplotlib embed
         self.figure = Figure(**fig_kw)
         self.ax     = self.figure.add_subplot()
-        line,       = self.ax.plot([], [], '.')
+        line,       = self.ax.plot([], [], '.-')
         self.line   = line
 
         self.canvas = FigureCanvasTkAgg(self.figure, self.root)
         NavigationToolbar2Tk(self.canvas, self.root)
-        line.set_data([i for i in range(10)], [np.sin(i) for i in range(10)])
         self.canvas.get_tk_widget().pack(fill=tkinter.BOTH, expand=True)
 
         # Toolbar > Y-axis
@@ -232,6 +251,8 @@ class FigureGUI():
         self.XaxisMenu.current(0)
         self.XaxisMenu.grid(row=0, column=3, sticky=tkinter.W, padx=5, pady=5)
         self.XaxisMenu.bind("<<ComboboxSelected>>", self.event_xaxis)
+        if self.data.space.shape[0] <= 1:
+            self.XaxisMenu.configure(values=(self.data.time_label,)+tuple(self.data.var))
 
         # Toolbar > Sliders
         self.TimeFrame  = ttk.Frame(self.toolbar)
@@ -245,8 +266,9 @@ class FigureGUI():
             variable=self.TimeValue,
             command=self.event_timeSlider
         )
-        self.TimeLabel.pack(side=tkinter.LEFT, padx=5, pady=5)
-        self.TimeSlider.pack(side=tkinter.LEFT, padx=20, pady=5, expand=True, fill=tkinter.X)
+        if self.data.time.shape[0] > 1:
+            self.TimeLabel.pack(side=tkinter.LEFT, padx=5, pady=5)
+            self.TimeSlider.pack(side=tkinter.LEFT, padx=20, pady=5, expand=True, fill=tkinter.X)
 
         self.SpaceFrame  = ttk.Frame(self.toolbar)
         self.SpaceFrame.grid(row=1, column=0, columnspan=4, sticky=tkinter.NSEW)
@@ -268,9 +290,10 @@ class FigureGUI():
         #     wrap=False,
         #     values=tuple(self.data.space)
         # )
-        self.SpaceLabel.pack(side=tkinter.LEFT, padx=5, pady=5)
-        # self.SpaceSpinbox.pack(side=tkinter.LEFT, padx=5, pady=5)
-        self.SpaceSlider.pack(side=tkinter.LEFT, padx=20, pady=5, expand=True, fill=tkinter.X)
+        if self.data.space.shape[0] > 1:
+            self.SpaceLabel.pack(side=tkinter.LEFT, padx=5, pady=5)
+            # self.SpaceSpinbox.pack(side=tkinter.LEFT, padx=5, pady=5)
+            self.SpaceSlider.pack(side=tkinter.LEFT, padx=20, pady=5, expand=True, fill=tkinter.X)
 
         # Configure style
         self.style = ttk.Style(self.root)
@@ -286,35 +309,60 @@ class FigureGUI():
         self.xlabel = self.XaxisOptions.get()
         self.ax.set_xlabel(self.xlabel)
 
-        # Switch vers Y(spatial)
+        # Switch Slider (spatial => temporel)
         if self.xlabel == self.data.space_label and previous_xlabel != self.data.space_label:
             self.TimeFrame.tkraise()
             self.spaceIdx = None
             self.timeIdx = 0
+            self.set_values()
         
-        # Switch depuis Y(spatial)
+        # Switch Slider (temporel => spatial)
         elif self.xlabel != self.data.space_label and previous_xlabel == self.data.space_label:
             self.SpaceFrame.tkraise()
             self.timeIdx = None
             self.spaceIdx = 0
+            self.set_values()
+        
+        # No switch
+        else:
+            self.set_values(which="X")
 
+        self.relim()
         self.update()
 
     def event_yaxis(self, event):
         self.YaxisMenu.selection_clear()
         self.ylabel = self.YaxisOptions.get()
         self.ax.set_ylabel(self.ylabel)
+        
+        self.set_values(which="Y")
+        self.relim()
         self.update()
 
     def event_timeSlider(self, event):
         self.timeIdx = self.TimeValue.get()
         self.TimeLabel.config(text=f"{self.data.time_label} = {self.data.time[self.timeIdx]:.4f}")
+
+        self.set_values()
         self.update()
 
     def event_spaceSlider(self, event):
         self.spaceIdx = self.SpaceValue.get()
         self.SpaceLabel.config(text=f"{self.data.space_label} = {self.data.space[self.spaceIdx]:.4f}")
+
+        self.set_values()
         self.update()
+
+    def set_values(self, which="BOTH"):
+        # Set X value
+        if which in ["BOTH", "X"]:
+            if self.xlabel == self.data.space_label:  self.x = self.data.space
+            elif self.xlabel == self.data.time_label: self.x = self.data.time
+            else:                                     self.x = self.data.get(self.xlabel, space_idx=self.spaceIdx, time_idx=self.timeIdx)
+        
+        # Set Y value
+        if which in ["BOTH", "Y"]:
+            self.y = self.data.get(self.ylabel, space_idx=self.spaceIdx, time_idx=self.timeIdx)
 
     def relim(self):
         # Limits
@@ -323,10 +371,6 @@ class FigureGUI():
         else:
             x_array = self.data.get(self.xlabel)
         y_array = self.data.get(self.ylabel)
-
-        # self.line.set_data([np.nanmin(x_array), np.nanmax(x_array)], [np.nanmin(y_array), np.nanmax(y_array)])
-        # self.ax.relim()
-        # self.ax.autoscale_view()
 
         xlims = [np.nanmin(x_array), np.nanmax(x_array)]
         ylims = [np.nanmin(y_array), np.nanmax(y_array)]
@@ -337,21 +381,7 @@ class FigureGUI():
 
     def update(self):
         """ Mise à jour du plot """
-        # X value
-        if self.xlabel == self.data.time_label:
-            self.x = self.data.time
-
-        elif self.xlabel == self.data.space_label:
-            self.x = self.data.space
-
-        else:
-            self.x = self.data.get(self.xlabel, space_idx=self.spaceIdx, time_idx=self.timeIdx)
-        
-        # Y value
-        self.y = self.data.get(self.ylabel, space_idx=self.spaceIdx, time_idx=self.timeIdx)
-
         # Data
-        self.relim()
         self.line.set_data(self.x, self.y)
 
         # Title
@@ -369,6 +399,8 @@ class FigureGUI():
         self.canvas.draw()
 
     def start(self):
+        self.set_values()
+        self.relim()
         self.update()
         self.ax.set_xlabel(self.xlabel)
         self.ax.set_ylabel(self.ylabel)
@@ -428,3 +460,11 @@ data.time  # array du temps
 # Plot les données
 init_plotting()
 data.plot()
+
+"""
+    data.plot() => lance matplotlib
+    options:
+    - radius=xxx   : limiter les données au rayon indiqué (pas besoin d'être précis sur la valeur tant qu'on est proche)
+    - time_min=xxx : on élimine les données telles qu'on n'aura plus que TIME > time_min
+    - time_max=xxx : on élimine les données telles qu'on n'aura plus que TIME > time_max
+"""
