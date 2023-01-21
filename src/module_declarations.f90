@@ -142,6 +142,9 @@ REAL(KIND=XP) :: SD_AD
 INTEGER :: N_S
 INTEGER :: COURBE_EN_S
 
+! frame 2D
+INTEGER :: FRAME_COND
+
 !===================================================================================================
             CONTAINS 
 !===================================================================================================
@@ -154,7 +157,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: FILE_ID
-    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC, COURBE_EN_S, TEMP_MIN_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S
+    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC, COURBE_EN_S, TEMP_MIN_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S, FRAME_COND
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
     MASS          = 1._xp      ! [M_{sol}]
@@ -171,6 +174,8 @@ SUBROUTINE APPEL_PARAM_INPUT()
     SG_AD         = 1.0_xp
     SD_AD         = 1.0e6_xp
     N_S           = 5000
+    
+    FRAME_COND = 0
 
     ! LECTURE DES PARAMETRES DEPUIS LE FICHIER
     OPEN(newunit=file_id,file='config/input.config',action='read',status='old')
@@ -184,7 +189,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     WRITE(*,"('------------VALEURS PARAMETRES EN INPUT---------')")
     WRITE(*,"(48('-'))")
     WRITE(*,"('MASSE DU TROU NOIR [MASSE SOLAIRE]             = ',F12.1)") MASS
-    WRITE(*,"('RAPPORT TAUX D ACCRETION / TAUX CRITIQUE       = ',F12.3)") f_accretion  
+    WRITE(*,"('RAPPORT TAUX D ACCRETION / TAUX CRITIQUE       = ',F12.5)") f_accretion  
     WRITE(*,"('R_MAX [RAYON DE SCHWARZSCHILD]                 = ',F12.1)") r_max
     WRITE(*,"('ALPHA                                          = ',F12.2)") ALPHA
     WRITE(*,"('X                                              = ',F12.2)") X_FRAC

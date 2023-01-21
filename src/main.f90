@@ -36,12 +36,12 @@ ENDIF
 !-- CONDITIONS INITIALES
 !---------------------------------
 CALL CREATION_CONDITIONS_INITIALES()
-! CALL REPRISE_CONDITIONS_INITIALES()
+!CALL REPRISE_CONDITIONS_INITIALES()
 
 !----------------------------------
 !-- BOUCLES DE CALCULS
 !----------------------------------
-! CALL SCHEMA_FIRST_BRANCH()
+CALL SCHEMA_FIRST_BRANCH()
 CALL CLOSE_OUTPUT()
 			
 !========================================================================

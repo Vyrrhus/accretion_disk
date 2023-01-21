@@ -28,6 +28,54 @@ INTEGER, PRIVATE :: NB_IT_TH    !! Nombre d'itérations réalisées dans le rég
             CONTAINS    
 !===================================================================================================
 
+!---------------------------------------------------------------------------------------------------
+! subroutine qui permet d'écrire un array 2D qui contient l'image 2D, cette subroutine est appelée en mettant frame_cond = 1 en input.config
+!---------------------------------------------------------------------------------------------------
+SUBROUTINE CREER_FRAME(VAR,INDEX)
+
+	IMPLICIT NONE
+	INTEGER, INTENT(IN) :: INDEX
+	REAL(KIND=XP),INTENT(IN),DIMENSION(NX) :: VAR
+	INTEGER,PARAMETER :: SIZE = 2*NX
+	INTEGER :: CENTER,I,J,IND,UNTY
+	REAL(KIND=XP),DIMENSION(SIZE,SIZE) :: IMG 
+	CHARACTER(LEN=1024) :: FRAME_NAME
+	CHARACTER(LEN=1024) :: NUMB
+	REAL(KIND=XP):: NAN_VALUE 
+	
+	NAN_VALUE = 0.0
+	NAN_VALUE = 0.0/NAN_VALUE
+	11 FORMAT(I0)
+	WRITE(NUMB,11) INDEX
+	FRAME_NAME = 'frame_'//TRIM(NUMB)//'.out'
+        
+        
+        CENTER = SIZE/2
+        DO I=1,SIZE
+                 DO J=1,SIZE
+                 
+                          IND = (ABS(I-CENTER)**2+ABS(J-CENTER)**2)**0.5
+                          IF (IND<SIZE/2) THEN
+                          		IMG(I,J) = VAR(IND)
+                          ELSE 
+                          
+                          IMG(I,J) = NAN_VALUE
+                          
+                          ENDIF
+                 ENDDO
+        ENDDO
+        
+        OPEN(UNIT=UNTY,FILE="frame_array/"//TRIM(ADJUSTL(FRAME_NAME)),ACTION='WRITE')
+        DO I=1,SIZE
+        WRITE(UNTY,"(200(1pE12.4, 2X))") IMG(I,:)
+        ENDDO
+        
+        CLOSE(UNTY)
+
+END SUBROUTINE CREER_FRAME
+!---------------------------------------------------------------------------------------------------
+
+!---------------------------------------------------------------------------------------------------
 SUBROUTINE SCHEMA_TH_TIME()
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine itère depuis une température et densité de surface initiale jusqu'à converger 
@@ -64,7 +112,7 @@ SUBROUTINE SCHEMA_TH_TIME()
                 & ABS(MINVAL(M_DOT_AD-1.0_xp))
         ENDIF
         
-        TIME_AD = TIME_AD + DELTA_T_TH_A
+        TIME_AD = TIME_AD + DELTA_T_TH_AD
         
         I=I+1
               
@@ -82,7 +130,7 @@ SUBROUTINE SCHEMA_TH_TIME()
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_TH_TIME
 !---------------------------------------------------------------------------------------------------
-
+!---------------------------------------------------------------------------------------------------
 SUBROUTINE SCHEMA_FIRST_BRANCH()
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine itère depuis une température et densité de surface initiale jusqu'à converger
@@ -112,6 +160,7 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     
     ! lancement boucle pour arriver à m_dot = 1
     ITE=1
+    I = 0
     DO WHILE(M_DOT_MIN>=0.01_xp)
             
             
@@ -121,12 +170,24 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         ! Ecriture avant itérations du schéma numérique thermique
         CALL ADIM_TO_PHYSIQUE()
         CALL ECRITURE_DIM()
-
+        I = I+1
+        
+        !ecriture frame
+        IF (FRAME_COND==1)THEN
+        CALL CREER_FRAME(TEMP,I)
+        ENDIF
+        
         CALL SCHEMA_TH_TIME()
 
         ! Ecriture après itérations
         CALL ADIM_TO_PHYSIQUE()
         CALL ECRITURE_DIM()
+        
+        I=I+1
+        !ecriture frame
+        IF (FRAME_COND==1)THEN
+        CALL CREER_FRAME(TEMP,I)
+        ENDIF
 
         CALL SCHEMA_IMPLICITE_S(NU_AD)
 	    
@@ -145,6 +206,11 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     ! Ecriture pas final
     CALL ADIM_TO_PHYSIQUE()
     CALL ECRITURE_DIM()
+    I=I+1
+    ! ecriture frame
+    IF (FRAME_COND==1) THEN
+    CALL CREER_FRAME(TEMP,I)
+    ENDIF
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_FIRST_BRANCH
