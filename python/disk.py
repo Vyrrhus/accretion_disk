@@ -439,8 +439,6 @@ data = DataHandler(FILENAME)
 data.space # array spatial
 data.time  # array du temps
 
-print(type(data.time[0]))
-
 """
     data.time  => np.array 1D : valeurs temporelles
     data.space => np.array 1D: valeurs spatiales
