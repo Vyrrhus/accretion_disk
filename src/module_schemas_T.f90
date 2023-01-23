@@ -45,37 +45,43 @@
 
     END SUBROUTINE ITERATION_TEMP_AD
 
-    SUBROUTINE ITERATION_TEMP_SIGMA_AD_ADVECTION()
+    SUBROUTINE COMPUTE_Q_ADV_AD(DT, S_AD_SAVE)
     !---------------------------------------------------------------------------------------------------
-    !>    Cette routine itère sur un pas de temps thermique le tableau de température adimensionné TEMP_AD
-    !>    en prenant en compte le therme d'advection, ansi 
-    !---------------------------------------------------------------------------------------------------      
+    !>    Cette routine calcul Q_ADV_AD à partir de l'ancienne valeur S_AD stocké dans S_AD_SAVE, 
+    !>    représentant le tableau S_AD au pas de temps DT antérieur. 
+    !---------------------------------------------------------------------------------------------------  
         IMPLICIT NONE
-
-        REAL(kind=xp), dimension(NX)                     :: DTEMP_AD_DT
+        REAL(kind=xp),                intent(in)         :: DT
+        REAL(kind=xp), dimension(NX), intent(in)         :: S_AD_SAVE
         REAL(kind=xp), dimension(NX)                     :: GAMMA_3
         REAL(kind=xp), dimension(NX)                     :: DS_AD_DT
         REAL(kind=xp), dimension(NX)                     :: DS_AD_DX
         REAL(kind=xp), dimension(NX)                     :: DTEMP_AD_DX
-        REAL(kind=xp), dimension(NX)                     :: S_AD_SAVE
 
         INTEGER                                          :: i
-
-        !Evolution sur un pas de temps pour S_AD
-        S_AD_SAVE = S_AD
-        CALL SCHEMA_IMPLICITE_S(NU_AD)
 
         !Calcul de Gamma_3
         GAMMA_3 = 1 + (4-3*BETA)/(BETA*C_V_0)
 
         !Dérivée temporelle de S_AD
-        DS_AD_DT = (S_AD-S_AD_SAVE)/DELTA_T_AD
+        DS_AD_DT = (S_AD-S_AD_SAVE)/DT
 
         !Dérivée spatiale de S_AD
-        DO i = 2, NX
-            DS_AD_DX(i) = (S_AD(i)-S_AD(i-1))/DX
+        DO i = 2, NX-1
+            IF(SPEED_AD(i)<=0) THEN
+                DS_AD_DX(i) = (S_AD(i+1)-S_AD(i))/DX
+            ELSE 
+                DS_AD_DX(i) = (S_AD(i)-S_AD(i-1))/DX
+            END IF
         END DO
-        DS_AD_DX(1)  = S_AD(1)/DX
+
+        IF(SPEED_AD(1)<=0) THEN
+            DS_AD_DX(1)  = (S_AD(2)-S_AD(1))/DX
+        ELSE 
+            DS_AD_DX(1)  = (S_AD(1))/DX
+        END IF
+
+        DS_AD_DX(NX) = S_AD(NX)-S_AD(NX-1)/DX
 
         !Dérivée spatiale de TEMP_AD
         DO i = 2, NX-1
@@ -92,7 +98,26 @@
         Q_ADV_AD = C_V_AD*((GAMMA_3-1) * TEMP_AD/S_AD *&
         & (DS_AD_DT + SPEED_AD/(2*X_AD)*DS_AD_DX - SPEED_AD/(2*X_AD**2)*S_AD)  &
         & - SPEED_AD/(2*X_AD)*DTEMP_AD_DX)
+
+        END SUBROUTINE
+
+
+    SUBROUTINE ITERATION_TEMP_SIGMA_AD_ADVECTION()
+    !---------------------------------------------------------------------------------------------------
+    !>    Cette routine itère sur un pas de temps thermique le tableau de température adimensionné TEMP_AD
+    !>    en prenant en compte le therme d'advection.
+    !---------------------------------------------------------------------------------------------------      
+        IMPLICIT NONE
+
+        REAL(kind=xp), dimension(NX)                     :: DTEMP_AD_DT
+        REAL(kind=xp), dimension(NX)                     :: S_AD_SAVE
+
+        !Evolution sur un pas de temps pour S_AD
+        S_AD_SAVE = S_AD
+        CALL SCHEMA_IMPLICITE_S(NU_AD)
+        CALL COMPUTE_Q_ADV_AD(DELTA_T_AD, S_AD_SAVE)
         
+
         !Calculs de la dérivée temporelle de TEMP_ADV
         DTEMP_AD_DT = MU/(R_BOLTZ*OMEGA_MAX*TEMP_0*C_V_AD) &
         &* (Q_PLUS_0*Q_PLUS_AD - Q_PLUS_0*Q_MOINS_AD + Q_ADV_0*Q_ADV_AD)
