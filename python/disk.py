@@ -433,7 +433,7 @@ class FigureGUI():
 # MAIN PROGRAM
 
 # Récupérer le fichier de sortie
-data = DataHandler('data_ad.out')
+data = DataHandler(FILENAME)
 
 # Numpy array :
 data.space # array spatial
