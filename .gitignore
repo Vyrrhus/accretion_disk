@@ -17,3 +17,9 @@ cleanup
 
 # Folders
 doc/
+python/disk.py
+test.py
+.bashrc
+3d.py
+anim.mp4
+python/__pycache__/disk.cpython-310.pyc
