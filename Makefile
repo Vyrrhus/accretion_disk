@@ -2,9 +2,9 @@
 #	COMPILER
 ################
 F90	   := gfortran
-FFLAGS := -g -O2 -fno-second-underscore -falign-loops=16 -fno-ipa-cp-clone
+#FFLAGS := -g -O2 -fno-second-underscore -falign-loops=16 -fno-ipa-cp-clone
 #FFLAGS := -g -Og -fno-second-underscore -Wall -Wextra -Wno-compare-reals -fcheck=all -fimplicit-none -std=f2008 -pedantic -ffpe-trap=invalid,zero,overflow -fbacktrace -fall-intrinsics -Wno-unused-function -fdump-core -ggdb -finit-real=nan -finit-logical=false -finit-integer=999999 -finit-derived
-#FFLAGS :=-g -Og -fno-second-underscore -Wall -Wextra -Wno-compare-reals -fcheck=all -fimplicit-none -std=f2008 -pedantic -ffpe-trap=invalid,zero,overflow -fbacktrace -fall-intrinsics -Wno-unused-function -fdump-core -ggdb -Wuninitialized
+FFLAGS :=-g -Og -fno-second-underscore -Wall -Wextra -Wno-compare-reals -fcheck=all -fimplicit-none -std=f2008 -pedantic -ffpe-trap=invalid,zero,overflow -fbacktrace -fall-intrinsics -Wno-unused-function -fdump-core -ggdb -Wuninitialized
 LIB  = -llapack -lblas -lpthread
 
 # DIRECTORIES
@@ -22,6 +22,7 @@ MODULE_SRC 	:= 	module_declarations.f90 \
 				module_schemas_sigma.f90 \
 				module_schemas_T.f90 \
 				module_s_curve.f90 \
+				module_schemas_instabilite.f90\
 				module_boucle.f90
 
 MAIN_SRC 	:= main.f90
