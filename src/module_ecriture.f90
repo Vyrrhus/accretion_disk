@@ -104,12 +104,12 @@ SUBROUTINE INIT_FILES()
 
     ! Formats
     IF (MODULO(NX,PAS_ECRITURE_SPATIAL) == 1) THEN
-        WRITE(FMT, "('(A,X,', I0, '(1pE', I0, '.', I0, ',2X))')") NX / PAS_ECRITURE_SPATIAL, PRECISION + 7, PRECISION
+        WRITE(FMT, "('(A,X,', I0, '(1pE', I0, '.', I0, 'E3,2X))')") NX / PAS_ECRITURE_SPATIAL, PRECISION + 8, PRECISION
     ELSE
-        WRITE(FMT, "('(A,X,', I0, '(1pE', I0, '.', I0, ',2X))')") NX / PAS_ECRITURE_SPATIAL+1, PRECISION + 7, PRECISION
+        WRITE(FMT, "('(A,X,', I0, '(1pE', I0, '.', I0, 'E3,2X))')") NX / PAS_ECRITURE_SPATIAL+1, PRECISION + 8, PRECISION
     ENDIF
 
-    WRITE(FMT_SINGLE_VALUE, "('(A,X,(1pE', I0, '.', I0, ',2X))')") PRECISION + 7, PRECISION
+    WRITE(FMT_SINGLE_VALUE, "('(A,X,(1pE', I0, '.', I0, 'E3,2X))')") PRECISION + 8, PRECISION
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE INIT_FILES
