@@ -19,8 +19,8 @@ USE MODULE_ECRITURE
 USE MODULE_SCHEMAS_T
 IMPLICIT NONE
 
-REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH   = 5.0E-2_xp   !! Fraction du pas de temps thermique
-REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 5.0E-4_XP   !! Fraction du pas de temps visqueux
+REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH   = 1.0E-2_xp   !! Fraction du pas de temps thermique
+REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 5.0E-5_XP   !! Fraction du pas de temps visqueux
 
 INTEGER, PRIVATE :: NB_IT_TH    !! Nombre d'itérations réalisées dans le régime thermique
 
@@ -142,6 +142,7 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
      
     INTEGER :: ITE,I
     REAL(KIND=XP) :: M_DOT_MIN
+    REAL(KIND=XP) :: S_SAVE(NX)
     
     DELTA_T_VISQ = FRACTION_DT_VISQ * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
     
@@ -190,10 +191,14 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         ENDIF
 
         CALL SCHEMA_IMPLICITE_S(NU_AD)
+        
+        
 	    
 	    WRITE(*,"('S_AD(50) = ',1pE12.4)") S_AD(50)
 	     
 	    CALL COMPUTE_EQS()
+	    S_SAVE = S_AD
+	    CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ,S_SAVE)
 	    
 	    TIME_AD = TIME_AD + DELTA_T_VISQ - NB_IT_TH * DELTA_T_TH_AD
 	    
