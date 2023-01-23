@@ -126,13 +126,13 @@ class DataHandler():
         # Time array
         self.time_label = data[0].iat[0]
         data_time  = data.loc[data[0] == self.time_label][1]
-        self.time  = data_time.to_numpy()
+        self.time  = data_time.to_numpy().astype(np.float64)
         data.drop(data_time.index, axis=0, inplace=True)
 
         # Space array
         self.space_label = data[0].iat[0]
         data_space       = data.loc[data[0] == self.space_label]
-        self.space       = data.iloc[0][1:].to_numpy()
+        self.space       = data.iloc[0][1:].to_numpy().astype(np.float64)
         data.drop(data_space.index, axis=0, inplace=True)
 
         # Multi-index
@@ -152,7 +152,7 @@ class DataHandler():
         self.scurve = DataScurve(scurve_filename)
 
     def get(self, variable, space_idx=None, time_idx=None):
-        array = self.df.query(f"variables=='{variable}'").to_numpy()
+        array = self.df.query(f"variables=='{variable}'").to_numpy().astype(np.float64)
         array = np.reshape(array, (self.time.shape[0], self.space.shape[0]))
 
         if time_idx is None and space_idx is None:
@@ -270,6 +270,7 @@ class FigureGUI():
             self.TimeLabel.pack(side=tkinter.LEFT, padx=5, pady=5)
             self.TimeSlider.pack(side=tkinter.LEFT, padx=20, pady=5, expand=True, fill=tkinter.X)
 
+        print(self.data.space_label, type(self.data.space_label), self.data.space[0], type(self.data.space[0]))
         self.SpaceFrame  = ttk.Frame(self.toolbar)
         self.SpaceFrame.grid(row=1, column=0, columnspan=4, sticky=tkinter.NSEW)
         self.SpaceLabel  = ttk.Label(self.SpaceFrame, text=f"{self.data.space_label} = {self.data.space[0]:.4f}")
@@ -432,11 +433,13 @@ class FigureGUI():
 # MAIN PROGRAM
 
 # Récupérer le fichier de sortie
-data = DataHandler(FILENAME)
+data = DataHandler('data_ad.out')
 
 # Numpy array :
 data.space # array spatial
 data.time  # array du temps
+
+print(type(data.time[0]))
 
 """
     data.time  => np.array 1D : valeurs temporelles
