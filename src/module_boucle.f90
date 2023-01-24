@@ -17,10 +17,12 @@ USE MODULE_FUNCTION
 USE MODULE_SCHEMAS_SIGMA
 USE MODULE_ECRITURE
 USE MODULE_SCHEMAS_T
+USE MODULE_SCHEMAS_INSTABILITE
+
 IMPLICIT NONE
 
-REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH   = 1.0E-2_xp   !! Fraction du pas de temps thermique
-REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 5.0E-5_XP   !! Fraction du pas de temps visqueux
+REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH   = 1.0E-1_xp   !! Fraction du pas de temps thermique
+REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 5.0E-4_XP   !! Fraction du pas de temps visqueux
 
 INTEGER, PRIVATE :: NB_IT_TH    !! Nombre d'itérations réalisées dans le régime thermique
 
@@ -74,7 +76,18 @@ SUBROUTINE CREER_FRAME(VAR,INDEX)
 
 END SUBROUTINE CREER_FRAME
 !---------------------------------------------------------------------------------------------------
+SUBROUTINE FRAME(VAR,FRAME_COND,INDEX)
 
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: FRAME_COND
+    INTEGER, INTENT(IN) :: INDEX
+    REAL(KIND=XP), INTENT(IN) :: VAR(NX)
+    
+     IF (FRAME_COND==1)THEN
+        CALL CREER_FRAME(VAR,INDEX)
+     ENDIF
+
+END SUBROUTINE FRAME
 !---------------------------------------------------------------------------------------------------
 SUBROUTINE SCHEMA_TH_TIME()
 !---------------------------------------------------------------------------------------------------
@@ -93,9 +106,6 @@ SUBROUTINE SCHEMA_TH_TIME()
        
     ! Affichage des variables d'entrée de boucle
     WRITE(*,"('Pas de temps thermique               DELTA_T_TH_AD = ',1pE12.4)") DELTA_T_TH_AD
-    WRITE(*,"('Q+ - Q- = ',1pe12.4,'           Temperature AD = ',1pE12.4)") &
-    & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) , &
-    & TEMP_AD(50)
     
     ! Lancement de la boucle qui tournera tant que Q+ - Q- est > switch
     I=0
@@ -121,11 +131,8 @@ SUBROUTINE SCHEMA_TH_TIME()
     NB_IT_TH = I
 
     ! Affichage des variables de sortie de boucle
-    PRINT*, NB_IT_TH
-    WRITE(*, "('Delta Temps thermique final = ',1pE12.4)") DELTA_T_TH_AD * I
-    WRITE(*,"('Q+ - Q- = ',1pe12.4,'           Temperature AD = ',1pE12.4)") &
-    & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) , &
-    & TEMP_AD(50)
+    WRITE(*,"('Nombre d iterations thermique : ',I12)") NB_IT_TH
+    WRITE(*, "('Temp thermique final = ',1pE12.4)") DELTA_T_TH_AD * I
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_TH_TIME
@@ -140,7 +147,7 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
      
-    INTEGER :: ITE,I
+    INTEGER :: ITE,I,INST
     REAL(KIND=XP) :: M_DOT_MIN
     REAL(KIND=XP) :: S_SAVE(NX)
     
@@ -162,7 +169,8 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     ! lancement boucle pour arriver à m_dot = 1
     ITE=1
     I = 0
-    DO WHILE(M_DOT_MIN>=0.01_xp)
+    
+    DO WHILE(M_DOT_MIN>=0.55_xp)
             
             
         WRITE(*,"(48('-'))")
@@ -171,12 +179,10 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         ! Ecriture avant itérations du schéma numérique thermique
         CALL ADIM_TO_PHYSIQUE()
         CALL ECRITURE_DIM()
-        I = I+1
         
+        I = I+1
         !ecriture frame
-        IF (FRAME_COND==1)THEN
-        CALL CREER_FRAME(TEMP,I)
-        ENDIF
+        CALL FRAME(TEMP,FRAME_COND,I)
         
         CALL SCHEMA_TH_TIME()
 
@@ -186,37 +192,59 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         
         I=I+1
         !ecriture frame
-        IF (FRAME_COND==1)THEN
-        CALL CREER_FRAME(TEMP,I)
-        ENDIF
+        CALL FRAME(TEMP,FRAME_COND,I)
 
         CALL SCHEMA_IMPLICITE_S(NU_AD)
         
+        CALL COMPUTE_EQS()
         
-	    
-	    WRITE(*,"('S_AD(50) = ',1pE12.4)") S_AD(50)
-	     
-	    CALL COMPUTE_EQS()
-	    S_SAVE = S_AD
-	    CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ,S_SAVE)
-	    
-	    TIME_AD = TIME_AD + DELTA_T_VISQ - NB_IT_TH * DELTA_T_TH_AD
-	    
-	    ITE=ITE+1
-            
+        S_SAVE = S_AD
+        CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ,S_SAVE)
+        
+        TIME_AD = TIME_AD + DELTA_T_VISQ - NB_IT_TH * DELTA_T_TH_AD
+        ITE=ITE+1
         M_DOT_MIN = ABS(MINVAL(M_DOT_AD-1.0_xp))
             
     ENDDO
-
+    
+    
+    WRITE(*,"('--------------- Regime instable ----------------')")
+    
+    DELTA_T_INSTABLE_AD = 1.0E-7_XP * MAXVAL( X_AD ** 4.0_xp / NU_AD )
+    CALL SETUP_SCHEMA_INSTABLE_TS(DELTA_T_INSTABLE_AD)
+    
+    DO INST=1,1000000
+        CALL COMPUTE_EQS()
+        IF (MODULO(INST,5000)==1) THEN
+        CALL ADIM_TO_PHYSIQUE()
+        CALL ECRITURE_DIM()
+        ENDIF
+        CALL SCHEMA_INSTABLE_TS(1.0_xp)
+        TIME_AD = TIME_AD+DELTA_T_INSTABLE_AD
+    ENDDO
+    
+    WRITE(*,"('On redivise le pas de temps par 10 pour plus de precision')")
+     
+    DELTA_T_INSTABLE_AD = 1.0E-9_XP * MAXVAL( X_AD ** 4.0_xp / NU_AD )
+    CALL SETUP_SCHEMA_INSTABLE_TS(DELTA_T_INSTABLE_AD)
+    
+    DO INST=1,10000000
+        CALL COMPUTE_EQS()
+        IF (MODULO(INST,10000) == 1) THEN
+        CALL ADIM_TO_PHYSIQUE()
+        CALL ECRITURE_DIM()
+        ENDIF
+        CALL SCHEMA_INSTABLE_TS(1.0_xp)
+        TIME_AD = TIME_AD + DELTA_T_INSTABLE_AD
+    ENDDO 
+    
     ! Ecriture pas final
     CALL ADIM_TO_PHYSIQUE()
     CALL ECRITURE_DIM()
     I=I+1
     ! ecriture frame
-    IF (FRAME_COND==1) THEN
-    CALL CREER_FRAME(TEMP,I)
-    ENDIF
-
+    CALL FRAME(TEMP,FRAME_COND,I)
+    
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_FIRST_BRANCH
 !---------------------------------------------------------------------------------------------------

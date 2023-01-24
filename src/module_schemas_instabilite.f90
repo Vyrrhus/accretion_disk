@@ -27,7 +27,7 @@ SUBROUTINE SCHEMA_INSTABLE_TS(PARAM_CN_INSTABLE)
     IMPLICIT NONE
     REAL(KIND=xp) :: PARAM_CN_INSTABLE
     REAL(KIND=xp), DIMENSION(NX) :: S_AD_TEMPSPRECEDENT !variable pour stocker S_AD au temps précédent pour Q_adv
-    REAL(kind=xp), dimension(NX) :: DTEMP_AD_DT !
+    REAL(kind=xp), dimension(NX) :: DTEMP_AD_DT 
 
     S_AD_TEMPSPRECEDENT=S_AD !pour le calcul de Q_adv (derivees en temps de S)
 
@@ -53,7 +53,7 @@ SUBROUTINE SETUP_SCHEMA_INSTABLE_TS(DELTA_T_INSTABLE_AD_bis)
     DELTA_T_VISQ=DELTA_T_INSTABLE_AD_bis
     DELTA_T_TH_AD=DELTA_T_INSTABLE_AD_bis
 
-    CALL CREER_LAMBDA
+    CALL CREER_LAMBDA()
 
 END SUBROUTINE
 
