@@ -2,7 +2,6 @@
             MODULE MODULE_BOUCLE 
 !===================================================================================================
 !> Ce module permet de calculer l'évolution des variables du disque d'accrétion au cours du temps.
-
 !> Il contient plusieurs subroutines :
 !> - creer_frame qui permet de réaliser une symétrie circulaire sur l'array d'une des variables ( avec la dernière orbite stable pour point central ) et d'en faire un fichier .out stocké dans le folder frame_array à ensuite plotter en python pour faire un animation
 !> - frame prend la condition en input frame_cond, un indice d'écriture et lance la subroutine creer_frame
@@ -16,6 +15,7 @@
 
 USE MODULE_DECLARATIONS
 USE DIMENSIONNEMENT
+USE FRAMES_2D
 USE MODULE_FUNCTION
 USE MODULE_SCHEMAS_SIGMA
 USE MODULE_ECRITURE
@@ -24,6 +24,7 @@ USE MODULE_SCHEMAS_INSTABILITE
 
 IMPLICIT NONE
 
+REAL(KIND=XP), PARAMETER, PRIVATE :: SWITCH_TH = 1.0e-15_xp         !! valeur d'arrêt de boucle pour Q+ - Q-
 REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH   = 1.0E-1_xp   !! Fraction du pas de temps thermique
 REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 5.0E-4_XP   !! Fraction du pas de temps visqueux
 
@@ -33,70 +34,6 @@ INTEGER, PRIVATE :: NB_IT_TH    !! Nombre d'itérations réalisées dans le rég
             CONTAINS    
 !===================================================================================================
 
-!---------------------------------------------------------------------------------------------------
-! subroutine qui permet d'écrire un array 2D qui contient l'image 2D, cette subroutine est appelée en mettant frame_cond = 1 en input.config
-!---------------------------------------------------------------------------------------------------
-SUBROUTINE CREER_FRAME(VAR,INDEX)
-
-	IMPLICIT NONE
-	INTEGER, INTENT(IN) :: INDEX
-	REAL(KIND=XP),INTENT(IN),DIMENSION(NX) :: VAR
-	INTEGER,PARAMETER :: SIZE = 2*NX
-	INTEGER :: CENTER,I,J,IND,UNTY
-	REAL(KIND=XP),DIMENSION(SIZE,SIZE) :: IMG 
-	CHARACTER(LEN=1024) :: FRAME_NAME
-	CHARACTER(LEN=1024) :: NUMB
-	REAL(KIND=XP):: NAN_VALUE 
-	
-	NAN_VALUE = 0.0
-	NAN_VALUE = 0.0/NAN_VALUE
-	11 FORMAT(I0)
-	WRITE(NUMB,11) INDEX
-	FRAME_NAME = 'frame_'//TRIM(NUMB)//'.out'
-        
-        
-        CENTER = SIZE/2
-        DO I=1,SIZE
-                 DO J=1,SIZE
-                 
-                          IND = (ABS(I-CENTER)**2+ABS(J-CENTER)**2)**0.5
-                          IF (IND<SIZE/2) THEN
-                          		IMG(I,J) = VAR(IND)
-                          ELSE 
-                          
-                          IMG(I,J) = NAN_VALUE
-                          
-                          ENDIF
-                 ENDDO
-        ENDDO
-        
-        OPEN(UNIT=UNTY,FILE="frame_array/"//TRIM(ADJUSTL(FRAME_NAME)),ACTION='WRITE')
-        DO I=1,SIZE
-        WRITE(UNTY,"(200(1pE12.4, 2X))") IMG(I,:)
-        ENDDO
-        
-        CLOSE(UNTY)
-
-END SUBROUTINE CREER_FRAME
-!---------------------------------------------------------------------------------------------------
-!---------------------------------------------------------------------------------------------------
-SUBROUTINE FRAME(VAR,FRAME_COND,INDEX)
-!---------------------------------------------------------------------------------------------------
-!> Cette subroutine est appelée dans la first_branch pour ecrire un fichier stocké dans le folder frame_array contenant l'image 2D à plot en pyhon
-!---------------------------------------------------------------------------------------------------
-
-    IMPLICIT NONE
-    INTEGER, INTENT(IN) :: FRAME_COND
-    INTEGER, INTENT(IN) :: INDEX
-    REAL(KIND=XP), INTENT(IN) :: VAR(NX)
-    
-     IF (FRAME_COND==1)THEN
-        CALL CREER_FRAME(VAR,INDEX)
-     ENDIF
-
-END SUBROUTINE FRAME
-!---------------------------------------------------------------------------------------------------
-!---------------------------------------------------------------------------------------------------
 SUBROUTINE SCHEMA_TH_TIME()
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine itère depuis une température et densité de surface initiale jusqu'à converger 
@@ -106,29 +43,25 @@ SUBROUTINE SCHEMA_TH_TIME()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     
-    REAL(KIND=XP) :: SWITCH      !! valeur d'arrêt de boucle pour Q+ - Q-
     INTEGER :: I
     
-    SWITCH = 1.0e-15_xp
-    
     ! Lancement de la boucle qui tournera tant que Q+ - Q- est > switch
-    I=0
+    I = 0
     
-    DO WHILE( MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH)
-              
-        CALL ITERATION_TEMP_AD()   ! on appel le schéma de l'équation de T
-        CALL COMPUTE_EQS()         ! on calcul le reste des variables
+    DO WHILE( MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH_TH)
+
+        CALL ITERATION_TEMP_AD()   ! on appelle le schéma de l'équation de T
+        CALL COMPUTE_EQS()         ! on calcule le reste des variables
         
         ! Affichage pour observer l'évolution du système ( q+-q- et m_dot)
         IF (MODULO(I,50000)==1) THEN
-            WRITE (*,"('Q+-Q- = ',1pE12.4,'  ABS(M_DOT-1) = ',1pE12.4)")&
+            WRITE (*,"('Q+-Q- = ',1pE12.4,'  ABS(M_DOT-1) = ',1pE12.4)") &
                 & MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)), &
                 & ABS(MINVAL(M_DOT_AD-1.0_xp))
         ENDIF
         
         TIME_AD = TIME_AD + DELTA_T_TH_AD
-        
-        I=I+1
+        I = I+1
               
     ENDDO
     
@@ -141,7 +74,7 @@ SUBROUTINE SCHEMA_TH_TIME()
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_TH_TIME
 !---------------------------------------------------------------------------------------------------
-!---------------------------------------------------------------------------------------------------
+
 SUBROUTINE SCHEMA_FIRST_BRANCH()
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine itère depuis une température et densité de surface initiale jusqu'à converger
@@ -155,13 +88,14 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     REAL(KIND=XP) :: M_DOT_MIN
     REAL(KIND=XP) :: S_SAVE(NX)
     
+    ! Pas de temps visqueux et thermique
     DELTA_T_VISQ_AD = FRACTION_DT_VISQ * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
     DELTA_T_TH_AD = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
     
-    ! Génération des grilles de calcul pour le schema implicit de S
+    ! Génération des grilles de calcul pour le schéma implicite de S
     CALL CREER_LAMBDA()
      
-    !AFfichage des données d'entrée de boucle
+    ! AFfichage des données d'entrée de boucle
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
     
@@ -173,12 +107,11 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     
     M_DOT_MIN = MAXVAL(ABS(M_DOT_AD-1.0_xp))
     
-    ! lancement boucle pour arriver à m_dot = 1
+    ! Lancement boucle pour arriver à m_dot = 1
     ITE=1
     I = 0
-    DO WHILE((M_DOT_MIN>=0.01_xp).and.(ITE<56)) !55 pour proche instab
-            
-            
+    DO WHILE((M_DOT_MIN>=0.01_xp).and.(ITE<56)) ! : 55 pour proche instabilité
+
         WRITE(*,"(48('-'))")
         WRITE(*,"(I0,'e iteration de temps thermique ')") ITE 
         
@@ -187,23 +120,26 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         CALL ECRITURE_DIM()
         
         I = I+1
-        !ecriture frame
-        CALL FRAME(TEMP,FRAME_COND,I)
+        ! Ecriture frame
+        CALL FRAME(TEMP,I)
         
+        ! Schéma numérique thermique
         CALL SCHEMA_TH_TIME()
 
         ! Ecriture après itérations
         CALL ADIM_TO_PHYSIQUE()
         CALL ECRITURE_DIM()
         
-        I=I+1
-        !ecriture frame
-        CALL FRAME(TEMP,FRAME_COND,I)
+        I = I+1
+        ! Ecriture frame
+        CALL FRAME(TEMP,I)
 
+        ! Calcul de Q_ADV et schéma numérique visqueux
         S_SAVE = S_AD
         CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ_AD,S_SAVE)
         CALL SCHEMA_IMPLICITE_S(NU_AD)
         
+        ! Calcul des autres variables
         CALL COMPUTE_EQS()
         
         TIME_AD = TIME_AD + DELTA_T_VISQ_AD - NB_IT_TH * DELTA_T_TH_AD
@@ -215,18 +151,18 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_FIRST_BRANCH
 !---------------------------------------------------------------------------------------------------
-!---------------------------------------------------------------------------------------------------
+
 SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
 !---------------------------------------------------------------------------------------------------
 !> Calcul précis de l'instabilité, à la fraction de temps caracteristique donnée en entrée (usuel 10e-7)
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
+
     INTEGER :: iterateur
     REAL(KIND=xp) :: FRACTION_DT_INSTABLE
 
-
     DELTA_T_INSTABLE_AD = FRACTION_DT_INSTABLE * MAXVAL( X_AD ** 4.0_xp / NU_AD )
-    CALL SETUP_SCHEMA_INSTABLE_TS
+    CALL SETUP_SCHEMA_INSTABLE_TS()
     
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
@@ -237,8 +173,8 @@ SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
     DO iterateur=1, 1000000
     
         CALL SCHEMA_INSTABLE_TS(1.0_xp)
-        CALL COMPUTE_EQS
-        TIME_AD=TIME_AD+DELTA_T_INSTABLE_AD
+        CALL COMPUTE_EQS()
+        TIME_AD = TIME_AD + DELTA_T_INSTABLE_AD
         
         IF (MODULO(iterateur,10000)==0) THEN
             CALL ADIM_TO_PHYSIQUE()
@@ -248,13 +184,13 @@ SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
     END DO
     
     DELTA_T_INSTABLE_AD = FRACTION_DT_INSTABLE * 1.0E-1 * MAXVAL( X_AD ** 4.0_xp / NU_AD )
-    CALL SETUP_SCHEMA_INSTABLE_TS
+    CALL SETUP_SCHEMA_INSTABLE_TS()
     
     DO iterateur=1, 1500000
     
         CALL SCHEMA_INSTABLE_TS(1.0_xp)
-        CALL COMPUTE_EQS
-        TIME_AD=TIME_AD+DELTA_T_INSTABLE_AD
+        CALL COMPUTE_EQS()
+        TIME_AD = TIME_AD + DELTA_T_INSTABLE_AD
         
         IF (MODULO(iterateur,100)==0) THEN
             CALL ADIM_TO_PHYSIQUE()
@@ -266,5 +202,7 @@ SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_SECOND_BRANCH
 !---------------------------------------------------------------------------------------------------
-                          END MODULE MODULE_BOUCLE
-!---------------------------------------------------------------------------------------------------
+
+!===================================================================================================
+            END MODULE MODULE_BOUCLE
+!===================================================================================================

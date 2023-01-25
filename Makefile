@@ -14,6 +14,7 @@ BINDIR  := bin
 # SOURCES
 MODULE_SRC 	:= 	module_declarations.f90 \
 				dimensionnement.f90 \
+				frames2D.f90 \
 				module_fonctions_utiles.f90 \
 				module_function.f90 \
 				module_ecriture.f90 \
