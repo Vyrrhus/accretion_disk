@@ -60,23 +60,14 @@ END SUBROUTINE CREATION_CONDITIONS_INITIALES
 SUBROUTINE REPRISE_CONDITIONS_INITIALES()
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine initialise TEMP_AD et S_AD à partir d'un fichier externe
-!> /!\ Il faut s'assurer que le fichier externe a bien les mêmes dimensions (NX, PAS_ECRITURE_SPATIAL)
-!> /!\ Egalement il faut s'assurer 
+!> /!\ Il faut s'assurer que le fichier externe a bien les mêmes paramètres de sortie :
+!>     (NX, PAS_ECRITURE_SPATIAL, PRECISION) (cf output.config et MODULE_DECLARATIONS pour NX)
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: INPUT_UNT 
     INTEGER :: IOS
-    INTEGER, PARAMETER :: PRECISION = 4
-    CHARACTER(LEN=30) :: FMT
     CHARACTER(LEN=12) :: HEADER
     REAL(KIND=XP), DIMENSION(NX) :: TEMP_INI, S_INI
-
-    ! Format
-    IF (MODULO(NX,PAS_ECRITURE_SPATIAL) == 1) THEN
-        WRITE(FMT, "('(A11,X,', I0, '(1pE', I0, '.', I0, ',2X))')") NX / PAS_ECRITURE_SPATIAL, PRECISION + 7, PRECISION
-    ELSE
-        WRITE(FMT, "('(A11,X,', I0, '(1pE', I0, '.', I0, ',2X))')") NX / PAS_ECRITURE_SPATIAL+1, PRECISION + 7, PRECISION
-    ENDIF
 
     OPEN(NEWUNIT=INPUT_UNT, file="config/conditions_initiales.config", ACTION="read", STATUS="old", IOSTAT=IOS)
     IF (IOS /= 0) THEN
