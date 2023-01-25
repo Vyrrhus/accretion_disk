@@ -101,7 +101,7 @@ SUBROUTINE SCHEMA_TH_TIME()
     REAL(KIND=XP) :: SWITCH      !! valeur d'arrêt de boucle pour Q+ - Q-
     INTEGER :: I
     
-    SWITCH = 1.0e-17_xp
+    SWITCH = 1.0e-8_xp
     DELTA_T_TH_AD = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
        
     ! Affichage des variables d'entrée de boucle
@@ -147,7 +147,7 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
      
-    INTEGER :: ITE,I,INST
+    INTEGER :: ITE,I
     REAL(KIND=XP) :: M_DOT_MIN
     REAL(KIND=XP) :: S_SAVE(NX)
     
@@ -164,13 +164,12 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
     
-    M_DOT_MIN = ABS(MINVAL(M_DOT_AD-1.0_xp))
+    M_DOT_MIN = MAXVAL(ABS(M_DOT_AD-1.0_xp))
     
     ! lancement boucle pour arriver à m_dot = 1
     ITE=1
     I = 0
-    
-    DO WHILE(M_DOT_MIN>=0.55_xp)
+    DO WHILE((M_DOT_MIN>=0.01_xp).and.(ITE<56)) !55 pour proche instab
             
             
         WRITE(*,"(48('-'))")
@@ -194,59 +193,74 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         !ecriture frame
         CALL FRAME(TEMP,FRAME_COND,I)
 
+        S_SAVE = S_AD
+        CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ,S_SAVE)
         CALL SCHEMA_IMPLICITE_S(NU_AD)
         
         CALL COMPUTE_EQS()
         
-        S_SAVE = S_AD
-        CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ,S_SAVE)
+        
         
         TIME_AD = TIME_AD + DELTA_T_VISQ - NB_IT_TH * DELTA_T_TH_AD
         ITE=ITE+1
         M_DOT_MIN = ABS(MINVAL(M_DOT_AD-1.0_xp))
             
-    ENDDO
-    
-    
-    WRITE(*,"('--------------- Regime instable ----------------')")
-    
-    DELTA_T_INSTABLE_AD = 1.0E-7_XP * MAXVAL( X_AD ** 4.0_xp / NU_AD )
-    CALL SETUP_SCHEMA_INSTABLE_TS(DELTA_T_INSTABLE_AD)
-    
-    DO INST=1,1000000
-        CALL COMPUTE_EQS()
-        IF (MODULO(INST,5000)==1) THEN
-        CALL ADIM_TO_PHYSIQUE()
-        CALL ECRITURE_DIM()
-        ENDIF
-        CALL SCHEMA_INSTABLE_TS(1.0_xp)
-        TIME_AD = TIME_AD+DELTA_T_INSTABLE_AD
-    ENDDO
-    
-    WRITE(*,"('On redivise le pas de temps par 10 pour plus de precision')")
-     
-    DELTA_T_INSTABLE_AD = 1.0E-9_XP * MAXVAL( X_AD ** 4.0_xp / NU_AD )
-    CALL SETUP_SCHEMA_INSTABLE_TS(DELTA_T_INSTABLE_AD)
-    
-    DO INST=1,10000000
-        CALL COMPUTE_EQS()
-        IF (MODULO(INST,10000) == 1) THEN
-        CALL ADIM_TO_PHYSIQUE()
-        CALL ECRITURE_DIM()
-        ENDIF
-        CALL SCHEMA_INSTABLE_TS(1.0_xp)
-        TIME_AD = TIME_AD + DELTA_T_INSTABLE_AD
-    ENDDO 
-    
-    ! Ecriture pas final
-    CALL ADIM_TO_PHYSIQUE()
-    CALL ECRITURE_DIM()
-    I=I+1
-    ! ecriture frame
-    CALL FRAME(TEMP,FRAME_COND,I)
-    
+    ENDDO  
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_FIRST_BRANCH
+
+
+
+!---------------------------------------------------------------------------------------------------
+SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
+!---------------------------------------------------------------------------------------------------
+!> Calcul précis de l'instabilité, à la fraction de temps caracteristique donnée en entrée (usuel 10e-7)
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+    INTEGER :: iterateur
+    REAL(KIND=xp) :: FRACTION_DT_INSTABLE
+
+
+    DELTA_T_INSTABLE_AD = FRACTION_DT_INSTABLE * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
+    PRINT*, 'Delta_t_instable', DELTA_T_INSTABLE_AD
+    CALL SETUP_SCHEMA_INSTABLE_TS
+    
+    WRITE(*,"(48('-'))")
+    WRITE(*,"(48('-'))")
+    WRITE(*,"('BOUCLE INSTABLE            DELTA_T_INSTABLE_AD = ',1pE12.4)") DELTA_T_INSTABLE_AD
+    WRITE(*,"(48('-'))")
+    WRITE(*,"(48('-'))")
+
+
+
+
+    DO iterateur=1, 1000000
+        CALL SCHEMA_INSTABLE_TS(1.0_xp)
+        CALL COMPUTE_EQS
+        TIME_AD=TIME_AD+DELTA_T_INSTABLE_AD
+        
+
+        IF (MODULO(iterateur,10000)==0) THEN
+            CALL ADIM_TO_PHYSIQUE()
+            CALL ECRITURE_DIM()
+        ENDIF
+    END DO
+
+    DO iterateur=1, 15000
+        CALL SCHEMA_INSTABLE_TS(1.0_xp)
+        CALL COMPUTE_EQS
+        TIME_AD=TIME_AD+DELTA_T_INSTABLE_AD
+        
+
+        IF (MODULO(iterateur,100)==0) THEN
+            CALL ADIM_TO_PHYSIQUE()
+            CALL ECRITURE_DIM()
+        ENDIF
+    END DO
+
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE SCHEMA_SECOND_BRANCH
+
 !---------------------------------------------------------------------------------------------------
                           END MODULE MODULE_BOUCLE
 !---------------------------------------------------------------------------------------------------

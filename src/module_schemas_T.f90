@@ -61,7 +61,7 @@
         INTEGER                                          :: i
 
         !Calcul de Gamma_3
-        GAMMA_3 = 1 + (4-3*BETA)/(BETA*C_V_0)
+        GAMMA_3 = 1.0_xp + (4.0_xp-3.0_xp*BETA)/(BETA*C_V_0)
 
         !Dérivée temporelle de S_AD
         DS_AD_DT = (S_AD-S_AD_SAVE)/DT
@@ -91,13 +91,15 @@
                 DTEMP_AD_DX(i) = (TEMP_AD(i)-TEMP_AD(i-1))/DX
             END IF
         END DO
+
+        
         DTEMP_AD_DX(1)   = (TEMP_AD(2)-TEMP_AD(1))/DX
-        DTEMP_AD_DX(NX)  = (T_EXT_AD-TEMP_AD(NX))/DX
+        DTEMP_AD_DX(NX)  = (TEMP_AD(NX)-TEMP_AD(NX-1))/DX
 
         !Calculs de Q_ADV
-        Q_ADV_AD = C_V_AD*((GAMMA_3-1) * TEMP_AD/S_AD *&
-        & (DS_AD_DT + SPEED_AD/(2*X_AD)*DS_AD_DX - SPEED_AD/(2*X_AD**2)*S_AD)  &
-        & - SPEED_AD/(2*X_AD)*DTEMP_AD_DX)
+        Q_ADV_AD = C_V_AD*((GAMMA_3-1.0_xp) * TEMP_AD/S_AD *&
+        & (DS_AD_DT + SPEED_AD/(2.0_xp*X_AD)*DS_AD_DX - SPEED_AD/(2.0_xp*X_AD**2)*S_AD)  &
+        & - SPEED_AD/(2.0_xp*X_AD)*DTEMP_AD_DX)
 
         END SUBROUTINE
 

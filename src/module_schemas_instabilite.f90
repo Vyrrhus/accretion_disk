@@ -36,22 +36,21 @@ SUBROUTINE SCHEMA_INSTABLE_TS(PARAM_CN_INSTABLE)
 
     !Calculs de la dérivée temporelle de TEMP_ADV
     DTEMP_AD_DT = MU/(R_BOLTZ*OMEGA_MAX*TEMP_0*C_V_AD) &
-    &* (Q_PLUS_0*Q_PLUS_AD - Q_PLUS_0*Q_MOINS_AD + Q_ADV_0*Q_ADV_AD)
+    &* (Q_PLUS_0*Q_PLUS_AD - Q_PLUS_0*Q_MOINS_AD + 1.0_xp*Q_ADV_0*Q_ADV_AD)
 
     CALL SCHEMA_EULER(TEMP_AD, DTEMP_AD_DT, DELTA_T_TH_AD)
 
 END SUBROUTINE
 
-SUBROUTINE SETUP_SCHEMA_INSTABLE_TS(DELTA_T_INSTABLE_AD_bis)
+SUBROUTINE SETUP_SCHEMA_INSTABLE_TS()
 !---------------------------------------------------------------------------------------------------
 !>    Cette routine prépare l'utilisation de SCHEMA_INSTABLE_TS :
 !>    elle initialise les pas de temps a DELTA_T_INSTABLE_AD_bis et créer le vecteur Lambda pour les schémas en S
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-    REAL(kind=xp) :: DELTA_T_INSTABLE_AD_bis
 
-    DELTA_T_VISQ=DELTA_T_INSTABLE_AD_bis
-    DELTA_T_TH_AD=DELTA_T_INSTABLE_AD_bis
+    DELTA_T_VISQ=DELTA_T_INSTABLE_AD
+    DELTA_T_TH_AD=DELTA_T_INSTABLE_AD
 
     CALL CREER_LAMBDA()
 
