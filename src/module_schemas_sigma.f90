@@ -129,7 +129,7 @@ END SUBROUTINE SCHEMA_CN_S
 
 SUBROUTINE CREER_LAMBDA()
 !---------------------------------------------------------------------------------------------------
-!>    Cette routine créer le tableau LAMBDA (une fois pour toutes) à partir de X_AD et du pas de temps DELTA_T
+!>    Cette routine créer le tableau LAMBDA (une fois pour toutes) à partir de X_AD et du pas de temps DELTA_T_VISQ
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
@@ -173,7 +173,7 @@ SUBROUTINE CREER_MATRICE_TRIDIAGONALE(MATRICE_DL, MATRICE_D, MATRICE_DU, MATRICE
     !! MISE EN PLACE DE LA DIAGONALE D
     
     DO iter=1, Nx
-        MATRICE_D(iter)=1-2*pmLAMBDA(iter)*NU_AD_bis(iter)
+        MATRICE_D(iter)=1.0_xp-2.0_xp*pmLAMBDA(iter)*NU_AD_bis(iter)
     END DO
     
     !! MISE EN PLACE DE LA SUR DIAGONALE DU

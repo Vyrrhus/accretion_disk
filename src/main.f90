@@ -42,6 +42,11 @@ CALL CREATION_CONDITIONS_INITIALES()
 !-- BOUCLES DE CALCULS
 !----------------------------------
 CALL SCHEMA_FIRST_BRANCH()
+
+CALL SCHEMA_SECOND_BRANCH(1.0E-7_xp)
+
+!CALL SCHEMA_SECOND_BRANCH()
+
 CALL CLOSE_OUTPUT()
 			
 !========================================================================
