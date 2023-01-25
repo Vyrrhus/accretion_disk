@@ -137,7 +137,7 @@ SUBROUTINE CREER_LAMBDA()
     INTEGER :: iter
 
     DO iter=1, Nx
-        LAMBDA(iter) = DELTA_T_visq / (DX**2 * X_AD(iter)**2 )
+        LAMBDA(iter) = DELTA_T_VISQ_AD / (DX**2 * X_AD(iter)**2 )
     END DO
 
 !---------------------------------------------------------------------------------------------------

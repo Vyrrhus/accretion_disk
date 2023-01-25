@@ -2,7 +2,10 @@
             MODULE MODULE_BOUCLE 
 !===================================================================================================
 !> Ce module permet de calculer l'évolution des variables du disque d'accrétion au cours du temps.
+
 !> Il contient plusieurs subroutines :
+!> - creer_frame qui permet de réaliser une symétrie circulaire sur l'array d'une des variables ( avec la dernière orbite stable pour point central ) et d'en faire un fichier .out stocké dans le folder frame_array à ensuite plotter en python pour faire un animation
+!> - frame prend la condition en input frame_cond, un indice d'écriture et lance la subroutine creer_frame
 !> - schema_th_time fait une boucle sur le schéma numérique de l'équation thermique et calcule 
 !>   ensuite le reste des variables.
 !>   La boucle s'arrêtera quand Q+-Q- atteindra une valeur de e-17. 
@@ -76,7 +79,11 @@ SUBROUTINE CREER_FRAME(VAR,INDEX)
 
 END SUBROUTINE CREER_FRAME
 !---------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------
 SUBROUTINE FRAME(VAR,FRAME_COND,INDEX)
+!---------------------------------------------------------------------------------------------------
+!> Cette subroutine est appelée dans la first_branch pour ecrire un fichier stocké dans le folder frame_array contenant l'image 2D à plot en pyhon
+!---------------------------------------------------------------------------------------------------
 
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: FRAME_COND
@@ -88,6 +95,7 @@ SUBROUTINE FRAME(VAR,FRAME_COND,INDEX)
      ENDIF
 
 END SUBROUTINE FRAME
+!---------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------
 SUBROUTINE SCHEMA_TH_TIME()
 !---------------------------------------------------------------------------------------------------
@@ -101,11 +109,7 @@ SUBROUTINE SCHEMA_TH_TIME()
     REAL(KIND=XP) :: SWITCH      !! valeur d'arrêt de boucle pour Q+ - Q-
     INTEGER :: I
     
-    SWITCH = 1.0e-8_xp
-    DELTA_T_TH_AD = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
-       
-    ! Affichage des variables d'entrée de boucle
-    WRITE(*,"('Pas de temps thermique               DELTA_T_TH_AD = ',1pE12.4)") DELTA_T_TH_AD
+    SWITCH = 1.0e-15_xp
     
     ! Lancement de la boucle qui tournera tant que Q+ - Q- est > switch
     I=0
@@ -131,8 +135,8 @@ SUBROUTINE SCHEMA_TH_TIME()
     NB_IT_TH = I
 
     ! Affichage des variables de sortie de boucle
-    WRITE(*,"('Nombre d iterations thermique : ',I12)") NB_IT_TH
-    WRITE(*, "('Temp thermique final = ',1pE12.4)") DELTA_T_TH_AD * I
+    WRITE(*,"('Nombre d iterations thermique       : ',I12)") NB_IT_TH
+    WRITE(*,"('Temp thermique adimensionné atteint = ',1pE12.4)") DELTA_T_TH_AD * I
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_TH_TIME
@@ -151,15 +155,18 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     REAL(KIND=XP) :: M_DOT_MIN
     REAL(KIND=XP) :: S_SAVE(NX)
     
-    DELTA_T_VISQ = FRACTION_DT_VISQ * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
+    DELTA_T_VISQ_AD = FRACTION_DT_VISQ * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
+    DELTA_T_TH_AD = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
     
     ! Génération des grilles de calcul pour le schema implicit de S
     CALL CREER_LAMBDA()
      
+    !AFfichage des données d'entrée de boucle
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
     
-    WRITE(*,"('PAS DE TEMPS VISQUEUX             DELTA_T_VISQ = ',1pE12.4)") DELTA_T_VISQ
+    WRITE(*,"('PAS DE TEMPS VISQUEUX          DELTA_T_VISQ_AD = ',1pE12.4)") DELTA_T_VISQ_AD
+    WRITE(*,"('PAS DE TEMPS THERMIQUE           DELTA_T_TH_AD = ',1pE12.4)") DELTA_T_TH_AD
     
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
@@ -194,23 +201,20 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         CALL FRAME(TEMP,FRAME_COND,I)
 
         S_SAVE = S_AD
-        CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ,S_SAVE)
+        CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ_AD,S_SAVE)
         CALL SCHEMA_IMPLICITE_S(NU_AD)
         
         CALL COMPUTE_EQS()
         
-        
-        
-        TIME_AD = TIME_AD + DELTA_T_VISQ - NB_IT_TH * DELTA_T_TH_AD
+        TIME_AD = TIME_AD + DELTA_T_VISQ_AD - NB_IT_TH * DELTA_T_TH_AD
         ITE=ITE+1
         M_DOT_MIN = ABS(MINVAL(M_DOT_AD-1.0_xp))
             
     ENDDO  
+
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_FIRST_BRANCH
-
-
-
+!---------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------
 SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
 !---------------------------------------------------------------------------------------------------
@@ -221,8 +225,7 @@ SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
     REAL(KIND=xp) :: FRACTION_DT_INSTABLE
 
 
-    DELTA_T_INSTABLE_AD = FRACTION_DT_INSTABLE * MAXVAL( X_AD ** 4.0_xp / NU_AD ) 
-    PRINT*, 'Delta_t_instable', DELTA_T_INSTABLE_AD
+    DELTA_T_INSTABLE_AD = FRACTION_DT_INSTABLE * MAXVAL( X_AD ** 4.0_xp / NU_AD )
     CALL SETUP_SCHEMA_INSTABLE_TS
     
     WRITE(*,"(48('-'))")
@@ -231,36 +234,37 @@ SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
 
-
-
-
     DO iterateur=1, 1000000
+    
         CALL SCHEMA_INSTABLE_TS(1.0_xp)
         CALL COMPUTE_EQS
         TIME_AD=TIME_AD+DELTA_T_INSTABLE_AD
         
-
         IF (MODULO(iterateur,10000)==0) THEN
             CALL ADIM_TO_PHYSIQUE()
             CALL ECRITURE_DIM()
         ENDIF
+        
     END DO
-
-    DO iterateur=1, 15000
+    
+    DELTA_T_INSTABLE_AD = FRACTION_DT_INSTABLE * 1.0E-1 * MAXVAL( X_AD ** 4.0_xp / NU_AD )
+    CALL SETUP_SCHEMA_INSTABLE_TS
+    
+    DO iterateur=1, 1500000
+    
         CALL SCHEMA_INSTABLE_TS(1.0_xp)
         CALL COMPUTE_EQS
         TIME_AD=TIME_AD+DELTA_T_INSTABLE_AD
         
-
         IF (MODULO(iterateur,100)==0) THEN
             CALL ADIM_TO_PHYSIQUE()
             CALL ECRITURE_DIM()
         ENDIF
+        
     END DO
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_SECOND_BRANCH
-
 !---------------------------------------------------------------------------------------------------
                           END MODULE MODULE_BOUCLE
 !---------------------------------------------------------------------------------------------------
