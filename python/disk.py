@@ -40,11 +40,6 @@ def init_plotting():
     plt.rcParams['axes.linewidth'] = 1
     plt.rcParams['lines.markersize'] = 5
 
-    # plt.gca().spines['right'].set_color('none')
-    # plt.gca().spines['top'].set_color('none')
-    # plt.gca().xaxis.set_ticks_position('bottom')
-    # plt.gca().yaxis.set_ticks_position('left')
-
 #============================================================
 # TIME DECORATOR
 
@@ -59,19 +54,42 @@ def timer(func):
     return wrapper
 
 #============================================================
-# CLASS
+# DATA CLASS
 
 class DataScurve():
     def __init__(self, filename):
-        self.data = pd.read_csv(f"output/{filename}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
-    
-    def get(self, radius, radius_label):
-        closest_value = min(self.data[radius_label].unique(), key=lambda x:abs(x-radius))
-        scurve = self.data[self.data[radius_label] == closest_value]
+        self.epais = pd.read_csv(f"output/{filename[0]}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
+        self.mince = pd.read_csv(f"output/{filename[1]}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
+
+    def get(self, radius, radius_label, isEpais=True):
+        if isEpais:
+            data = self.epais
+        else:
+            data = self.mince
+
+        closest_value = min(data[radius_label].unique(), key=lambda x:abs(x-radius))
+        scurve = data[data[radius_label] == closest_value]
 
         temp  = scurve["T"].to_numpy()
         sigma = scurve["Sigma"].to_numpy()
         return temp, sigma
+    
+    def plot(self, ax, radius, radius_label, epais=True, mince=True):
+        """ Plot S-curve for each branch
+        """
+        if epais:
+            temp, sigma = self.get(radius, radius_label)
+            line_epais, = ax.plot(sigma*10, temp, '--', color="orange", label="Courbe en S - Branche épaisse")
+        else:
+            line_epais = None
+
+        if mince:
+            temp, sigma = self.get(radius, radius_label, isEpais=False)
+            line_mince, = ax.plot(sigma*10, temp, '--', color="green", label="Courbe en S - Branche mince")
+        else:
+            line_mince = None
+
+        return line_epais, line_mince
 
 class SkipWrapper(io.TextIOWrapper):
     """ io.TextIOWrapper pour skip les premières lignes des fichiers .out jusqu'à match:
@@ -81,7 +99,10 @@ class SkipWrapper(io.TextIOWrapper):
     def __init__(self, file):
         super().__init__(file, line_buffering=True)
         self.f = file
-        self.has_matched = False
+        self.has_matched   = False
+        self.has_constants = False
+        self.constantes       = {}
+        self.constantes_label = {}
 
     def read(self, size=None):
         while not self.has_matched:
@@ -89,12 +110,20 @@ class SkipWrapper(io.TextIOWrapper):
             if "OUTPUT" in line:
                 self.has_matched = True
                 self.readline()
+            
+            if "CONSTANTES DE SIMULATION" in line:
+                self.has_constants = True
+            
+            if self.has_constants and "=" in line:
+                line = ' '.join(line.split()).split()
+                self.constantes[line[-3]] = float(line[-1])
+                self.constantes_label[line[-3]] = ' '.join(line[:-3])
         
         return super().read(size)
 
 class DataHandler():
     @timer
-    def __init__(self, filename, scurve_filename="results_epais.out"):
+    def __init__(self, filename, scurve_filename=["results_epais.out", "results_mince.out"]):
         """
             Extract data from an output file from file : [filename]
             -----------
@@ -113,11 +142,17 @@ class DataHandler():
         # Path
         self.path = "output/" + filename
 
+        # Constantes initiales
+        self.constantes       = {}
+        self.constantes_label = {}
+
         # Find amount of variables and time array
         with open(self.path, 'rb') as file:
             with SkipWrapper(file) as datafile:
                 data = pd.read_csv(datafile, header=None)
                 length = len(data[0].iat[1].split())
+                self.constantes       = datafile.constantes
+                self.constantes_label = datafile.constantes_label
 
         with open(self.path, 'rb') as file:
             with SkipWrapper(file) as datafile:
@@ -186,24 +221,164 @@ class DataHandler():
             self.df = self.df.loc[self.time[0]:self.time[-1],:,:]
             print(f"Données restreintes à [{self.time[0]} ; {self.time[-1]}]")
         
-        GUI = FigureGUI(self, **fig_kw)
-        GUI.start()
+        # Start plot
+        GUI(self, **fig_kw).start()
 
-class FigureGUI():
+#============================================================
+# PLOTS CLASS
+
+class Plot():
+    def __init__(self, data: DataHandler, **fig_kw):
+        # Data
+        self.data = data
+        self.x = None
+        self.y = None
+        self.time_idx  = None
+        self.space_idx = None
+
+        # Figure & axes
+        self.figure = Figure(**fig_kw)
+        self.ax     = self.figure.add_subplot()
+        line,       = self.ax.plot([], [], '.-')
+        self.line   = line
+        self.optional_lines = []
+        self.legend = None
+
+        # Plot options
+        self.hasGrid = True
+        self.xlabel = ""
+        self.ylabel = ""
+        self.title  = ""
+    
+    def relim(self, margin=0.05):
+        """ Set the limits of the plot (xlim, ylim) with a given [margin]
+        """
+        # Get data array at all time or space index
+        if self.xlabel in [self.data.time_label, self.data.space_label]:
+            x_array = self.x
+        else:
+            x_array = self.data.get(self.xlabel)
+        
+        y_array = self.data.get(self.ylabel)
+
+        # Limits
+        xlims = [np.nanmin(x_array), np.nanmax(x_array)]
+        ylims = [np.nanmin(y_array), np.nanmax(y_array)]
+
+        # Margins
+        xmargin = (xlims[1] - xlims[0]) * margin
+        ymargin = (ylims[1] - ylims[0]) * margin
+
+        # Set limits
+        self.ax.set_xlim(xlims[0] - xmargin, xlims[1] + xmargin)
+        self.ax.set_ylim(ylims[0] - ymargin, ylims[1] + ymargin)
+    
+    def set_axis(self, xlabel=None, ylabel=None):
+        """ Set the X-axis and Y-axis of the plot
+        """
+        # No change
+        if self.xlabel is xlabel and self.ylabel is ylabel:
+            return
+
+        # Set labels
+        if xlabel:
+            self.xlabel = xlabel
+            self.ax.set_xlabel(xlabel)
+        
+        if ylabel:
+            self.ylabel = ylabel
+            self.ax.set_ylabel(ylabel)
+        
+        # Reset sliders
+        self.reset_slider_idx()
+
+        # Set title
+        self.set_title()
+
+        # Set new data
+        self.set_data()
+
+        # Redefine limits
+        self.relim()
+
+    def set_title(self, title=None):
+        """ Set the title to the plot
+        """
+        if title:
+            self.title = title
+        else:
+            self.title = f"{self.ylabel}({self.xlabel})"
+        self.ax.set_title(self.title)
+
+    def set_data(self):
+        """ Set the data to plot: Y(X)
+        """
+        # X value
+        if   self.xlabel == self.data.space_label:  self.x = self.data.space
+        elif self.xlabel == self.data.time_label:   self.x = self.data.time
+        else:                                       self.x = self.data.get(self.xlabel, space_idx=self.space_idx, time_idx=self.time_idx)
+
+        # Y value
+        self.y = self.data.get(self.ylabel, space_idx=self.space_idx, time_idx=self.time_idx)
+
+    def set_idx(self, space_idx=None, time_idx=None):
+        """ Set values of the Slider index
+        """
+        self.time_idx  = time_idx
+        self.space_idx = space_idx
+
+    def reset_slider_idx(self):
+        """ Reset to 0 the current Slider index and set to None the other one
+        """
+        # Time Slider
+        if self.xlabel == self.data.space_label:
+            self.set_idx(time_idx=0)
+        
+        # Space Slider
+        elif self.space_idx is None:
+            self.set_idx(space_idx=0)
+
+    def update(self):
+        """ Update plot
+        """
+        # Plot
+        self.line.set_data(self.x, self.y)
+
+        # Grid
+        if self.hasGrid:    self.ax.grid(True)
+        else:               self.ax.grid(False)
+
+        # Destroy optional lines
+        for line in self.optional_lines:
+            if line:
+                self.ax.lines.remove(line)
+        self.optional_lines = []
+
+        # Legend
+        self.legend = self.ax.get_legend()
+
+        # S-curve => TEMP(SIGMA)
+        if self.ylabel == "TEMP" and self.xlabel == "SIGMA":
+            self.plotScurve()
+            self.ax.legend()
+        elif self.legend:
+            self.legend.remove()
+    
+    def plotScurve(self, optical_depth=[1.]):
+        """ Add S-Curve lines and Optical Depth line
+        """
+        # S-Curve
+        lines = self.data.scurve.plot(self.ax, self.data.space[self.space_idx], self.data.space_label)
+        self.optional_lines += list(lines)
+
+#============================================================
+# GUI CLASS
+    
+class GUI():
     # INIT
     def __init__(self, data: DataHandler, **fig_kw):
         # Pandas dataframe
         self.data = data
-
-        # Plot options (default values)
-        self.hasGrid = True
-        self.x = self.data.time
-        self.y = None
-        self.xlabel = self.data.time_label
-        self.ylabel = self.data.var[0]
-        self.title  = ""
-        self.timeIdx  = None
-        self.spaceIdx = 0
 
         # Windows (and resize)
         self.root = tkinter.Tk()
@@ -217,12 +392,8 @@ class FigureGUI():
         self.toolbar.columnconfigure(3, weight=2)
 
         # Matplotlib embed
-        self.figure = Figure(**fig_kw)
-        self.ax     = self.figure.add_subplot()
-        line,       = self.ax.plot([], [], '.-')
-        self.line   = line
-
-        self.canvas = FigureCanvasTkAgg(self.figure, self.root)
+        self.plot = Plot(self.data)
+        self.canvas = FigureCanvasTkAgg(self.plot.figure, self.root)
         NavigationToolbar2Tk(self.canvas, self.root)
         self.canvas.get_tk_widget().pack(fill=tkinter.BOTH, expand=True)
 
@@ -270,7 +441,6 @@ class FigureGUI():
             self.TimeLabel.pack(side=tkinter.LEFT, padx=5, pady=5)
             self.TimeSlider.pack(side=tkinter.LEFT, padx=20, pady=5, expand=True, fill=tkinter.X)
 
-        print(self.data.space_label, type(self.data.space_label), self.data.space[0], type(self.data.space[0]))
         self.SpaceFrame  = ttk.Frame(self.toolbar)
         self.SpaceFrame.grid(row=1, column=0, columnspan=4, sticky=tkinter.NSEW)
         self.SpaceLabel  = ttk.Label(self.SpaceFrame, text=f"{self.data.space_label} = {self.data.space[0]:.4f}")
@@ -305,140 +475,92 @@ class FigureGUI():
             pass
 
     def event_xaxis(self, event):
+        """ Change in X-axis event
+        """
+        # Clear Menu
         self.XaxisMenu.selection_clear()
-        previous_xlabel = self.xlabel
-        self.xlabel = self.XaxisOptions.get()
-        self.ax.set_xlabel(self.xlabel)
 
-        # Switch Slider (spatial => temporel)
-        if self.xlabel == self.data.space_label and previous_xlabel != self.data.space_label:
+        # Change axis
+        previous_xlabel = self.plot.xlabel
+        self.plot.set_axis(xlabel=self.XaxisOptions.get())
+
+        # Switch between sliders
+        if self.plot.xlabel == self.data.space_label:
             self.TimeFrame.tkraise()
-            self.spaceIdx = None
-            self.timeIdx = 0
-            self.set_values()
-        
-        # Switch Slider (temporel => spatial)
-        elif self.xlabel != self.data.space_label and previous_xlabel == self.data.space_label:
-            self.SpaceFrame.tkraise()
-            self.timeIdx = None
-            self.spaceIdx = 0
-            self.set_values()
-        
-        # No switch
         else:
-            self.set_values(which="X")
-
-        self.relim()
-        self.update()
+            self.SpaceFrame.tkraise()
+        
+        # Reset Time or Space sliders
+        if self.plot.xlabel == self.data.space_label:
+            self.TimeSlider.set(0)
+            self.TimeSlider.update()
+        elif previous_xlabel == self.data.space_label:
+            self.SpaceSlider.set(0)
+            self.SpaceSlider.update()
+        else:
+        # Update plot
+            self.update()
 
     def event_yaxis(self, event):
+        """ Change in Y-axis event
+        """
+        # Clear Menu
         self.YaxisMenu.selection_clear()
-        self.ylabel = self.YaxisOptions.get()
-        self.ax.set_ylabel(self.ylabel)
-        
-        self.set_values(which="Y")
-        self.relim()
-        self.update()
+
+        # Change axis
+        self.plot.set_axis(ylabel=self.YaxisOptions.get())
+
+        # Reset Time slider
+        if self.plot.xlabel == self.data.space_label:
+            self.TimeSlider.set(0)
+            self.TimeSlider.update()
+        else:
+        # Update plot
+            self.update()
 
     def event_timeSlider(self, event):
-        self.timeIdx = self.TimeValue.get()
-        self.TimeLabel.config(text=f"{self.data.time_label} = {self.data.time[self.timeIdx]:.4f}")
+        """ Change in Slider value (Time)
+        """
+        # Change index value
+        value = self.TimeValue.get()
+        self.TimeLabel.config(text=f"{self.data.time_label} = {self.data.time[value]:.4f}")
+        self.plot.set_idx(time_idx=value)
 
-        self.set_values()
+        # Change data
+        self.plot.set_data()
+
+        # Update plot
         self.update()
 
     def event_spaceSlider(self, event):
-        self.spaceIdx = self.SpaceValue.get()
-        self.SpaceLabel.config(text=f"{self.data.space_label} = {self.data.space[self.spaceIdx]:.4f}")
+        """ Change in Slider value (Space)
+        """
+        # Change index value
+        value = self.SpaceValue.get()
+        self.SpaceLabel.config(text=f"{self.data.space_label} = {self.data.space[value]:.4f}")
+        self.plot.set_idx(space_idx=value)
 
-        self.set_values()
+        # Change data
+        self.plot.set_data()
+
+        # Update plot
         self.update()
-
-    def set_values(self, which="BOTH"):
-        # Set X value
-        if which in ["BOTH", "X"]:
-            if self.xlabel == self.data.space_label:  self.x = self.data.space
-            elif self.xlabel == self.data.time_label: self.x = self.data.time
-            else:                                     self.x = self.data.get(self.xlabel, space_idx=self.spaceIdx, time_idx=self.timeIdx)
-        
-        # Set Y value
-        if which in ["BOTH", "Y"]:
-            self.y = self.data.get(self.ylabel, space_idx=self.spaceIdx, time_idx=self.timeIdx)
-
-    def relim(self):
-        # Limits
-        if self.xlabel == self.data.time_label or self.xlabel == self.data.space_label:
-            x_array = self.x
-        else:
-            x_array = self.data.get(self.xlabel)
-        y_array = self.data.get(self.ylabel)
-
-        xlims = [np.nanmin(x_array), np.nanmax(x_array)]
-        ylims = [np.nanmin(y_array), np.nanmax(y_array)]
-        xmargin = (xlims[1] - xlims[0]) * 0.05
-        ymargin = (ylims[1] - ylims[0]) * 0.05
-        self.ax.set_xlim(xlims[0] - xmargin, xlims[1] + xmargin)
-        self.ax.set_ylim(ylims[0] - ymargin, ylims[1] + ymargin)
 
     def update(self):
         """ Mise à jour du plot """
-        # Data
-        self.line.set_data(self.x, self.y)
-
-        # Title
-        self.ax.set_title(f"{self.ylabel}({self.xlabel})")
-
-        # Grid
-        if self.hasGrid:
-            self.ax.grid(True)
-        else:
-            self.ax.grid(False)
-
-        # Additionnal custom features
-        self.custom_plot()
-
+        self.plot.update()
         self.canvas.draw()
 
     def start(self):
-        self.set_values()
-        self.relim()
+        self.plot.set_axis(xlabel=self.XaxisOptions.get(), ylabel=self.YaxisOptions.get())
         self.update()
-        self.ax.set_xlabel(self.xlabel)
-        self.ax.set_ylabel(self.ylabel)
         tkinter.mainloop()
 
-    def custom_plot(self):
-        # S-curve
-        if self.xlabel == "SIGMA" and self.ylabel == "TEMP":
-            radius = self.data.space[self.spaceIdx]
-            temp, sigma = self.data.scurve.get(radius, self.data.space_label)
-            try:
-                self.scurve_line.set_data(sigma*10, temp)
-            except:
-                line,            = self.ax.plot(sigma*10, temp, '--', label="Courbe en S")
-                self.scurve_line = line
-
-            self.ax.legend()
-
-        else:
-            try:
-                self.scurve_line.set_data([], [])
-                _lg = self.ax.get_legend()
-                _lg.remove()
-                
-            except:
-                pass
-
 #============================================================
-# MAIN PROGRAM
-
-# Récupérer le fichier de sortie
-data = DataHandler(FILENAME)
-
-# Numpy array :
-data.space # array spatial
-data.time  # array du temps
-
+#============================================================
+#                       MAIN PROGRAM                        #
+#============================================================
+#============================================================
 """
     data.time  => np.array 1D : valeurs temporelles
     data.space => np.array 1D: valeurs spatiales
@@ -457,11 +579,6 @@ data.time  # array du temps
         
         data.get("M_DOT", space_idx=-1, time_idx=-1) ==> np.array de 1 élément correspondant à M_dot au bord extérieur et au temps final
 """
-
-# Plot les données
-init_plotting()
-data.plot()
-
 """
     data.plot() => lance matplotlib
     options:
@@ -469,3 +586,11 @@ data.plot()
     - time_min=xxx : on élimine les données telles qu'on n'aura plus que TIME > time_min
     - time_max=xxx : on élimine les données telles qu'on n'aura plus que TIME > time_max
 """
+
+
+# Récupérer le fichier de sortie
+data = DataHandler(FILENAME)
+
+# Plot les données
+init_plotting()
+data.plot()
