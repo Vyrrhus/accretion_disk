@@ -30,24 +30,25 @@ CALL INIT_FILES()
 
 IF (COURBE_EN_S == 1) THEN
    CALL S_curve(Temp_min_AD, Temp_max_AD, Sg_AD, Sd_AD, n_s)
+   CALL POINTS_CRITIQUES()
 ENDIF
 
 !---------------------------------
 !-- CONDITIONS INITIALES
 !---------------------------------
-CALL CREATION_CONDITIONS_INITIALES()
-!CALL REPRISE_CONDITIONS_INITIALES()
+! CALL CREATION_CONDITIONS_INITIALES()
+! !CALL REPRISE_CONDITIONS_INITIALES()
 
-!----------------------------------
-!-- BOUCLES DE CALCULS
-!----------------------------------
-CALL SCHEMA_FIRST_BRANCH()
+! !----------------------------------
+! !-- BOUCLES DE CALCULS
+! !----------------------------------
+! CALL SCHEMA_FIRST_BRANCH()
 
-CALL SCHEMA_SECOND_BRANCH(1.0E-7_xp)
+! CALL SCHEMA_SECOND_BRANCH(1.0E-7_xp)
 
-!CALL SCHEMA_SECOND_BRANCH()
+! !CALL SCHEMA_SECOND_BRANCH()
 
-CALL CLOSE_OUTPUT()
+! CALL CLOSE_OUTPUT()
 			
 !========================================================================
                       END PROGRAM MAIN 
