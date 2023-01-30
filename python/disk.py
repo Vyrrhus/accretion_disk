@@ -385,7 +385,7 @@ class Plot():
         elif self.legend:
             self.legend.remove()
     
-    def plotScurve(self, optical_depth=[1., 10., 100.]):
+    def plotScurve(self, optical_depth=[1.]):
         """ Add S-Curve lines and Optical Depth line
             tau = 0.5 * (Ke * Kff)**0.5 * Sigma
             Kff = 6.13e18 * rho(r) * T**(-7/2)
