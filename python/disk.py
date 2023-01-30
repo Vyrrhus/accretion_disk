@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+import matplotlib.animation as animation
 
 import tkinter
 from tkinter import ttk
@@ -13,6 +14,12 @@ import io
 #============================================================
 # FILENAME
 FILENAME = "data.out"
+""" TODO
+    - Animation quand xlabel /= radius
+    - Ajouter le temps sur le graphe matplotlib lors d'une animation (ou même dès qu'on a Y(r))
+    - Ajouter le rayon sur les autres graphes matplotlib dès qu'on a Y(X) et X /= r ?
+    - Ecraser le bouton save pour sauvegarder des images dans un dossier image/[filename]/*.png (avec le .gitignore qui va bien)
+"""
 
 #============================================================
 # MATPLOTLIB GLOBAL SETTINGS
@@ -249,6 +256,11 @@ class Plot():
         self.xlabel = ""
         self.ylabel = ""
         self.title  = ""
+
+        # Animation options
+        self.animation = None
+        self.isPaused  = False
+        self.frameRate = 5
     
     def relim(self, margin=0.05):
         """ Set the limits of the plot (xlim, ylim) with a given [margin]
@@ -277,7 +289,7 @@ class Plot():
         """ Set the X-axis and Y-axis of the plot
         """
         # No change
-        if self.xlabel is xlabel and self.ylabel is ylabel:
+        if self.xlabel == xlabel and self.ylabel == ylabel:
             return
 
         # Set labels
@@ -296,7 +308,10 @@ class Plot():
         self.set_title()
 
         # Set new data
-        self.set_data()
+        if self.xlabel == self.data.space_label:    self.x = self.data.space
+        elif self.xlabel == self.data.time_label:   self.x = self.data.time
+        else:                                       self.x = self.data.get(self.xlabel)
+        self.y = self.data.get(self.ylabel)
 
         # Redefine limits
         self.relim()
@@ -313,13 +328,17 @@ class Plot():
     def set_data(self):
         """ Set the data to plot: Y(X)
         """
-        # X value
-        if   self.xlabel == self.data.space_label:  self.x = self.data.space
-        elif self.xlabel == self.data.time_label:   self.x = self.data.time
-        else:                                       self.x = self.data.get(self.xlabel, space_idx=self.space_idx, time_idx=self.time_idx)
-
-        # Y value
-        self.y = self.data.get(self.ylabel, space_idx=self.space_idx, time_idx=self.time_idx)
+        # Y(r)
+        if self.time_idx is not None:
+            self.line.set_data(self.x, self.y[self.time_idx, :])
+        
+        # Y(t):
+        elif self.xlabel == self.data.time_label:
+            self.line.set_data(self.x, self.y[:, self.space_idx])
+        
+        # Y(X)
+        else:
+            self.line.set_data(self.x[:, self.space_idx], self.y[:, self.space_idx])
 
     def set_idx(self, space_idx=None, time_idx=None):
         """ Set values of the Slider index
@@ -342,7 +361,7 @@ class Plot():
         """ Update plot
         """
         # Plot
-        self.line.set_data(self.x, self.y)
+        self.set_data()
 
         # Grid
         if self.hasGrid:    self.ax.grid(True)
@@ -370,6 +389,31 @@ class Plot():
         # S-Curve
         lines = self.data.scurve.plot(self.ax, self.data.space[self.space_idx], self.data.space_label)
         self.optional_lines += list(lines)
+
+    def start_animation(self, slider_to_update=None):
+        """ Animation func
+        """
+        def updateTime(frame_number):
+            """ Animation function for Y(r)
+            """
+            self.time_idx = (self.time_idx + 1) % self.data.time.shape[0]
+            self.set_data()
+            if slider_to_update:
+                slider_to_update.set(self.time_idx)
+        
+        def updateSpace(frame_number):
+            """ Animation function for Y(X) with X /= r
+            """
+
+        # Whole plot animation
+        if self.space_idx is None:
+            self.animation = animation.FuncAnimation(self.figure, updateTime, interval=self.frameRate)
+        
+
+    def stop_animation(self):
+        if self.animation is not None:
+            self.animation._stop()
+            self.animation = None
 
 #============================================================
 # GUI CLASS
@@ -453,18 +497,18 @@ class GUI():
             command=self.event_spaceSlider
         )
         self.SpaceTextValue = tkinter.StringVar(value=self.data.space[0])
-        # self.SpaceSpinbox = ttk.Spinbox(
-        #     self.SpaceFrame,
-        #     from_=0,
-        #     to=self.data.space[-1],
-        #     textvariable=self.SpaceTextValue,
-        #     wrap=False,
-        #     values=tuple(self.data.space)
-        # )
+
         if self.data.space.shape[0] > 1:
             self.SpaceLabel.pack(side=tkinter.LEFT, padx=5, pady=5)
-            # self.SpaceSpinbox.pack(side=tkinter.LEFT, padx=5, pady=5)
             self.SpaceSlider.pack(side=tkinter.LEFT, padx=20, pady=5, expand=True, fill=tkinter.X)
+
+        # Toolbar > Animation button
+        self.animationButton = ttk.Button(
+            self.toolbar,
+            text="Start",
+            command=self.event_animation
+        )
+        self.animationButton.grid(row=0, column=5, sticky=tkinter.W, padx=20, pady=5)
 
         # Configure style
         self.style = ttk.Style(self.root)
@@ -479,6 +523,10 @@ class GUI():
         """
         # Clear Menu
         self.XaxisMenu.selection_clear()
+
+        # Stop animation
+        self.plot.stop_animation()
+        self.animationButton.configure(text="Start")
 
         # Change axis
         previous_xlabel = self.plot.xlabel
@@ -507,6 +555,10 @@ class GUI():
         # Clear Menu
         self.YaxisMenu.selection_clear()
 
+        # Stop animation
+        self.plot.stop_animation()
+        self.animationButton.configure(text="Start")
+
         # Change axis
         self.plot.set_axis(ylabel=self.YaxisOptions.get())
 
@@ -524,27 +576,51 @@ class GUI():
         # Change index value
         value = self.TimeValue.get()
         self.TimeLabel.config(text=f"{self.data.time_label} = {self.data.time[value]:.4f}")
-        self.plot.set_idx(time_idx=value)
 
-        # Change data
-        self.plot.set_data()
+        if not self.plot.animation or self.plot.isPaused:
+            self.plot.set_idx(time_idx=value)
 
-        # Update plot
-        self.update()
+            # Update plot
+            self.update()
 
     def event_spaceSlider(self, event):
         """ Change in Slider value (Space)
         """
+        # Stop animation
+        self.plot.stop_animation()
+        self.animationButton.configure(text="Start")
+
         # Change index value
         value = self.SpaceValue.get()
         self.SpaceLabel.config(text=f"{self.data.space_label} = {self.data.space[value]:.4f}")
         self.plot.set_idx(space_idx=value)
 
-        # Change data
-        self.plot.set_data()
-
         # Update plot
         self.update()
+    
+    def event_animation(self):
+        """ Start / Stop plot animation
+        """
+        # Clear button
+        self.animationButton.selection_clear()
+
+        # Play/Pause animation
+        if self.plot.animation:
+            if self.plot.isPaused:
+                self.plot.animation.resume()
+                self.animationButton.configure(text="Pause")
+            else:
+                self.plot.animation.pause()
+                self.animationButton.configure(text="Play")
+            
+            self.plot.isPaused = not self.plot.isPaused
+        
+        # Start animation
+        else:
+            self.plot.isPaused = False
+            self.animationButton.configure(text="Pause")
+            self.plot.start_animation(slider_to_update=self.TimeSlider)
+            self.canvas.draw()
 
     def update(self):
         """ Mise à jour du plot """
