@@ -67,8 +67,16 @@ SUBROUTINE REPRISE_CONDITIONS_INITIALES()
     INTEGER :: INPUT_UNT 
     INTEGER :: IOS
     CHARACTER(LEN=12) :: HEADER
+    CHARACTER(LEN=30) :: FMT_PYT
     REAL(KIND=XP), DIMENSION(NX) :: TEMP_INI, S_INI
 
+    ! Formats
+    IF (MODULO(NX,PAS_ECRITURE_SPATIAL) == 1) THEN
+        WRITE(FMT_PYT, "('(A11,X,', I0, '(1pE', I0, '.', I0, 'E3,2X))')") NX / PAS_ECRITURE_SPATIAL, 6 + 8, 6
+    ELSE
+        WRITE(FMT_PYT, "('(A11,X,', I0, '(1pE', I0, '.', I0, 'E3,2X))')") NX / PAS_ECRITURE_SPATIAL+1,6 + 8, 6
+    ENDIF
+    
     OPEN(NEWUNIT=INPUT_UNT, file="config/conditions_initiales.config", ACTION="read", STATUS="old", IOSTAT=IOS)
     IF (IOS /= 0) THEN
         PRINT*, "==========================================================="
@@ -78,8 +86,8 @@ SUBROUTINE REPRISE_CONDITIONS_INITIALES()
         CALL CREATION_CONDITIONS_INITIALES()
     
     ELSE
-        READ(INPUT_UNT, FMT, IOSTAT=IOS) HEADER, S_INI
-        READ(INPUT_UNT, FMT, IOSTAT=IOS) HEADER, TEMP_INI
+        READ(INPUT_UNT, FMT_PYT, IOSTAT=IOS) HEADER, S_INI
+        READ(INPUT_UNT, FMT_PYT, IOSTAT=IOS) HEADER, TEMP_INI
         CLOSE(INPUT_UNT)
 
         ! Variables adimensionnées

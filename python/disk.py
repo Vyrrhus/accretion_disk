@@ -13,7 +13,7 @@ import io
 
 #============================================================
 # FILENAME
-FILENAME = "data.out"
+FILENAME = "data_pluslong.out"
 """ TODO
     - Animation quand xlabel /= radius
     - Ajouter le temps sur le graphe matplotlib lors d'une animation (ou même dès qu'on a Y(r))

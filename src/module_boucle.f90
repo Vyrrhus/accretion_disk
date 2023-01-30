@@ -177,9 +177,10 @@ SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE,ECRIT_PAS)
         CALL SCHEMA_INSTABLE_TS(0.8_xp)
         CALL COMPUTE_EQS()
         TIME_AD = TIME_AD + DELTA_T_INSTABLE_AD
-        
+        CALL ADIM_TO_PHYSIQUE()
         IF (MODULO(iterateur,ECRIT_PAS)==0) THEN
-            CALL ADIM_TO_PHYSIQUE()
+            PRINT*,iterateur,'   TEMPS AD =  ',TIME_AD
+            
             CALL ECRITURE_DIM()
         ENDIF
         
