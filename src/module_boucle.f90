@@ -152,14 +152,16 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
 END SUBROUTINE SCHEMA_FIRST_BRANCH
 !---------------------------------------------------------------------------------------------------
 
-SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
+SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE,ECRIT_PAS)
 !---------------------------------------------------------------------------------------------------
 !> Calcul précis de l'instabilité, à la fraction de temps caracteristique donnée en entrée (usuel 10e-7)
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
     INTEGER :: iterateur
+    INTEGER, INTENT(IN) :: ECRIT_PAS
     REAL(KIND=xp) :: FRACTION_DT_INSTABLE
+    
 
     DELTA_T_INSTABLE_AD = FRACTION_DT_INSTABLE * MAXVAL( X_AD ** 4.0_xp / NU_AD )
     CALL SETUP_SCHEMA_INSTABLE_TS()
@@ -176,39 +178,13 @@ SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE)
         CALL COMPUTE_EQS()
         TIME_AD = TIME_AD + DELTA_T_INSTABLE_AD
         
-        IF (MODULO(iterateur,10000)==0) THEN
+        IF (MODULO(iterateur,ECRIT_PAS)==0) THEN
             CALL ADIM_TO_PHYSIQUE()
             CALL ECRITURE_DIM()
         ENDIF
         
     END DO
     
-    DELTA_T_INSTABLE_AD = FRACTION_DT_INSTABLE * 1.0E-1_xp * MAXVAL( X_AD ** 4.0_xp / NU_AD )
-    CALL SETUP_SCHEMA_INSTABLE_TS()
-    
-    WRITE(*,"(48('-'))")
-    WRITE(*,"(48('-'))")
-    WRITE(*,"('ON RAJOUTE DE LA PREC      DELTA_T_INSTABLE_AD = ',1pE12.4)") DELTA_T_INSTABLE_AD
-    WRITE(*,"(48('-'))")
-    WRITE(*,"(48('-'))")
-    
-    DO iterateur=1, 1500000
-    
-        CALL SCHEMA_INSTABLE_TS(1.0_xp)
-        CALL COMPUTE_EQS()
-        TIME_AD = TIME_AD + DELTA_T_INSTABLE_AD
-        
-        IF (MODULO(iterateur,1000)==0) THEN
-            CALL ADIM_TO_PHYSIQUE()
-            CALL ECRITURE_DIM()
-        ENDIF
-        
-    END DO
-    
-    WRITE(*,"(48('-'))")
-    WRITE(*,"('------------SECOND BRANCH DONE----------')")
-    WRITE(*,"(48('-'))")
-
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE SCHEMA_SECOND_BRANCH
 !---------------------------------------------------------------------------------------------------
