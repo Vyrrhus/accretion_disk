@@ -260,7 +260,9 @@ class Plot():
         # Animation options
         self.animation = None
         self.isPaused  = False
-        self.frameRate = 5
+        self.animationLine = None
+        self.frameStep = int(max(self.data.time.shape[0] / 500, 1))
+        print(self.data.time.shape[0], self.frameStep)
     
     def relim(self, margin=0.05):
         """ Set the limits of the plot (xlim, ylim) with a given [margin]
@@ -325,7 +327,7 @@ class Plot():
             self.title = f"{self.ylabel}({self.xlabel})"
         self.ax.set_title(self.title)
 
-    def set_data(self):
+    def set_data(self, idx_time=None, idx_space=None):
         """ Set the data to plot: Y(X)
         """
         # Y(r)
@@ -385,10 +387,26 @@ class Plot():
     
     def plotScurve(self, optical_depth=[1.]):
         """ Add S-Curve lines and Optical Depth line
+            tau = 0.5 * (Ke * Kff)**0.5 * Sigma
+            Kff = 6.13e18 * rho(r) * T**(-7/2)
+            ==>
+                Kff = 2 * tau 
+                T**(-7/2) = Kff / (6.13e18 * rho(r))
+                T**(-7/2) = (2*tau / Sigma)**2 / (Ke * 6.13e18 * rho(r))
         """
         # S-Curve
         lines = self.data.scurve.plot(self.ax, self.data.space[self.space_idx], self.data.space_label)
         self.optional_lines += list(lines)
+
+        # Optical depth
+        sigma = self.data.get("SIGMA", space_idx=self.space_idx)
+        rho   = self.data.get("RHO", space_idx=self.space_idx)
+        Ke    = self.data.constantes["KAPPA_E"]
+        
+        for tau in optical_depth:
+            temp_tau = ((2 * tau / sigma)**2 / (Ke * 6.13e18 * rho))**(-2/7)
+            line, = self.ax.plot(sigma, temp_tau, '--', color='gray', label=r'$\tau_{eff} = $'+str(tau))
+            self.optional_lines += [line]
 
     def start_animation(self, slider_to_update=None):
         """ Animation func
@@ -396,7 +414,7 @@ class Plot():
         def updateTime(frame_number):
             """ Animation function for Y(r)
             """
-            self.time_idx = (self.time_idx + 1) % self.data.time.shape[0]
+            self.time_idx = (self.time_idx + self.frameStep) % self.data.time.shape[0]
             self.set_data()
             if slider_to_update:
                 slider_to_update.set(self.time_idx)
@@ -404,16 +422,29 @@ class Plot():
         def updateSpace(frame_number):
             """ Animation function for Y(X) with X /= r
             """
+            idx = frame_number % self.data.time.shape[0]
+            if self.xlabel == self.data.time_label:
+                self.animationLine.set_data(self.x[idx], self.y[idx, self.space_idx])
+            else:
+                self.animationLine.set_data(self.x[idx, self.space_idx], self.y[idx, self.space_idx])
 
         # Whole plot animation
         if self.space_idx is None:
-            self.animation = animation.FuncAnimation(self.figure, updateTime, interval=self.frameRate)
-        
+            self.animation = animation.FuncAnimation(self.figure, updateTime, interval=10)
 
+        # Point animation
+        if self.time_idx is None:
+            line, = self.ax.plot([], [], 'ro')
+            self.animationLine = line
+            self.animation = animation.FuncAnimation(self.figure, updateSpace, interval=10)
+     
     def stop_animation(self):
         if self.animation is not None:
             self.animation._stop()
             self.animation = None
+        if self.animationLine:
+            self.animationLine.set_data([], [])
+            self.animationLine = None
 
 #============================================================
 # GUI CLASS

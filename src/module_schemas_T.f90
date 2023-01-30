@@ -9,8 +9,8 @@
 
     IMPLICIT NONE
 
-    REAL(kind=xp)             :: DELTA_T_AD        !!Pas de temps pour l'intégration de T et S avec l'advection
-    REAL(kind=xp)             :: T_EXT_AD             !!Temperature de la matière arivant dans le disque
+    REAL(kind=xp)             :: DELTA_T_AD              !!Pas de temps pour l'intégration de T et S avec l'advection
+    REAL(kind=xp)             :: TEMP_EXT_AD             !!Temperature de la matière arivant dans le disque
 
     CONTAINS
 
@@ -60,7 +60,7 @@
         INTEGER                                          :: i
 
         !Calcul de Gamma_3
-        GAMMA_3 = 1.0_xp + (4.0_xp-3.0_xp*BETA)/(BETA*C_V_0)
+        GAMMA_3 = 1.0_xp + (4.0_xp-3.0_xp*BETA)/(BETA*C_V_AD)
 
         !Dérivée temporelle de S_AD
         DS_AD_DT = (S_AD-S_AD_SAVE)/DT
@@ -80,6 +80,12 @@
             DS_AD_DX(1)  = (S_AD(1))/DX
         END IF
 
+        IF(SPEED_AD(NX)<=0) THEN
+            DS_AD_DX(NX)  = (S_AD(NX)-S_AD(NX-1))/DX !!!???
+        ELSE 
+            DS_AD_DX(NX)  = (S_AD(NX)-S_AD(NX-1))/DX
+        END IF
+
         DS_AD_DX(NX) = S_AD(NX)-S_AD(NX-1)/DX
 
         !Dérivée spatiale de TEMP_AD
@@ -92,8 +98,13 @@
         END DO
 
         
-        DTEMP_AD_DX(1)   = (TEMP_AD(2)-TEMP_AD(1))/DX
-        DTEMP_AD_DX(NX)  = (TEMP_AD(NX)-TEMP_AD(NX-1))/DX
+        DTEMP_AD_DX(1)   = (TEMP_AD(2)-TEMP_AD(1))/DX !ok si v<0
+
+        IF(SPEED_AD(NX)<=0) THEN
+            DTEMP_AD_DX(NX)  = (TEMP_AD(NX)-TEMP_AD(NX-1))/DX !!!???
+        ELSE 
+            DTEMP_AD_DX(NX)  = (TEMP_AD(NX)-TEMP_AD(NX-1))/DX
+        END IF
 
         !Calculs de Q_ADV
         Q_ADV_AD = C_V_AD*((GAMMA_3-1.0_xp) * TEMP_AD/S_AD *&
