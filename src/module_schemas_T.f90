@@ -81,7 +81,7 @@
         END IF
 
         IF(SPEED_AD(NX)<=0) THEN
-            DS_AD_DX(NX)  = (S_AD(NX+1)-S_AD(NX))/DX !!!???
+            DS_AD_DX(NX)  = (S_AD(NX)-S_AD(NX-1))/DX !!!???
         ELSE 
             DS_AD_DX(NX)  = (S_AD(NX)-S_AD(NX-1))/DX
         END IF
@@ -99,7 +99,6 @@
 
         
         DTEMP_AD_DX(1)   = (TEMP_AD(2)-TEMP_AD(1))/DX !ok si v<0
-        DTEMP_AD_DX(NX)  = (TEMP_AD(NX)-TEMP_AD(NX-1))/DX !ok si v>0
 
         IF(SPEED_AD(NX)<=0) THEN
             DTEMP_AD_DX(NX)  = (TEMP_AD(NX)-TEMP_AD(NX-1))/DX !!!???

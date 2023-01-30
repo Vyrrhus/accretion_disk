@@ -18,6 +18,7 @@ cleanup
 # Folders
 doc/
 python/disk.py
+python/plot.py
 test.py
 .bashrc
 3d.py
