@@ -9,8 +9,8 @@
 
     IMPLICIT NONE
 
-    REAL(kind=xp)             :: DELTA_T_AD        !!Pas de temps pour l'intégration de T et S avec l'advection
-    REAL(kind=xp)             :: T_EXT_AD             !!Temperature de la matière arivant dans le disque
+    REAL(kind=xp)             :: DELTA_T_AD              !!Pas de temps pour l'intégration de T et S avec l'advection
+    REAL(kind=xp)             :: TEMP_EXT_AD             !!Temperature de la matière arivant dans le disque
 
     CONTAINS
 
