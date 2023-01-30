@@ -49,7 +49,7 @@ SUBROUTINE SETUP_SCHEMA_INSTABLE_TS()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
-    DELTA_T_VISQ=DELTA_T_INSTABLE_AD
+    DELTA_T_VISQ_AD=DELTA_T_INSTABLE_AD
     DELTA_T_TH_AD=DELTA_T_INSTABLE_AD
 
     CALL CREER_LAMBDA()
