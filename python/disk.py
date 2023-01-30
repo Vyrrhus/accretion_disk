@@ -204,18 +204,22 @@ class DataHandler():
 
     def get(self, variable, space_idx=None, time_idx=None):
         array = self.df.query(f"variables=='{variable}'").to_numpy().astype(np.float64)
-        array = np.reshape(array, (self.time.shape[0], self.space.shape[0]))
+        if variable != "L_STEFAN":
+            array = np.reshape(array, (self.time.shape[0], self.space.shape[0]))
 
-        if time_idx is None and space_idx is None:
-            return array
+            if time_idx is None and space_idx is None:
+                return array
 
-        if time_idx is None:
-            return array[:,space_idx]
+            if time_idx is None:
+                return array[:,space_idx]
 
-        if space_idx is None:
-            return array[time_idx,:]
+            if space_idx is None:
+                return array[time_idx,:]
 
-        return array[time_idx, space_idx]
+            return array[time_idx, space_idx]
+        
+        else:
+            return array[:,0]
 
     def plot(self, radius=None, time_min=None, time_max=None, **fig_kw):
         """ Plot toutes les données.
@@ -338,6 +342,10 @@ class Plot():
     def set_data(self, idx_time=None, idx_space=None):
         """ Set the data to plot: Y(X)
         """
+        if self.ylabel == "L_STEFAN":
+            self.line.set_data(self.x, self.y)
+            return
+            
         # Y(r)
         if self.time_idx is not None:
             self.line.set_data(self.x, self.y[self.time_idx, :])
