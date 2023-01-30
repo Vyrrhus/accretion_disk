@@ -172,9 +172,9 @@ SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE,ECRIT_PAS)
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
 
-    DO iterateur=1, 1000000
+    DO iterateur=1, 7000000
     
-        CALL SCHEMA_INSTABLE_TS(1.0_xp)
+        CALL SCHEMA_INSTABLE_TS(0.8_xp)
         CALL COMPUTE_EQS()
         TIME_AD = TIME_AD + DELTA_T_INSTABLE_AD
         
