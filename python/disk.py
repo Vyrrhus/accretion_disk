@@ -64,7 +64,10 @@ def timer(func):
 # DATA CLASS
 
 class DataScurve():
-    def __init__(self, filename):
+    def __init__(self, filename, constantes, optical_depth=[1.]):
+        self.constantes    = constantes
+        self.optical_depth = optical_depth
+
         self.epais = pd.read_csv(f"output/{filename[0]}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
         self.mince = pd.read_csv(f"output/{filename[1]}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
 
@@ -81,22 +84,28 @@ class DataScurve():
         sigma = scurve["Sigma"].to_numpy()
         return temp, sigma
     
-    def plot(self, ax, radius, radius_label, epais=True, mince=True):
+    def plot(self, ax, radius, radius_label, plot_epais=True, plot_mince=True, plot_optical_depth=True):
         """ Plot S-curve for each branch
         """
-        if epais:
+        if plot_epais:
             temp, sigma = self.get(radius, radius_label)
             line_epais, = ax.plot(sigma*10, temp, '--', color="orange", label="Courbe en S - Branche épaisse")
         else:
             line_epais = None
 
-        if mince:
+        if plot_mince:
             temp, sigma = self.get(radius, radius_label, isEpais=False)
             line_mince, = ax.plot(sigma*10, temp, '--', color="green", label="Courbe en S - Branche mince")
         else:
             line_mince = None
 
-        return line_epais, line_mince
+        # if plot_optical_depth:
+        #     # Compute Temp, Sigma with given tau_eff and radius
+        
+        # else:
+        #     line_optical_depth = None
+
+        return line_epais, line_mince #, line_optical_depth
 
 class SkipWrapper(io.TextIOWrapper):
     """ io.TextIOWrapper pour skip les premières lignes des fichiers .out jusqu'à match:
@@ -191,7 +200,7 @@ class DataHandler():
         self.df = data
 
         # Scurve data
-        self.scurve = DataScurve(scurve_filename)
+        self.scurve = DataScurve(scurve_filename, self.constantes)
 
     def get(self, variable, space_idx=None, time_idx=None):
         array = self.df.query(f"variables=='{variable}'").to_numpy().astype(np.float64)
@@ -262,7 +271,6 @@ class Plot():
         self.isPaused  = False
         self.animationLine = None
         self.frameStep = int(max(self.data.time.shape[0] / 500, 1))
-        print(self.data.time.shape[0], self.frameStep)
     
     def relim(self, margin=0.05):
         """ Set the limits of the plot (xlim, ylim) with a given [margin]
@@ -385,7 +393,7 @@ class Plot():
         elif self.legend:
             self.legend.remove()
     
-    def plotScurve(self, optical_depth=[1.]):
+    def plotScurve(self, optical_depth=[1., 10.]):
         """ Add S-Curve lines and Optical Depth line
             tau = 0.5 * (Ke * Kff)**0.5 * Sigma
             Kff = 6.13e18 * rho(r) * T**(-7/2)
@@ -400,13 +408,13 @@ class Plot():
 
         # Optical depth
         sigma = self.data.get("SIGMA", space_idx=self.space_idx)
-        rho   = self.data.get("RHO", space_idx=self.space_idx)
+        H     = self.data.get("H", space_idx=self.space_idx)
         Ke    = self.data.constantes["KAPPA_E"]
         
-        for tau in optical_depth:
-            temp_tau = ((2 * tau / sigma)**2 / (Ke * 6.13e18 * rho))**(-2/7)
-            line, = self.ax.plot(sigma, temp_tau, '--', color='gray', label=r'$\tau_{eff} = $'+str(tau))
-            self.optional_lines += [line]
+        # for tau in optical_depth:
+        #     temp_tau = ((8 * H * tau**2) / (Ke * 6.13e18 * sigma**3))**(-2/7)
+        #     line, = self.ax.plot(sigma, temp_tau, '--', color='gray', label=r'$\tau_{eff} = $'+str(tau))
+        #     self.optional_lines += [line]
 
     def start_animation(self, slider_to_update=None):
         """ Animation func
