@@ -74,15 +74,6 @@ MODULE module_fonctions_utiles
 
     END SUBROUTINE
 
-
-    SUBROUTINE signeQ(Temp,S,X_AD)
-    !-------------------------------------------------------------------------------------------------------------
-    !Calcul du signe de Q+-Q-
-    !---------------------------------------------------------------------------------------------------------------------
-       REAL(KIND=xp), INTENT(IN)           :: Temp, S, X_AD
-
-    END SUBROUTINE
-
 !------------------------------------------------------------------------------------------------------------------------------------
 !---------------------------------------------------Subroutine append----------------------------------------------------------------
 !------------------------------------------------------------------------------------------------------------------------------------
@@ -307,79 +298,78 @@ MODULE module_fonctions_utiles
     
     END SUBROUTINE POINTS_CRITIQUES
 
-    !SUBROUTINE calc_rho(S_AD, X_AD, H_AD, RHO_AD)
+    SUBROUTINE calc_QpmQm (Temp_S_AD, S_S_AD, ipos, QpmQm)
+    !---------------------------------------------------------------------------------------
+    !Subroutine qui calcul Q+-Q-
+    !-------------------------------------------------------------------------------------------
+       REAL(KIND=xp),  INTENT(in)  :: Temp_S_AD
+       REAL(KIND=xp),  INTENT(in)  :: S_S_AD
+       INTEGER,        INTENT(in)  :: ipos
+       REAL(KIND=xp),  INTENT(out) :: QpmQm
 
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    ! Calcule la densité adimensionnée correspondant à un couple (H_AD, S_AD) pour X_AD donné
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    
-       ! REAL(kind=xp)  , INTENT(IN)     :: S_AD, X_AD, H_AD
-      !  REAL(kind=xp)  , INTENT(OUT)    :: RHO_AD
-    
-     !   RHO_AD = S_AD/(X_AD*H_AD)
-    
-    !END SUBROUTINE
-    
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    ! La fonction à annuler est de la forme 1/(4*3**(1.5))*(P_RAD_AD+P_GAZ_AD)+THIRD_TERM=0
-    ! Le troisième terme étant dépendant de la branche sur laquelle on se place.
-    ! On va calculer dans les prochaines subroutines ces différents termes.
-    ! --------------------------------------------------------------------------------------------------------------------------------------
+       REAL(KIND=xp)              :: Omega_S_AD
+       REAL(KIND=xp)              :: H_S_AD
+       REAL(KIND=xp)              :: rho_S_AD
+       REAL(KIND=xp)              :: Kff_S
+       REAL(KIND=xp)              :: Tau_S_eff
+       REAL(KIND=xp)              :: nu_S_AD
+       REAL(KIND=xp)              :: Fz_S
+       REAL(KIND=xp)              :: Q_plus_S
+       REAL(KIND=xp)              :: Q_moins_S
 
-    !SUBROUTINE calc_P_rad(TEMP_AD, P_RAD_AD)
 
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    ! Calcule la pression de radiation adimensionnée à partir de la température adimensionnée
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    
-       ! REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD
-      !  REAL(kind=xp)  , INTENT(OUT)    :: P_RAD_AD
-    
-     !   P_RAD_AD = (P_rad_0 / P_0) * TEMP_AD**4._xp
-    
-    !END SUBROUTINE
-    
-    !SUBROUTINE calc_P_gaz(TEMP_AD, RHO_AD, P_GAZ_AD)
+       Omega_S_AD = 3._xp ** (3._xp/2._xp) * X_AD(ipos) ** (-3._xp)
 
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    ! Calcule la pression de gaz adimensionnée à partir de la température et de la densité adimensionnées
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    
-       ! REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD, RHO_AD
-      !  REAL(kind=xp)  , INTENT(OUT)    :: P_GAZ_AD
-    
-     !   P_GAZ_AD = (P_gaz_0 / P_0) * TEMP_AD * RHO_AD
-    
-    !END SUBROUTINE
-    
-    !SUBROUTINE calc_third_term_mince(TEMP_AD, RHO_AD, THIRD_TERM_AD)
+       CALL calc_H2( Temp_S_AD, X_AD(ipos), Omega_S_AD, S_S_AD, H_S_AD )
 
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    ! Calcul du troisième terme dans le cas optiquement mince, en prenant une proposition de température et de densité
-    ! --------------------------------------------------------------------------------------------------------------------------------------
+       rho_S_AD = S_S_AD / ( X_AD(ipos) * H_S_AD )
 
-     !   REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD, RHO_AD
-      !  REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
-    
-       ! THIRD_TERM_AD = F_Z_RAD_0 *RHO_AD**2._xp * TEMP_AD**0.5_xp
-    
-    !END SUBROUTINE calc_third_term_mince
-    
-    !SUBROUTINE calc_third_term_epais(TEMP_AD, RHO_AD, H_AD, THIRD_TERM_AD)
+       nu_S_AD = 0.5_xp * Omega_S_AD * H_S_AD * H_S_AD
 
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    ! Calcul du troisième terme dans le cas optiquement épais, en prenant une proposition de température, de densité et de H
-    ! --------------------------------------------------------------------------------------------------------------------------------------
-    !
-    !    REAL(kind=xp)  , INTENT(IN)     :: TEMP_AD, RHO_AD, H_AD
-    !    REAL(kind=xp)                   :: NUMERATOR, DENOMINATOR
-    !    REAL(kind=xp)  , INTENT(OUT)    :: THIRD_TERM_AD
-    !
-    !    numerator=-F_Z_DIFF_0*(2._xp*T_AD**4._xp)
-    !    denominator=(KAPPA_E + 6.13E18 * RHO_AD * T_AD**(-7._xp/2._xp) * rho_0 * T_0**(-7._xp/2._xp)) * S_0 &
-    !    * RHO_AD**2 *H_AD**2
-    !    THIRD_TERM_AD=numerator/denominator
+       Kff_S = 6.13E18 *rho_S_AD * Temp_S_AD ** (-7._xp/2._xp) *rho_0 * TEMP_0 ** (-7._xp/2._xp)
+
+       Tau_S_eff = 0.5_xp * S_S_AD / X_AD(ipos) * S_0 * SQRT(KAPPA_E * Kff_S)
+
+       Fz_S = F_Z_DIFF_0 * X_AD(ipos) * Temp_S_AD ** 4._xp / ( (KAPPA_E + Kff_S) * S_S_AD )
+
+       Q_plus_S = nu_S_AD * Omega_S_AD**2._xp * Q_PLUS_0
+
+       Q_moins_S = 2._xp * X_AD(ipos) * Fz_S / ( S_S_AD * S_0 )
+
+       QpmQm = Q_plus_S - Q_moins_S
+
+    END SUBROUTINE 
+
+    SUBROUTINE map_QpmQm (T_min_map_AD, T_max_map_AD, S_map_AD, n_map)
+    !--------------------------------------------------------------------------------------------------------------------
+    !Subroutine qui calcule la carte des valeurs de Q+-Q- à tous les rayons dans l'espace T-Sigma
+    !-------------------------------------------------------------------------------------------------------------
+       
+       REAL(KIND=xp), INTENT(in)  :: T_min_map_AD, T_max_map_AD
+       REAL(KIND=xp), INTENT(in)  :: S_map_AD
+       INTEGER,       INTENT(in)  :: n_map
+
+       REAL(KIND=xp)              :: QpmQm_map
+       REAL(KIND=xp)              :: T_map_AD
+       INTEGER                    :: j, ipos
+
+       OPEN (unit=10, file="./output/map.out", status="unknown")
+
+       DO ipos=1,NX
+
+          T_map_AD = T_min_map_AD
     
-    !END SUBROUTINE calc_third_term_epais
+           DO j=1, n_map
+
+              CALL calc_QpmQm (T_map_AD, S_map_AD, ipos, QpmQm_map)
+              WRITE(10,*) T_map_AD * Temp_0, S_map_AD * S_0 / X_AD(ipos) * 1E-1, QpmQm_map, X_AD(ipos)
+              T_map_AD = T_map_AD + ( T_max_map_AD - T_min_map_AD ) / n_map
+
+           ENDDO
+        ENDDO
+
+       CLOSE(10)
+
+    END SUBROUTINE
     
 END MODULE module_fonctions_utiles

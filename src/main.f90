@@ -31,6 +31,10 @@ CALL INIT_FILES()
 IF (COURBE_EN_S == 1) THEN
    CALL S_curve(Temp_min_AD, Temp_max_AD, Sg_AD, Sd_AD, n_s)
    CALL POINTS_CRITIQUES()
+   Temp_min_AD=1.0e-1
+   Temp_max_AD=1.0e1
+   Sg_AD = 790._xp * 10 / S_0 * X_AD(10)
+   CALL map_QpmQm(Temp_min_AD, Temp_max_AD, Sg_AD, 100)
 ENDIF
 
 !---------------------------------
