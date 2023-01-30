@@ -385,12 +385,28 @@ class Plot():
         elif self.legend:
             self.legend.remove()
     
-    def plotScurve(self, optical_depth=[1.]):
+    def plotScurve(self, optical_depth=[1., 10., 100.]):
         """ Add S-Curve lines and Optical Depth line
+            tau = 0.5 * (Ke * Kff)**0.5 * Sigma
+            Kff = 6.13e18 * rho(r) * T**(-7/2)
+            ==>
+                Kff = 2 * tau 
+                T**(-7/2) = Kff / (6.13e18 * rho(r))
+                T**(-7/2) = (2*tau / Sigma)**2 / (Ke * 6.13e18 * rho(r))
         """
         # S-Curve
         lines = self.data.scurve.plot(self.ax, self.data.space[self.space_idx], self.data.space_label)
         self.optional_lines += list(lines)
+
+        # Optical depth
+        sigma = self.data.get("SIGMA", space_idx=self.space_idx)
+        rho   = self.data.get("RHO", space_idx=self.space_idx)
+        Ke    = self.data.constantes["KAPPA_E"]
+        
+        for tau in optical_depth:
+            temp_tau = ((2 * tau / sigma)**2 / (Ke * 6.13e18 * rho))**(-2/7)
+            line, = self.ax.plot(sigma, temp_tau, '--', color='gray', label=r'$\tau_{eff} = $'+str(tau))
+            self.optional_lines += [line]
 
     def start_animation(self, slider_to_update=None):
         """ Animation func
