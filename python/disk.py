@@ -260,7 +260,8 @@ class Plot():
         # Animation options
         self.animation = None
         self.isPaused  = False
-        self.frameRate = 5
+        self.frameStep = int(max(self.data.time.shape[0] / 500, 1))
+        print(self.data.time.shape[0], self.frameStep)
     
     def relim(self, margin=0.05):
         """ Set the limits of the plot (xlim, ylim) with a given [margin]
@@ -396,7 +397,7 @@ class Plot():
         def updateTime(frame_number):
             """ Animation function for Y(r)
             """
-            self.time_idx = (self.time_idx + 1) % self.data.time.shape[0]
+            self.time_idx = (self.time_idx + self.frameStep) % self.data.time.shape[0]
             self.set_data()
             if slider_to_update:
                 slider_to_update.set(self.time_idx)
@@ -407,9 +408,8 @@ class Plot():
 
         # Whole plot animation
         if self.space_idx is None:
-            self.animation = animation.FuncAnimation(self.figure, updateTime, interval=self.frameRate)
-        
-
+            self.animation = animation.FuncAnimation(self.figure, updateTime, interval=10)
+     
     def stop_animation(self):
         if self.animation is not None:
             self.animation._stop()
