@@ -21,7 +21,6 @@ REAL(KIND=xp)                 :: Sa_AD, Sb_AD                                 !!
 REAL(KIND=xp)                 :: Sc_AD                                        !! Point milieu de la dichotomie
 LOGICAL                       :: mince                                        !! Booléen pour changer de branche
 LOGICAL                       :: ecriture                                     !! Booléen pour écrire ou non dans le fichier
-CHARACTER(LEN=20)             :: message = "no_sig"
 
 OPEN (unit=10, file="./output/results_epais.out", status="unknown")
 

@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-T_epais,S_epais,positions=np.loadtxt("./../results_epais.out",unpack=True,usecols=(0,1,2))
-T_mince,S_mince,positions2=np.loadtxt("./../results_mince.out",unpack=True,usecols=(0,1,2))
+T_epais,S_epais,positions=np.loadtxt("./../output/results_epais.out",unpack=True,usecols=(0,1,2))
+T_mince,S_mince,positions2=np.loadtxt("./../output/results_mince.out",unpack=True,usecols=(0,1,2))
 
 p=[]
 for i in positions : 
