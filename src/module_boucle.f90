@@ -3,14 +3,13 @@
 !===================================================================================================
 !> Ce module permet de calculer l'évolution des variables du disque d'accrétion au cours du temps.
 !> Il contient plusieurs subroutines :
-!> - creer_frame qui permet de réaliser une symétrie circulaire sur l'array d'une des variables ( avec la dernière orbite stable pour point central ) et d'en faire un fichier .out stocké dans le folder frame_array à ensuite plotter en python pour faire un animation
-!> - frame prend la condition en input frame_cond, un indice d'écriture et lance la subroutine creer_frame
-!> - schema_th_time fait une boucle sur le schéma numérique de l'équation thermique et calcule 
+!> - boucle_thermique fait une boucle sur le schéma numérique de l'équation thermique et calcule 
 !>   ensuite le reste des variables.
 !>   La boucle s'arrêtera quand Q+-Q- atteindra une valeur de e-17. 
-!> - schema_first_branch fait une boucle en appelant le schema thermique et le schema implicit de S puis recalcule 
+!> - boucle_branche_epaisse fait une boucle en appelant boucle_thermique et le schema implicite de S puis recalcule 
 !>   le reste des variables.
-!>   La boucle s'arrêtera quand on arrivera à m_dot égal à 1 dans tout le disque.
+!>   La boucle s'arrêtera quand on arrivera à m_dot égal à 1 dans tout le disque, ou quand on rentre en zone critique
+!> - boucle_parallele résoud Sigma et Température en parallele
 !===================================================================================================
 
 USE MODULE_DECLARATIONS
@@ -34,7 +33,7 @@ INTEGER, PRIVATE :: NB_IT_TH    !! Nombre d'itérations réalisées dans le rég
             CONTAINS    
 !===================================================================================================
 
-SUBROUTINE SCHEMA_TH_TIME()
+SUBROUTINE BOUCLE_THERMIQUE()
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine itère depuis une température et densité de surface initiale jusqu'à converger 
 !> vers Q+ - Q- = 0.
@@ -72,10 +71,10 @@ SUBROUTINE SCHEMA_TH_TIME()
     WRITE(*,"('Temp thermique adimensionné atteint = ',1pE12.4)") DELTA_T_TH_AD * I
 
 !---------------------------------------------------------------------------------------------------
-END SUBROUTINE SCHEMA_TH_TIME
+END SUBROUTINE BOUCLE_THERMIQUE
 !---------------------------------------------------------------------------------------------------
 
-SUBROUTINE SCHEMA_FIRST_BRANCH()
+SUBROUTINE BOUCLE_BRANCHE_EPAISSE()
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine itère depuis une température et densité de surface initiale jusqu'à converger
 !> vers le point critique de la courbe en S (sur sa partie optiquement épaisse).
@@ -124,7 +123,7 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
         CALL FRAME(TEMP,I)
         
         ! Schéma numérique thermique
-        CALL SCHEMA_TH_TIME()
+        CALL BOUCLE_THERMIQUE()
 
         ! Ecriture après itérations
         CALL ADIM_TO_PHYSIQUE()
@@ -149,10 +148,10 @@ SUBROUTINE SCHEMA_FIRST_BRANCH()
     ENDDO  
 
 !---------------------------------------------------------------------------------------------------
-END SUBROUTINE SCHEMA_FIRST_BRANCH
+END SUBROUTINE BOUCLE_BRANCHE_EPAISSE
 !---------------------------------------------------------------------------------------------------
 
-SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE,ECRIT_PAS)
+SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE,ECRIT_PAS)
 !---------------------------------------------------------------------------------------------------
 !> Calcul précis de l'instabilité, à la fraction de temps caracteristique donnée en entrée (usuel 10e-7)
 !---------------------------------------------------------------------------------------------------
@@ -187,7 +186,7 @@ SUBROUTINE SCHEMA_SECOND_BRANCH(FRACTION_DT_INSTABLE,ECRIT_PAS)
     END DO
     
 !---------------------------------------------------------------------------------------------------
-END SUBROUTINE SCHEMA_SECOND_BRANCH
+END SUBROUTINE BOUCLE_PARALLELE
 !---------------------------------------------------------------------------------------------------
 
 !===================================================================================================

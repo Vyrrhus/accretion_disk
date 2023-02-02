@@ -129,7 +129,11 @@ SUBROUTINE ECRITURE_ADIM()
     IMPLICIT NONE
      
     ! TEMPS
+<<<<<<< HEAD
     WRITE(UNT_AD, "('T          ',1PE14.6)") TIME_AD
+=======
+    WRITE(UNT_AD, FMT_SINGLE_VALUE) "T         ", TIME_AD
+>>>>>>> 59c852d0cad2f3884456cb2424496ccd36814f7c
 
     IF(MODULO(NX-1,PAS_ECRITURE_SPATIAL) == 0) THEN
         ! ESPACE
@@ -204,7 +208,11 @@ SUBROUTINE ECRITURE_DIM()
     IMPLICIT NONE
 
     ! TEMPS
+<<<<<<< HEAD
     WRITE(UNT, "('T          ',1PE14.6)") TIME
+=======
+    WRITE(UNT, FMT_SINGLE_VALUE) "T         ", TIME
+>>>>>>> 59c852d0cad2f3884456cb2424496ccd36814f7c
     
     IF(MODULO(NX-1,PAS_ECRITURE_SPATIAL) == 0) THEN
 
