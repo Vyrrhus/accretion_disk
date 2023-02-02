@@ -147,6 +147,7 @@ REAL(KIND=XP) :: S_CRIT(NX-2)
 
 ! frame 2D
 INTEGER :: FRAME_COND
+INTEGER :: FRAME_ITE
 
 !===================================================================================================
             CONTAINS 

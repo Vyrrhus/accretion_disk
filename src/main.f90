@@ -17,7 +17,7 @@ USE MODULE_S_CURVE
 USE MODULE_CRITICAL_POINTS
 
 IMPLICIT NONE
-INTEGER :: FRAME_ITE
+
 !---------------------------------
 !-- INITIALISATION
 !---------------------------------
@@ -51,9 +51,12 @@ CALL CREATION_CONDITIONS_INITIALES()
 !----------------------------------
 !-- BOUCLES DE CALCULS
 !----------------------------------
-
+FRAME_ITE=55
 CALL BOUCLE_BRANCHE_EPAISSE()
-CALL BOUCLE_PARALLELE(1.0E-10_xp,7000)
+!CALL BOUCLE_PARALLELE(1.0E-10_xp,7000)
+CALL BOUCLE_TEMP_A_ATTEINDRE(1.0E-7_XP,5000,121.55_XP,FRAME_ITE)
+CALL BOUCLE_TEMP_A_ATTEINDRE(1.0E-9_XP,5000,122.20_XP,FRAME_ITE)
+
 CALL CLOSE_OUTPUT()
 			
 !========================================================================
