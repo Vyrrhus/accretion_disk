@@ -8,23 +8,25 @@ FFLAGS := -g -O2 -fno-second-underscore -falign-loops=16 -fno-ipa-cp-clone
 LIB  = -llapack -lblas -lpthread
 
 # DIRECTORIES
-SRCDIR  := src
-BINDIR  := bin
+SRCDIR     := src
+BINDIR     := bin
+CONFIGDIR  := config
+DEFAULTDIR := default
 
 # SOURCES
 MODULE_SRC 	:= 	module_declarations.f90 \
-				dimensionnement.f90 \
-				frames2D.f90 \
-				module_fonctions_utiles.f90 \
-				module_function.f90 \
-				module_ecriture.f90 \
-				module_dicho.f90 \
-				module_conditions_initiales.f90 \
-				module_schemas_sigma.f90 \
-				module_schemas_T.f90 \
-				module_s_curve.f90 \
-				module_schemas_instabilite.f90\
-				module_boucle.f90
+                dimensionnement.f90 \
+                frames2D.f90 \
+                module_fonctions_utiles.f90 \
+                module_function.f90 \
+                module_ecriture.f90 \
+                module_dicho.f90 \
+                module_conditions_initiales.f90 \
+                module_schemas_sigma.f90 \
+                module_schemas_T.f90 \
+                module_s_curve.f90 \
+                module_schemas_instabilite.f90\
+                module_boucle.f90
 
 MAIN_SRC 	:= main.f90
 SCURVE_SRC 	:= S_curve.f90
@@ -50,6 +52,14 @@ FFLAGS  += -J $(BINDIR)
 ifneq ($(BINDIR),)
 $(shell test -d $(BINDIR) || mkdir -p $(BINDIR))
 endif
+
+################################################
+#	CONFIG FILES
+################
+$(shell cp -n $(DEFAULTDIR)/input.config $(CONFIGDIR)/input.config)
+$(shell cp -n $(DEFAULTDIR)/output.config $(CONFIGDIR)/output.config)
+$(shell cp -n $(DEFAULTDIR)/conditions_initiales.config $(CONFIGDIR)/conditions_initiales.config)
+$(shell cp -n $(DEFAULTDIR)/wanted_variables.txt $(CONFIGDIR)/wanted_variables.txt)
 
 ################################################
 #	TARGETS
@@ -81,6 +91,12 @@ clean:
 	@rm -rf $(BINDIR)/*.o $(BINDIR)/*.mod
 	@rm -rf disk scurve schema
 	@echo "All binaries and exe deleted"
+
+# INIT : COPY CONFIG FILES
+# init:
+# 	@if ! [ -f config/input.config ]; then \
+# 		cp default/input.config config/input.config; \
+# 	fi
 
 # DOCUMENTATION
 docu:

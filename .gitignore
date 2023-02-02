@@ -1,8 +1,6 @@
 # Extensions
 *.out
-*.txt
 *.dat
-*.config
 *.png
 *.dSYM
 *.ipynb
