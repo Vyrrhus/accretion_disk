@@ -29,7 +29,9 @@ CALL INIT_FILES()
 !---------------------------------
 
 IF (COURBE_EN_S == 1) THEN
+   WRITE(*, "('Calcul des courbes en S')")
    CALL S_curve(Temp_min_AD, Temp_max_AD, Sg_AD, Sd_AD, n_s)
+   WRITE(*, "('Calcul des points critiques')")
    CALL POINTS_CRITIQUES()
    Temp_min_AD=1.0e-1
    Temp_max_AD=1.0e1
@@ -46,9 +48,9 @@ CALL REPRISE_CONDITIONS_INITIALES()
 !----------------------------------
 !-- BOUCLES DE CALCULS
 !----------------------------------
-!CALL SCHEMA_FIRST_BRANCH()
+!CALL BOUCLE_BRANCHE_EPAISSE()
 
-CALL SCHEMA_SECOND_BRANCH(1.0E-10_xp,7000)
+CALL BOUCLE_PARALLELE(1.0E-10_xp,7000)
 CALL CLOSE_OUTPUT()
 			
 !========================================================================
