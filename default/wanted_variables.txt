@@ -1,0 +1,10 @@
+!--------------------------------------------------------------------------------------------
+! pour choisir la variable : 1
+! pour ne pas écrire la variable : 0
+
+&wanted_variables
+list =   1       1        1    1   1   1   1     1    1   1     1     1     1      1      1       1       1        1        1          1           1/
+
+!        1       2        3    4   5   6   7     8    9   10    11    12    13     14     15      16      17       18       19         20          21 
+!      Omega  Pression  beta  c_s  H  Rho  Nu  Sigma  V  Temp  M_dot  F_z  P_gaz  P_rad  Q_plus  Q_adv  Q_moins  Tau_eff  Kappa_ff  Epsilon_ff  L_stefan 
+!--------------------------------------------------------------------------------------------

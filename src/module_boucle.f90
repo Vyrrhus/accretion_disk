@@ -189,6 +189,53 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE,ECRIT_PAS)
 END SUBROUTINE BOUCLE_PARALLELE
 !---------------------------------------------------------------------------------------------------
 
+!---------------------------------------------------------------------------------------------------
+SUBROUTINE BOUCLE_TEMP_A_ATTEINDRE(FRACTION_DT_INSTABLE,ECRIT_PAS,T_TO_REACH,I)
+!---------------------------------------------------------------------------------------------------
+!> Subroutine qui utilise un mode fontionnement temporel
+!> Calcul précis de l'instabilité, à la fraction de temps caracteristique donnée en entrée 
+!> La boucle tourne jusqu'à atteindre un temps dimensionné mit en argument
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+
+    INTEGER :: iterateur
+    INTEGER,INTENT(INOUT) :: I
+    INTEGER, INTENT(IN) :: ECRIT_PAS
+    REAL(KIND=XP), INTENT(IN) :: T_TO_REACH
+    REAL(KIND=xp) :: FRACTION_DT_INSTABLE
+    
+
+    DELTA_T_INSTABLE_AD = FRACTION_DT_INSTABLE * MAXVAL( X_AD ** 4.0_xp / NU_AD )
+    CALL SETUP_SCHEMA_INSTABLE_TS()
+    
+    WRITE(*,"(48('-'))")
+    WRITE(*,"(48('-'))")
+    WRITE(*,"('BOUCLE INSTABLE            DELTA_T_INSTABLE_AD = ',1pE12.4)") DELTA_T_INSTABLE_AD
+    WRITE(*,"(48('-'))")
+    WRITE(*,"(48('-'))")
+    
+    iterateur = 1
+    DO WHILE( TIME_AD/OMEGA_MAX <= T_TO_REACH)
+    
+        CALL SCHEMA_INSTABLE_TS(0.8_xp)
+        CALL COMPUTE_EQS()
+        TIME_AD = TIME_AD + DELTA_T_INSTABLE_AD
+        CALL ADIM_TO_PHYSIQUE()
+        IF (MODULO(iterateur,ECRIT_PAS)==0) THEN
+            PRINT*,iterateur,'   TEMPS  =  ',TIME_AD/OMEGA_MAX
+            
+            CALL ECRITURE_DIM()
+            CALL FRAME(TEMP,I)
+            I=I+1
+        ENDIF
+        
+        iterateur = iterateur +1
+    END DO
+    
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE BOUCLE_TEMP_A_ATTEINDRE
+!---------------------------------------------------------------------------------------------------
+
 !===================================================================================================
             END MODULE MODULE_BOUCLE
 !===================================================================================================
