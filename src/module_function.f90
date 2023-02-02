@@ -37,7 +37,7 @@ SUBROUTINE COMPUTE_EQS()
     ! Luminosité du disque
     L_STEFAN_AD = 0.0_xp
     DO I=1,NX-1
-    L_STEFAN_AD = L_STEFAN_AD + TEMP_AD(I)**4.0_xp * X_AD(I)**2.0_xp * (X_AD(I+1)-X_AD(I))
+    L_STEFAN_AD = L_STEFAN_AD + TEMP_AD(I)**4.0_xp * X_AD(I)**3.0_xp * (X_AD(I+1)-X_AD(I))
     ENDDO
     
     ! Demi-hauteur du disque (calcul coefficients d'un trinôme du 2nd degré dont H est la solution positive)
