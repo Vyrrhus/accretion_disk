@@ -1,130 +1,129 @@
-MODULE MODULE_S_CURVE
-USE module_declarations
-USE module_fonctions_utiles
-USE module_dicho
+!===================================================================================================
+            MODULE MODULE_S_CURVE
+!===================================================================================================
+!>   Ce module permet de calculer les courbes en S
+!===================================================================================================
+
+USE MODULE_DECLARATIONS
+USE MODULE_DICHO
 IMPLICIT NONE
 
-CONTAINS
+CHARACTER(LEN=*), PRIVATE, PARAMETER :: FMT_SCURVE     = "(4(1pE19.12, X))"
+CHARACTER(LEN=*),          PARAMETER :: FILENAME_EPAIS = "./output/scurve/epais.out"
+CHARACTER(LEN=*),          PARAMETER :: FILENAME_MINCE = "./output/scurve/mince.out"
 
-SUBROUTINE S_curve(Temp_min_AD, Temp_max_AD, Sg_AD, Sd_AD, n_s)
-!---------------------------------------------------------------------------------------------------------------------
-! Calcul des courbes en S
-!------------------------------------------------------------------------------------------------------------------------------
+!===================================================================================================
+            CONTAINS 
+!===================================================================================================
 
-INTEGER,       INTENT(in)     :: n_s                                            !! Nombre de points pour la courbe en S
-REAL(KIND=xp), DIMENSION(n_s)   :: Temp_epais_AD                                !! Tableau des températures pour la branche épaise
-REAL(KIND=xp), DIMENSION(n_s)   :: Temp_mince_AD                                !! Tableau des températures pour la branche mince
-INTEGER                       :: j, i
-REAL(KIND=xp), INTENT(in)     :: Temp_min_AD, Temp_max_AD                     !! Températures maximales et minimales pour la dicho
-REAL(KIND=xp), INTENT(in)     :: Sg_AD, Sd_AD                                 !! Bornes initiales pour la dicho
-REAL(KIND=xp)                 :: Sa_AD, Sb_AD                                 !! Points de gauche et de droite pour la dicho
-REAL(KIND=xp)                 :: Sc_AD                                        !! Point milieu de la dichotomie
-LOGICAL                       :: mince                                        !! Booléen pour changer de branche
-LOGICAL                       :: ecriture                                     !! Booléen pour écrire ou non dans le fichier
+SUBROUTINE S_CURVE()
+!---------------------------------------------------------------------------------------------------
+!> Subroutine de calcul des courbes en S
+!> Pour chaque point spatial (total NX), on cherche les zéros de TEMP(SIGMA)
+!> Comme on peut avoir plusieurs zéros associés à un même Sigma, on itère le long de la température
+!> en discrétisant la température avec N_S points entre TEMP_MAX_AD et TEMP_MIN_AD
+!> Pour trouver les zéros, on procède par dichotomie selon Sigma
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+    REAL(KIND=xp), DIMENSION(N_S)  :: TEMP_EPAIS_AD  !! Tableau des températures pour la branche épaisse
+    REAL(KIND=xp), DIMENSION(N_S)  :: TEMP_MINCE_AD  !! Tableau des températures pour la branche mince
 
-OPEN (unit=10, file="./output/results_epais.out", status="unknown")
+    REAL(KIND=xp) :: Sa_AD, Sb_AD, Sc_AD   !! Points de gauche, droite et milieu pour la dicho
+    
+    LOGICAL  :: mince     !! Booléen pour changer de branche
+    LOGICAL  :: ecriture  !! Booléen pour écrire ou non dans le fichier
+    INTEGER  :: j, i
+    INTEGER  :: UNT_MINCE, UNT_EPAIS
 
-!----------------------------------------------------------------------------------------
-!Calcul pour la branche épaisse
-!------------------------------------------------------------------------------------------
+    !-----------------------------------------------------------------------------------------------
+    ! Branche épaisse
+    mince = .false.
+    OPEN (newunit=UNT_EPAIS, file=FILENAME_EPAIS, status="unknown")
 
-mince=.false.
+    DO j=1,NX
+    
+        ! 1ère température
+        TEMP_EPAIS_AD(1) = TEMP_MIN_AD
+        Sa_AD = Sg_AD
+        Sb_AD = Sd_AD
 
-DO j=1,NX
-   
-   !--------------------------------------------------------------------------------------------------
-   !Calcul pour la première température
-   !--------------------------------------------------------------------------------------------------
+        CALL DICHOTOMIE(TEMP_EPAIS_AD(1), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
 
-   Temp_epais_AD(1)=Temp_min_AD
+        ! Si la dichotomie trouve un zéro, on écrit dans le fichier en [SI]
+        IF (ecriture .eqv. .true.) THEN
+            WRITE(UNT_EPAIS, FMT_SCURVE) TEMP_EPAIS_AD(1) * TEMP_0, Sc_AD * S_0 / X_AD(j), X_AD(j)**2._xp * R_S, X_AD(j)
+        ENDIF
 
-   Sa_AD=Sg_AD
-   Sb_AD=Sd_AD
+        ! Températures suivantes
+        DO i=2,N_S
 
-   CALL dichotomie( Temp_epais_AD(1), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
+            ! Reset des bornes de la dichotomie (qui changent à chaque CALL DICHOTOMIE())
+            Sa_AD = Sg_AD
+            Sb_AD = Sd_AD
 
-   IF (ecriture .eqv. .true.) THEN
-      WRITE(10,*) Temp_epais_AD(1) * Temp_0, Sc_AD * S_0 / x_ad(j) * 1E-1, X_AD(j)**2._xp * R_S, X_AD(j)      !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
-   ELSE
-         !WRITE(10,*) Temp_epais(i)*Temp_0, message, X_AD(j)
-   ENDIF
+            ! Itération sur la température suivante
+            TEMP_EPAIS_AD(i) = TEMP_EPAIS_AD(i-1) + (TEMP_MAX_AD - TEMP_MIN_AD) / N_S
 
-   !---------------------------------------------------------------------------------------------------------------
-   !Boucle pour les autres températures
-   !--------------------------------------------------------------------------------------------------------------
+            CALL DICHOTOMIE(TEMP_EPAIS_AD(i), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
 
-   DO i=2,n_s
+            ! Si la dichotomie trouve un zéro, on écrit dans le fichier en [SI]
+            IF (ecriture .eqv. .true.) THEN
+                WRITE(UNT_EPAIS, FMT_SCURVE) TEMP_EPAIS_AD(i) * TEMP_0, Sc_AD * S_0 / X_AD(j), X_AD(j)**2._xp * R_S, X_AD(j)
+            ENDIF
 
-      Sa_AD=Sg_AD                                                                               !On refixe les bornes car elles ont changé dans la dichotomie précédente
-      Sb_AD=Sd_AD
-   
-      Temp_epais_AD(i) = Temp_epais_AD(i-1) + (Temp_max_AD - Temp_min_AD) / n_s                 !On calcule la température suivante
+        ENDDO
+    ENDDO
 
-      CALL dichotomie( Temp_epais_AD(i), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
+    CLOSE(UNT_EPAIS)
 
-      IF (ecriture .eqv. .true.) THEN
-         WRITE(10,*) Temp_epais_AD(i) * Temp_0, Sc_AD * S_0 / x_ad(j) * 1E-1, X_AD(j)**2._xp * R_S, X_AD(j)                       !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
-      ELSE
-         !WRITE(10,*) Temp_epais(i)*Temp_0, message, X_AD(j)
-      ENDIF
+    !-----------------------------------------------------------------------------------------------
+    ! Branche mince
+    mince = .true.
+    OPEN (newunit=UNT_MINCE, file=FILENAME_MINCE, status="unknown")
 
-   ENDDO
-ENDDO
+    !Bornes pour la dichotomie
+    Sa_AD = Sg_AD
+    Sb_AD = Sd_AD
 
-CLOSE(10)
+    DO j=1,NX
 
+        ! Calcul pour la 1ere température
+        TEMP_MINCE_AD(1) = TEMP_MIN_AD
 
-OPEN (unit=11,file="./output/results_mince.out",status="unknown")
+        CALL DICHOTOMIE(TEMP_MINCE_AD(1), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
 
-!------------------------------------------------------------------------------------------------------------------------------------
-!Calcul pour la branche mince
-!-----------------------------------------------------------------------------------------------------------------------------------
-mince=.true.
+        ! Si la dichotomie trouve un zéro, on écrit dans le fichier en [SI]
+        IF (ecriture .eqv. .true.) THEN
+            WRITE(UNT_MINCE, FMT_SCURVE) TEMP_MINCE_AD(1) * TEMP_0, Sc_AD * S_0 / X_AD(j), X_AD(j)**2._xp * R_S, X_AD(j)
+        ENDIF
 
-!Bornes pour la dichotomie
-Sa_AD=Sg_AD
-Sb_AD=Sd_AD
+        ! Températures suivantes
+        DO i=2,N_S
 
-DO j=1,NX
+            ! Reset des bornes de la dichotomie (qui changent à chaque CALL DICHOTOMIE())
+            Sa_AD = Sg_AD
+            Sb_AD = Sd_AD
 
-   !--------------------------------------------------------------------------------------------------
-   !Calcul pour la première température
-   !--------------------------------------------------------------------------------------------------
+            ! Itération sur la température suivante
+            TEMP_MINCE_AD(i) = TEMP_MINCE_AD(i-1) + ( TEMP_MAX_AD - TEMP_MIN_AD ) / N_S
 
-   Temp_mince_AD(1)=Temp_min_AD
+            CALL DICHOTOMIE(TEMP_MINCE_AD(i), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
 
-   CALL dichotomie( Temp_mince_AD(1), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
+            ! Si la dichotomie trouve un zéro, on écrit dans le fichier en [SI]
+            IF (ecriture .eqv. .true.) THEN
+                WRITE(UNT_MINCE, FMT_SCURVE) TEMP_MINCE_AD(i) * TEMP_0, Sc_AD * S_0 / X_AD(j), X_AD(j)**2._xp * R_S, X_AD(j)
+            ENDIF
 
-   IF (ecriture .eqv. .true.) THEN
-      WRITE(11,*) Temp_mince_AD(1)*Temp_0, Sc_AD * S_0 / x_ad(j) * 1E-1, X_AD(j)**2._xp * R_S, X_AD(j)                                !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
-   ELSE
-      !WRITE(11,*) Temp_mince(1)*Temp_0, message, X_AD(j)
-   ENDIF
+        ENDDO
 
-   !---------------------------------------------------------------------------------------------------------------
-   !Boucle pour les autres températures
-   !--------------------------------------------------------------------------------------------------------------
+    ENDDO
 
-   DO i=2,n_s
+    CLOSE(UNT_MINCE)
 
-      Sa_AD = Sg_AD
-      Sb_AD = Sd_AD
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE S_CURVE
+!---------------------------------------------------------------------------------------------------
 
-      Temp_mince_AD(i)=Temp_mince_AD(i-1) + ( Temp_max_AD - Temp_min_AD ) / n_s
-
-      CALL dichotomie( Temp_mince_AD(i), Sa_AD, Sb_AD, j, mince, Sc_AD, ecriture)
-
-      IF (ecriture .eqv. .true.) THEN
-         WRITE(11,*) Temp_mince_AD(i) * Temp_0, Sc_AD * S_0 / x_ad(j)*1E-1, X_AD(j)**2._xp * R_S, X_AD(j)                     !Si la dichotomie a trouvé un zéro écrit dans le fichier en cgs
-      ELSE
-         !WRITE(11,*) Temp_mince(i)*Temp_0, message, X_AD(j)
-      ENDIF
-   ENDDO
-
-ENDDO
-
-CLOSE(11)
-
-END SUBROUTINE 
-
+!===================================================================================================
 END MODULE MODULE_S_CURVE
+!===================================================================================================

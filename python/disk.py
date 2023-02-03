@@ -89,13 +89,13 @@ class DataScurve():
         """
         if plot_epais:
             temp, sigma = self.get(radius, radius_label)
-            line_epais, = ax.plot(sigma*10, temp, '--', color="orange", label="Courbe en S - Branche épaisse")
+            line_epais, = ax.plot(sigma, temp, '--', color="orange", label="Courbe en S - Branche épaisse")
         else:
             line_epais = None
 
         if plot_mince:
             temp, sigma = self.get(radius, radius_label, isEpais=False)
-            line_mince, = ax.plot(sigma*10, temp, '--', color="green", label="Courbe en S - Branche mince")
+            line_mince, = ax.plot(sigma, temp, '--', color="green", label="Courbe en S - Branche mince")
         else:
             line_mince = None
 
@@ -139,7 +139,7 @@ class SkipWrapper(io.TextIOWrapper):
 
 class DataHandler():
     @timer
-    def __init__(self, filename, scurve_filename=["results_epais.out", "results_mince.out"]):
+    def __init__(self, filename, scurve_filename=["scurve/epais.out", "scurve/mince.out"]):
         """
             Extract data from an output file from file : [filename]
             -----------

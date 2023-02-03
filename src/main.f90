@@ -24,7 +24,7 @@ IMPLICIT NONE
 CALL APPEL_PARAM_INPUT()
 CALL CALCUL_CONSTANTES()
 CALL INIT_FILES()
-CALL READ_CRITICAL_POINTS()
+! CALL READ_CRITICAL_POINTS()
 
 !---------------------------------
 !-- Calcul des courbes en S
@@ -32,7 +32,7 @@ CALL READ_CRITICAL_POINTS()
 
 IF (COURBE_EN_S == 1) THEN
    WRITE(*, "('Calcul des courbes en S')")
-   CALL S_curve(Temp_min_AD, Temp_max_AD, Sg_AD, Sd_AD, n_s)
+   CALL S_CURVE()
    WRITE(*, "('Calcul des points critiques')")
    CALL POINTS_CRITIQUES()
    Temp_min_AD=1.0e-1
@@ -41,7 +41,7 @@ IF (COURBE_EN_S == 1) THEN
    CALL map_QpmQm(Temp_min_AD, Temp_max_AD, Sg_AD, 100)
 ENDIF
 
-CALL READ_CRITICAL_POINTS()
+! CALL READ_CRITICAL_POINTS()
 
 !---------------------------------
 !-- CONDITIONS INITIALES
