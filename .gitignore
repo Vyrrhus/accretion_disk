@@ -8,7 +8,6 @@
 
 # Executables
 disk
-scurve
 schema
 run
 cleanup
@@ -22,4 +21,3 @@ test.py
 3d.py
 anim.mp4
 python/__pycache__/disk.cpython-310.pyc
-src/module_critical_points.f90
