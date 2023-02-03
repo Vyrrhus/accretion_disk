@@ -202,7 +202,9 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
 !> mode_arret > 0 : réalise mode_arret pas de temps 
 !>
 !> ECRIT_PAS > 0 : Ecrit les données tous les ECRIT_PAS pas de temps.
-!> ECRIT_PAS = 0 : Ecrit les données quand les variables ont suffisamment changé (5e4 15)
+!> ECRIT_PAS = 0 : Ecrit les données quand les variables ont suffisamment changé, ajustable avec un facteur choix_precision_ecriture
+!> (par défaut 1.0_xp, correspond a environ un centieme de la taille caracteristique de T et Sigma)
+!>
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     !variables d'entrée
