@@ -54,9 +54,8 @@ SUBROUTINE SETUP_SCHEMA_INSTABLE_TS()
 
     CALL CREER_LAMBDA()
 
-END SUBROUTINE
+END SUBROUTINE SETUP_SCHEMA_INSTABLE_TS
 
 !===================================================================================================
 END MODULE MODULE_SCHEMAS_INSTABILITE
 !===================================================================================================
-

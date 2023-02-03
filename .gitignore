@@ -8,14 +8,12 @@
 
 # Executables
 disk
-scurve
 schema
 run
 cleanup
 
 # Folders
 doc/
-python/disk.py
 python/plot.py
 test.py
 .bashrc
