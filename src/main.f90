@@ -24,6 +24,7 @@ IMPLICIT NONE
 CALL APPEL_PARAM_INPUT()
 CALL CALCUL_CONSTANTES()
 CALL INIT_FILES()
+CALL READ_CRITICAL_POINTS()
 
 !---------------------------------
 !-- Calcul des courbes en S
@@ -51,14 +52,22 @@ CALL CREATION_CONDITIONS_INITIALES()
 !----------------------------------
 !-- BOUCLES DE CALCULS
 !----------------------------------
-FRAME_ITE=55
-CALL BOUCLE_BRANCHE_EPAISSE()
-!CALL BOUCLE_PARALLELE(1.0E-10_xp,7000)
-CALL BOUCLE_TEMP_A_ATTEINDRE(1.0E-7_XP,5000,121.55_XP,FRAME_ITE)
-CALL BOUCLE_TEMP_A_ATTEINDRE(1.0E-9_XP,5000,122.20_XP,FRAME_ITE)
+! ascension de la branche épaisse
+CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
 
-CALL CLOSE_OUTPUT()
-			
+!approche du point critique
+CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
+!suivi de la spirale
+CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
+!branche mince et redescente
+CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
+
+!ascension de la branche épaisse à nouveau
+CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+
+
+
+CALL CLOSE_OUTPUT()	
 !========================================================================
                       END PROGRAM MAIN 
 !========================================================================
