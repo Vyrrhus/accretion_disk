@@ -40,7 +40,7 @@ REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
 
 !! PARAMÈTRES SPATIAUX
-INTEGER,PARAMETER :: NX = 100       !! Nombre de points de discrétisation spatiale
+INTEGER,PARAMETER :: NX = 500        !! Nombre de points de discrétisation spatiale
 REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
 REAL(KIND=XP)     :: X_MIN           !! Rayon minimal adimensionné
 REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
@@ -147,7 +147,7 @@ REAL(KIND=XP) :: SIGMA_CRITIQUE(NX)
 
 ! frame 2D
 INTEGER :: FRAME_COND
-INTEGER :: FRAME_ITE
+INTEGER :: FRAME_ID
 
 !===================================================================================================
             CONTAINS 
@@ -180,6 +180,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     N_S           = 5000
     
     FRAME_COND = 0
+    FRAME_ID = 0
 
     ! LECTURE DES PARAMETRES DEPUIS LE FICHIER
     OPEN(newunit=file_id,file='config/input.config',action='read',status='old')

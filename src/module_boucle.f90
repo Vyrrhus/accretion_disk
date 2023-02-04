@@ -75,7 +75,7 @@ SUBROUTINE BOUCLE_THERMIQUE()
 END SUBROUTINE BOUCLE_THERMIQUE
 !---------------------------------------------------------------------------------------------------
 
-SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
+SUBROUTINE BOUCLE_BRANCHE_EPAISSE(frame_id,mode_arret, choix_facteur_securite)
 !---------------------------------------------------------------------------------------------------
 !> Une itération de cette boucle consiste à converger à l'eq thermique (ie Q+ - Q- = 0) en appelant
 !> BOUCLE_THERMIQUE, puis à itérer la densité surfacique sur un pas de temps visqueux.
@@ -94,10 +94,11 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
 
     ! Variables d'entrée
     INTEGER, INTENT(IN) :: mode_arret
+    INTEGER, INTENT(INOUT) :: frame_id
     REAL(KIND=xp), INTENT(IN), OPTIONAL :: choix_facteur_securite
 
     ! Variables internes
-    INTEGER :: ITE,I
+    INTEGER :: ITE
     REAL(KIND=XP) :: M_DOT_MIN
     REAL(KIND=XP) :: S_SAVE(NX), SIGMA_SAVE(NX)
     REAL(KIND=XP) :: FACTEUR_SECURITE           !!fraction du Sigma critique avant laquelle s'arreter
@@ -130,7 +131,6 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
     
     ! Lancement boucle
     ITE=1 ! ordinal de l'itération actuelle
-    I = 0 ! relatif a l'ecriture de frame2D
 
     DO
         WRITE(*,"(48('-'))")
@@ -141,8 +141,8 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         CALL ECRITURE_DIM()
         
         ! Ecriture frame
-        I = I+1
-        CALL FRAME(TEMP,I)
+        frame_id = frame_id+1
+        CALL FRAME(TEMP,frame_id)
         
         ! Schéma numérique thermique
         CALL BOUCLE_THERMIQUE()
@@ -152,8 +152,8 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         CALL ECRITURE_DIM()
         
         ! Ecriture frame
-        I = I+1
-        CALL FRAME(TEMP,I)
+        frame_id = frame_id +1
+        CALL FRAME(TEMP,frame_id)
 
         ! Calcul de Q_ADV et schéma numérique visqueux
         S_SAVE = S_AD   ! sauvegarde de l'ancienne S_AD
@@ -191,7 +191,7 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
 END SUBROUTINE BOUCLE_BRANCHE_EPAISSE
 !---------------------------------------------------------------------------------------------------
 
-SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_facteur_securite, choix_precision_ecriture)
+SUBROUTINE BOUCLE_PARALLELE(frame_id,FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_facteur_securite, choix_precision_ecriture)
 !---------------------------------------------------------------------------------------------------
 !> Calcul précis de l'instabilité, à la fraction de temps caracteristique donnée en entrée.
 !> mode_arret = -1 : s'arrete quand tous les points sont descendus dessous choix_facteur_securite*Temperature_critique:
@@ -209,6 +209,7 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
 !> ECRIT_PAS = 0 : Ecrit les données quand les variables ont suffisamment changé, ajustable avec un facteur choix_precision_ecriture
 !> (par défaut 1.0_xp, correspond a environ un centieme de la taille caracteristique de T et Sigma)
 !>
+!> frame_id : integer relatif à la lecture des frame2D
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
@@ -216,6 +217,7 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
     REAL(KIND=xp), INTENT(IN) :: FRACTION_DT_INSTABLE
     INTEGER, INTENT(IN) :: ECRIT_PAS
     INTEGER, INTENT(IN) :: mode_arret
+    INTEGER, INTENT(INOUT) :: frame_id
     REAL(KIND=xp), INTENT(IN), OPTIONAL :: choix_facteur_securite
     REAL(KIND=xp), INTENT(IN), OPTIONAL :: choix_precision_ecriture
 
@@ -284,6 +286,8 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
         ! ECRITURE------------------------------------------------------------------------------------------------
         ! Mode ecrit_pas > 0: écriture tout les ecrit_pas
         IF ((ECRIT_PAS > 0).and.(MODULO(iterateur, ECRIT_PAS) == 0)) THEN
+            CALL FRAME(TEMP,frame_id)
+            frame_id = frame_id+1
             CALL ECRITURE_DIM()
             COMPTE_ECRITURE = COMPTE_ECRITURE + 1
         ENDIF
@@ -296,6 +300,8 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
         ! Mode ecrit_pas = 0: on vérifie la distance du dernier point tracé, on écrit si on s'est suffisamment éloigné
         IF ((ECRIT_PAS == 0).and.(MAXVAL((ABS((TEMP - TEMP_DERNIERE_ECRITURE)) / 5e5_xp) &
                                     &   +(ABS((SIGMA - SIGMA_DERNIERE_ECRITURE)) / 2500.0_xp)) > 1.0_xp / PRECISION_ECRITURE)) THEN
+            CALL FRAME(TEMP,frame_id)
+            frame_id = frame_id+1
             CALL ECRITURE_DIM()
             TEMP_DERNIERE_ECRITURE  = TEMP
             SIGMA_DERNIERE_ECRITURE = SIGMA

@@ -47,19 +47,16 @@ CALL CREATION_CONDITIONS_INITIALES()
 !-- BOUCLES DE CALCULS
 !----------------------------------
 ! ascension de la branche épaisse
-CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+CALL BOUCLE_BRANCHE_EPAISSE(frame_id,0, 0.99_xp)
 
 !approche du point critique
-CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
+CALL BOUCLE_PARALLELE(frame_id,1.0E-7_xp, 0, 0, 1.00_xp)
 !suivi de la spirale
-CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
+CALL BOUCLE_PARALLELE(frame_id,5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
 !branche mince et redescente
-CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
-
+CALL BOUCLE_PARALLELE(frame_id,1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
 !ascension de la branche épaisse à nouveau
-CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
-
-
+CALL BOUCLE_BRANCHE_EPAISSE(frame_id,0, 0.99_xp)
 
 CALL CLOSE_OUTPUT()	
 !========================================================================

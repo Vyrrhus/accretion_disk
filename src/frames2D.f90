@@ -27,10 +27,12 @@ SUBROUTINE FRAME(VAR,INDEX)
     CHARACTER(LEN=1024) :: FRAME_NAME
     CHARACTER(LEN=1024) :: NUMB
     REAL(KIND=XP):: NAN_VALUE 
-
+    CHARACTER(LEN=30):: FMT_frame
+    
     ! Condition pour utiliser la subroutine
     IF (FRAME_COND /= 1) RETURN
     
+    WRITE(FMT_frame,"('(',I0,'(1pE12.4, 2X))')") SIZE
     ! NaN value
     NAN_VALUE = 0.0
     NAN_VALUE = 0.0/NAN_VALUE
@@ -57,7 +59,7 @@ SUBROUTINE FRAME(VAR,INDEX)
     
     OPEN(NEWUNIT=UNTY,FILE="frame_array/"//TRIM(ADJUSTL(FRAME_NAME)),ACTION='WRITE')
     DO I=1,SIZE
-        WRITE(UNTY,"(200(1pE12.4, 2X))") IMG(I,:)
+        WRITE(UNTY,FMT_frame) IMG(I,:)
     ENDDO
     
     CLOSE(UNTY)
