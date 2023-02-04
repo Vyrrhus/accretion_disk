@@ -284,7 +284,7 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
         !on écrit sur la console tous les 100 ECRIT_PAS
         IF ((ECRIT_PAS>0).and.(MODULO(iterateur,100*ECRIT_PAS)==0)) THEN
             PRINT*,iterateur,'   TEMPS AD =  ',TIME_AD
-            PRINT*, MAXVAL(TEMP-FACTEUR_SECURITE*TEMP_CRITIQUE)
+            PRINT*,'Distance a la valeur critique : ', MAXVAL(TEMP-FACTEUR_SECURITE*TEMP_CRITIQUE)
         ENDIF
 
         !Mode ecrit_pas=0: on vérifie la distance du dernier point tracé, on écrit si on s'est sufisamment éloigné
@@ -298,15 +298,16 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
         !on écrit sur la console tous les millions de pas de temps
         IF ((ECRIT_PAS==0).and.(MODULO(iterateur,1000000)==0)) THEN
             PRINT*,iterateur,'   TEMPS AD =  ',TIME_AD
-            PRINT*, MAXVAL(TEMP-FACTEUR_SECURITE*TEMP_CRITIQUE)
+            PRINT*,'Distance a la valeur critique : ', MAXVAL(TEMP-FACTEUR_SECURITE*TEMP_CRITIQUE)
         ENDIF
 
         !passage a la boucle suivante
         ITERATEUR=ITERATEUR+1
+        
     END DO
     
-    PRINT*, "nombre d'itérations:", ITERATEUR-1
-    PRINT*, "nombre d'écritures:", COMPTE_ECRITURE
+    WRITE(*, "('Nombre iterations : ',I0)") ITERATEUR-1
+    WRITE(*, "('Nombre ecritures  : ',I0)") COMPTE_ECRITURE
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE BOUCLE_PARALLELE
 !---------------------------------------------------------------------------------------------------
