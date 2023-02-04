@@ -26,7 +26,6 @@ MODULE_SRC 	:= 	module_declarations.f90 \
                 module_schemas_T.f90 \
                 module_s_curve.f90 \
                 module_schemas_instabilite.f90\
-                module_critical_points.f90 \
                 module_boucle.f90
 
 MAIN_SRC 	:= main.f90

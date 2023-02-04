@@ -305,6 +305,37 @@ SUBROUTINE POINTS_CRITIQUES()
 END SUBROUTINE POINTS_CRITIQUES
 !---------------------------------------------------------------------------------------------------
 
+SUBROUTINE LECTURE_POINTS_CRITIQUES()
+!---------------------------------------------------------------------------------------------------
+!> Lit le fichier généré par POINTS_CRITIQUES() et stocke les valeurs associées à chaque rayon
+!> dans les variables globales TEMP_CRITIQUE et SIGMA_CRITIQUE de dimension NX
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+    INTEGER :: I, UNTC
+    LOGICAL :: EXI
+
+    ! On vérifie que le fichier existe
+    INQUIRE(FILE="output/scurve/coord_turning_points.out", EXIST=EXI)
+    IF (.not.EXI) CALL POINTS_CRITIQUES()
+
+    ! Ouvre le fichier
+    OPEN(newunit=UNTC, file='output/scurve/coord_turning_points.out', status='old', action='read')
+
+    ! Lecture points critiques (à corriger plus tard)
+    DO I=1,NX-2 
+        READ(UNTC, *) TEMP_CRITIQUE(I), SIGMA_CRITIQUE(I)
+    ENDDO
+
+    TEMP_CRITIQUE(NX-1)  = TEMP_CRITIQUE(NX-2)
+    TEMP_CRITIQUE(NX)    = TEMP_CRITIQUE(NX-2)
+
+    SIGMA_CRITIQUE(NX-1) = SIGMA_CRITIQUE(NX-2)
+    SIGMA_CRITIQUE(NX)   = SIGMA_CRITIQUE(NX-2)
+
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE LECTURE_POINTS_CRITIQUES
+!---------------------------------------------------------------------------------------------------
+
 SUBROUTINE calc_QpmQm (Temp_S_AD, S_S_AD, ipos, QpmQm)
 !---------------------------------------------------------------------------------------------------
 !> Subroutine qui calcule Q+ - Q- pour un triplet (Temp, Sigma, ipos) donné
