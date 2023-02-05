@@ -57,13 +57,14 @@ SUBROUTINE CREATION_CONDITIONS_INITIALES()
 END SUBROUTINE CREATION_CONDITIONS_INITIALES
 !---------------------------------------------------------------------------------------------------
 
-SUBROUTINE REPRISE_CONDITIONS_INITIALES()
+SUBROUTINE REPRISE_CONDITIONS_INITIALES(PRECISION_REPRISE)
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine initialise TEMP_AD et S_AD à partir d'un fichier externe
 !> /!\ Il faut s'assurer que le fichier externe a bien les mêmes paramètres de sortie :
 !>     (NX, PAS_ECRITURE_SPATIAL, PRECISION) (cf output.config et MODULE_DECLARATIONS pour NX)
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
+    INTEGER, INTENT(IN) :: PRECISION_REPRISE 
     INTEGER :: INPUT_UNT 
     INTEGER :: IOS
     CHARACTER(LEN=12) :: HEADER
@@ -72,9 +73,11 @@ SUBROUTINE REPRISE_CONDITIONS_INITIALES()
 
     ! Formats
     IF (MODULO(NX,PAS_ECRITURE_SPATIAL) == 1) THEN
-        WRITE(FMT_PYT, "('(A11,X,', I0, '(1pE', I0, '.', I0, 'E3,2X))')") NX / PAS_ECRITURE_SPATIAL, 6 + 8, 6
+        WRITE(FMT_PYT, "('(A11,X,', I0, '(1pE', I0, '.', I0, 'E3,2X))')") &
+        & NX / PAS_ECRITURE_SPATIAL, PRECISION_REPRISE + 8, PRECISION_REPRISE
     ELSE
-        WRITE(FMT_PYT, "('(A11,X,', I0, '(1pE', I0, '.', I0, 'E3,2X))')") NX / PAS_ECRITURE_SPATIAL+1,6 + 8, 6
+        WRITE(FMT_PYT, "('(A11,X,', I0, '(1pE', I0, '.', I0, 'E3,2X))')") &
+        & NX / PAS_ECRITURE_SPATIAL+1, PRECISION_REPRISE + 8, PRECISION_REPRISE
     ENDIF
     
     OPEN(NEWUNIT=INPUT_UNT, file="config/conditions_initiales.config", ACTION="read", STATUS="old", IOSTAT=IOS)
