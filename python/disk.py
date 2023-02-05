@@ -3,6 +3,7 @@ from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 import matplotlib.animation as animation
+import argparse
 
 import tkinter
 from tkinter import ttk
@@ -10,16 +11,6 @@ import pandas as pd
 
 from time import time
 import io
-
-#============================================================
-# FILENAME
-FILENAME = "data.out"
-""" TODO
-    - Animation quand xlabel /= radius
-    - Ajouter le temps sur le graphe matplotlib lors d'une animation (ou même dès qu'on a Y(r))
-    - Ajouter le rayon sur les autres graphes matplotlib dès qu'on a Y(X) et X /= r ?
-    - Ecraser le bouton save pour sauvegarder des images dans un dossier image/[filename]/*.png (avec le .gitignore qui va bien)
-"""
 
 #============================================================
 # MATPLOTLIB GLOBAL SETTINGS
@@ -31,6 +22,7 @@ def init_plotting():
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = 1.5*plt.rcParams['font.size']
     plt.rcParams['legend.fontsize'] = plt.rcParams['font.size']
+    plt.rcParams["legend.title_fontsize"] = plt.rcParams['font.size']
     plt.rcParams['xtick.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['ytick.labelsize'] = plt.rcParams['font.size']
     # plt.rcParams['savefig.dpi'] = 2*plt.rcParams['savefig.dpi']
@@ -64,48 +56,116 @@ def timer(func):
 # DATA CLASS
 
 class DataScurve():
-    def __init__(self, filename, constantes, optical_depth=[1.]):
+    def __init__(self, constantes, optical_depth=[1.], 
+                       filename={"epais":     "output/scurve/epais.out",
+                                 "mince":     "output/scurve/mince.out",
+                                 "critiques": "output/scurve/coord_turning_points.out"}):
         self.constantes    = constantes
         self.optical_depth = optical_depth
 
-        self.epais = pd.read_csv(f"output/{filename[0]}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
-        self.mince = pd.read_csv(f"output/{filename[1]}", header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
+        self.epais    = pd.read_csv(filename["epais"],     header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
+        self.mince    = pd.read_csv(filename["mince"],     header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
+        self.critique = pd.read_csv(filename["critiques"], header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
 
-    def get(self, radius, radius_label, isEpais=True):
-        if isEpais:
+    def get(self, radius, radius_label, isFrom="epais"):
+        if   isFrom == "epais":
             data = self.epais
-        else:
+        elif isFrom == "mince":
             data = self.mince
+        elif isFrom == "critique":
+            data = self.critique
 
-        closest_value = min(data[radius_label].unique(), key=lambda x:abs(x-radius))
+        closest_value = min(data[radius_label].unique(), key=lambda x:abs(x - radius * self.constantes["R_S"]))
         scurve = data[data[radius_label] == closest_value]
 
         temp  = scurve["T"].to_numpy()
         sigma = scurve["Sigma"].to_numpy()
         return temp, sigma
     
-    def plot(self, ax, radius, radius_label, plot_epais=True, plot_mince=True, plot_optical_depth=True):
+    def plot(self, ax, radius, radius_label, plot_epais=True, plot_mince=True, plot_critique=True, plot_optical=True):
         """ Plot S-curve for each branch
         """
         if plot_epais:
-            temp, sigma = self.get(radius, radius_label)
-            line_epais, = ax.plot(sigma, temp, '--', color="orange", label="Courbe en S - Branche épaisse")
+            temp, sigma = self.get(radius, radius_label, isFrom="epais")
+            line_epais, = ax.plot(sigma, temp, '--', color="orange", label="Branche épaisse")
         else:
             line_epais = None
 
         if plot_mince:
-            temp, sigma = self.get(radius, radius_label, isEpais=False)
-            line_mince, = ax.plot(sigma, temp, '--', color="green", label="Courbe en S - Branche mince")
+            temp, sigma = self.get(radius, radius_label, isFrom="mince")
+            line_mince, = ax.plot(sigma, temp, '--', color="green", label="Branche mince")
         else:
             line_mince = None
 
-        # if plot_optical_depth:
-        #     # Compute Temp, Sigma with given tau_eff and radius
+        if plot_critique:
+            temp, sigma = self.get(radius, radius_label, isFrom="critique")
+            line_crit, = ax.plot(sigma, temp, 'x', color="black", label="Point critique")
+        else:
+            line_crit = None
         
-        # else:
-        #     line_optical_depth = None
+        if plot_optical and self.optical_depth:
+            line_levels = tuple()
+            for level in self.optical_depth:
+                temp, sigma = self.compute_optical_depth(radius, level)
+                line, = ax.plot(sigma, temp, '-.', alpha=0.8, lw=0.8, color='black', label=r"$\tau_{eff} = $" + str(level)) 
+                line_levels += (line,)
+        else:
+            line_levels = None
 
-        return line_epais, line_mince #, line_optical_depth
+        return line_epais, line_mince, line_crit, *line_levels
+
+    def compute_optical_depth(self, radius, tau_eff_level, eps=0.01):
+        """ Computing levels of \tau_{eff} with bisection method with a given range
+        """
+        # Temp & Sigma array
+        sigma = np.linspace(500, 20000, 100)
+        temp  = np.zeros(len(sigma))
+
+        # Function \tau_eff - level ==> find root
+        def tau_eff(temp, sigma, radius, level):
+            # Constants
+            R = (1.380649e-23) / (1.67262192369e-27)
+            omega = np.sqrt(6.6743e-11 * self.constantes["MASS"] / (radius * self.constantes["R_S"])**3)
+
+            # Coefficients for H
+            a = 0.5 * omega**2 * sigma
+            b = -1/3 * 7.56573085e-16 * temp**4
+            c = - R * temp * sigma / (2 * self.constantes["MU"])
+
+            # Equations
+            H       = (-b + np.sqrt(b**2 - 4 * a * c)) / (2 * a)
+            rho     = sigma / (2 * H)
+            K_ff    = 6.13e18 * rho * temp**(-3.5)
+            tau_eff = 0.5 * sigma * np.sqrt(self.constantes["KAPPA_E"] * K_ff)
+
+            return tau_eff - level
+        
+        # Bisection method
+        for ii, sig in enumerate(sigma):
+            # Initial temperatures A & B
+            T_A = 1e6
+            T_B = 7e7
+
+            # f(A), f(B), f(C)
+            y_A = tau_eff(T_A, sig, radius, tau_eff_level)
+            y_B = tau_eff(T_B, sig, radius, tau_eff_level) 
+            y_C = 1
+
+            while abs(y_C) > eps:
+                T_C = (T_A + T_B) / 2
+                y_C = tau_eff(T_C, sig, radius, tau_eff_level)
+
+                # No solution
+                if y_A * y_B > 0:
+                    T_C = 0
+                    y_C = 0
+                
+                elif y_A * y_C > 0: T_A = T_C   # Solution between C and B
+                else:               T_B = T_C   # Solution between C and A
+            
+            temp[ii] = T_C
+        
+        return temp, sigma
 
 class SkipWrapper(io.TextIOWrapper):
     """ io.TextIOWrapper pour skip les premières lignes des fichiers .out jusqu'à match:
@@ -139,7 +199,7 @@ class SkipWrapper(io.TextIOWrapper):
 
 class DataHandler():
     @timer
-    def __init__(self, filename, scurve_filename=["scurve/epais.out", "scurve/mince.out"]):
+    def __init__(self, filename):
         """
             Extract data from an output file from file : [filename]
             -----------
@@ -162,6 +222,56 @@ class DataHandler():
         self.constantes       = {}
         self.constantes_label = {}
 
+        # Data
+        self.df     = None
+        self.scurve = None
+        self.time   = None
+        self.space  = None
+        self.general_metrics = {}
+
+        # Labels
+        self.time_label  = ""
+        self.space_label = ""
+        self.var         = []
+
+        # Variables LaTeX and units
+        self.LaTeX = {
+            "T"       : (r"$t$",                r"$s$"), 
+            "RADIUS"  : (r"$r$",                r"$R_s$"),
+            "OMEGA"   : (r"$\Omega$",           r"$s^{-1}$"),
+            "P"       : (r"$P$",                r"$Pa$"),
+            "BETA"    : (r"$\beta$",            r""),
+            "C_S"     : (r"$c_s$",              r"$m \cdot s^{-1}$"),
+            "H"       : (r"$H$",                r"$m$"),
+            "RHO"     : (r"$\rho$",             r"$kg \cdot m^{-3}$"),
+            "NU"      : (r"$\nu$",              r"$m^{2} \cdot s^{-1}$"),
+            "SIGMA"   : (r"$\Sigma$",           r"$kg \cdot m^{-2}$"),
+            "SPEED"   : (r"$v$",                r"$m \cdot s^{-1}$"),
+            "TEMP"    : (r"$T$",                r"$K$"),
+            "M_DOT"   : (r"$\dot{M}$",          r"$\dot{M_0}$"),
+            "F_Z"     : (r"$F_z$",              r"$W \cdot m^{-2}$"),
+            "P_GAZ"   : (r"$P_{gaz}$",          r"$Pa$"),
+            "P_RAD"   : (r"$P_{rad}$",          r"$Pa$"),
+            "Q_PLUS"  : (r"$Q_{+}$",            r"$m^{2} \cdot s^{-3}$"),
+            "Q_ADV"   : (r"$Q_{adv}$",          r"$m^{2} \cdot s^{-3}$"),
+            "Q_MOINS" : (r"$Q_{-}$",            r"$m^{2} \cdot s^{-3}$"),
+            "TAU_EFF" : (r"$\tau_{eff}$",       r""),
+            "K_FF"    : (r"$\kappa_{ff}$",      r"$m^{2} \cdot kg^{-1}$"),
+            "E_FF"    : (r"$\epsilon_{ff}$",    r"$$"),
+            "L_STEFAN": (r"$L$",                r"$L_{Edd}$"),
+            }
+
+        # Read output file
+        self.read_data()
+        
+        # Change units
+        self.normalize_data(self.space_label, self.constantes["R_S"])
+        self.normalize_data("M_DOT", self.constantes["M_0_DOT"])
+        self.normalize_data("L_STEFAN", self.constantes["L_EDD"])
+
+    def read_data(self):
+        """ Read data for initialization
+        """
         # Find amount of variables and time array
         with open(self.path, 'rb') as file:
             with SkipWrapper(file) as datafile:
@@ -197,14 +307,43 @@ class DataHandler():
         # Dataframe
         data = data.to_frame()
         data.rename(columns={0: "value"}, inplace=True)
+
+        # Remove time-only data
+        for var in self.var:
+            datavar = data.xs(var, level="variables")
+            if datavar.shape[0] == self.time.shape[0]:
+                self.general_metrics[var] = datavar.to_numpy().flatten()
+
+        for var in self.general_metrics:
+            self.var.remove(var)
+            data.drop(var, level="variables", inplace=True)
+
         self.df = data
 
         # Scurve data
-        self.scurve = DataScurve(scurve_filename, self.constantes)
+        self.scurve = DataScurve(self.constantes)
+
+    def normalize_data(self, variable, norm):
+        # Space
+        if variable == self.space_label:
+            self.space /= norm
+        
+        # Time
+        elif variable == self.time_label:
+            self.time /= norm
+        
+        # F(t) (general metrics)
+        elif variable in self.general_metrics:
+            self.general_metrics[variable] /= norm
+        
+        # F(r,t)
+        else:
+            array = self.df.xs(variable, level="variables")
+            self.df[self.df.index.get_level_values("variables") == variable] /= norm
 
     def get(self, variable, space_idx=None, time_idx=None):
-        array = self.df.query(f"variables=='{variable}'").to_numpy().astype(np.float64)
-        if variable != "L_STEFAN":
+        if variable in self.var:
+            array = self.df.query(f"variables=='{variable}'").to_numpy().astype(np.float64)
             array = np.reshape(array, (self.time.shape[0], self.space.shape[0]))
 
             if time_idx is None and space_idx is None:
@@ -218,8 +357,8 @@ class DataHandler():
 
             return array[time_idx, space_idx]
         
-        else:
-            return array[:,0]
+        elif variable in self.general_metrics:
+            return self.general_metrics[variable]
 
     def plot(self, radius=None, time_min=None, time_max=None, **fig_kw):
         """ Plot toutes les données.
@@ -262,6 +401,7 @@ class Plot():
         line,       = self.ax.plot([], [], '.-')
         self.line   = line
         self.optional_lines = []
+        self.annot  = None
         self.legend = None
 
         # Plot options
@@ -309,11 +449,13 @@ class Plot():
         # Set labels
         if xlabel:
             self.xlabel = xlabel
-            self.ax.set_xlabel(xlabel)
+            if self.data.LaTeX[xlabel][1]:  self.ax.set_xlabel(f"{self.data.LaTeX[xlabel][0]} [{self.data.LaTeX[xlabel][1]}]")
+            else:                           self.ax.set_xlabel(f"{self.data.LaTeX[xlabel][0]}")
         
         if ylabel:
             self.ylabel = ylabel
-            self.ax.set_ylabel(ylabel)
+            if self.data.LaTeX[ylabel][1]:  self.ax.set_ylabel(f"{self.data.LaTeX[ylabel][0]} [{self.data.LaTeX[ylabel][1]}]")
+            else:                           self.ax.set_ylabel(f"{self.data.LaTeX[ylabel][0]}")
         
         # Reset sliders
         self.reset_slider_idx()
@@ -325,7 +467,9 @@ class Plot():
         if self.xlabel == self.data.space_label:    self.x = self.data.space
         elif self.xlabel == self.data.time_label:   self.x = self.data.time
         else:                                       self.x = self.data.get(self.xlabel)
-        self.y = self.data.get(self.ylabel)
+
+        if self.ylabel in self.data.general_metrics.keys(): self.y = self.data.general_metrics[self.ylabel]
+        else:                                               self.y = self.data.get(self.ylabel)
 
         # Redefine limits
         self.relim()
@@ -336,13 +480,13 @@ class Plot():
         if title:
             self.title = title
         else:
-            self.title = f"{self.ylabel}({self.xlabel})"
+            self.title = f"{self.data.LaTeX[self.ylabel][0]}({self.data.LaTeX[self.xlabel][0]})"
         self.ax.set_title(self.title)
 
     def set_data(self, idx_time=None, idx_space=None):
         """ Set the data to plot: Y(X)
         """
-        if self.ylabel == "L_STEFAN":
+        if self.ylabel in self.data.general_metrics.keys():
             self.line.set_data(self.x, self.y)
             return
             
@@ -367,6 +511,8 @@ class Plot():
     def reset_slider_idx(self):
         """ Reset to 0 the current Slider index and set to None the other one
         """
+        if self.ylabel in self.data.general_metrics:
+            return
         # Time Slider
         if self.xlabel == self.data.space_label:
             self.set_idx(time_idx=0)
@@ -375,10 +521,30 @@ class Plot():
         elif self.space_idx is None:
             self.set_idx(space_idx=0)
 
+    def set_annotation(self):
+        """ Add text to show radius or time
+        """
+        # Erase previous artist
+        if self.annot:
+            self.annot.remove()
+            self.annot = None
+
+        # Text
+        if self.time_idx is not None:       text = f"$t = {self.data.time[self.time_idx]:.4f}\, s$"         # Time
+        elif self.space_idx is not None:    text = f"$r = {self.data.space[self.space_idx]:.2f} \,R_s$"     # Space
+        else:                               return                                                          # Other
+
+        self.annot = self.ax.annotate(
+            text, (0.99,1.015), 
+            xycoords='axes fraction', 
+            verticalalignment='baseline', horizontalalignment='right',
+            fontsize=11)
+
     def update(self):
         """ Update plot
         """
         # Plot
+        self.set_annotation()
         self.set_data()
 
         # Grid
@@ -397,18 +563,12 @@ class Plot():
         # S-curve => TEMP(SIGMA)
         if self.ylabel == "TEMP" and self.xlabel == "SIGMA":
             self.plotScurve()
-            self.ax.legend()
+            self.ax.legend(title=r"Courbe en S ($Q_{+} - Q_{-} = 0$)")
         elif self.legend:
             self.legend.remove()
     
-    def plotScurve(self, optical_depth=[1., 10.]):
+    def plotScurve(self):
         """ Add S-Curve lines and Optical Depth line
-            tau = 0.5 * (Ke * Kff)**0.5 * Sigma
-            Kff = 6.13e18 * rho(r) * T**(-7/2)
-            ==>
-                Kff = 2 * tau 
-                T**(-7/2) = Kff / (6.13e18 * rho(r))
-                T**(-7/2) = (2*tau / Sigma)**2 / (Ke * 6.13e18 * rho(r))
         """
         # S-Curve
         lines = self.data.scurve.plot(self.ax, self.data.space[self.space_idx], self.data.space_label)
@@ -418,11 +578,6 @@ class Plot():
         sigma = self.data.get("SIGMA", space_idx=self.space_idx)
         H     = self.data.get("H", space_idx=self.space_idx)
         Ke    = self.data.constantes["KAPPA_E"]
-        
-        # for tau in optical_depth:
-        #     temp_tau = ((8 * H * tau**2) / (Ke * 6.13e18 * sigma**3))**(-2/7)
-        #     line, = self.ax.plot(sigma, temp_tau, '--', color='gray', label=r'$\tau_{eff} = $'+str(tau))
-        #     self.optional_lines += [line]
 
     def start_animation(self, slider_to_update=None):
         """ Animation func
@@ -431,6 +586,7 @@ class Plot():
             """ Animation function for Y(r)
             """
             self.time_idx = (self.time_idx + self.frameStep) % self.data.time.shape[0]
+            self.set_annotation()
             self.set_data()
             if slider_to_update:
                 slider_to_update.set(self.time_idx)
@@ -439,7 +595,9 @@ class Plot():
             """ Animation function for Y(X) with X /= r
             """
             idx = frame_number % self.data.time.shape[0]
-            if self.xlabel == self.data.time_label:
+            if self.ylabel in self.data.general_metrics.keys():
+                self.animationLine.set_data(self.x[idx], self.y[idx])
+            elif self.xlabel == self.data.time_label:
                 self.animationLine.set_data(self.x[idx], self.y[idx, self.space_idx])
             else:
                 self.animationLine.set_data(self.x[idx, self.space_idx], self.y[idx, self.space_idx])
@@ -494,7 +652,7 @@ class GUI():
         self.YaxisMenu    = ttk.Combobox(
             self.toolbar,
             textvariable=self.YaxisOptions,
-            values=tuple(self.data.var),
+            values=tuple(self.data.var) + tuple(self.data.general_metrics.keys()),
             state="readonly"
         )
         self.YaxisMenu.current(0)
@@ -519,7 +677,7 @@ class GUI():
         # Toolbar > Sliders
         self.TimeFrame  = ttk.Frame(self.toolbar)
         self.TimeFrame.grid(row=1, column=0, columnspan=4, sticky=tkinter.NSEW)
-        self.TimeLabel  = ttk.Label(self.TimeFrame, text=f"{self.data.time_label} = {self.data.time[0]:.4f}")
+        self.TimeLabel  = ttk.Label(self.TimeFrame, text=f"{self.data.time_label} = {self.data.time[0]:.4f}s")
         self.TimeValue  = tkinter.IntVar(self.TimeFrame)
         self.TimeSlider = ttk.Scale(
             self.TimeFrame,
@@ -534,7 +692,7 @@ class GUI():
 
         self.SpaceFrame  = ttk.Frame(self.toolbar)
         self.SpaceFrame.grid(row=1, column=0, columnspan=4, sticky=tkinter.NSEW)
-        self.SpaceLabel  = ttk.Label(self.SpaceFrame, text=f"{self.data.space_label} = {self.data.space[0]:.4f}")
+        self.SpaceLabel  = ttk.Label(self.SpaceFrame, text=f"{self.data.space_label} = {self.data.space[0]:.2f} Rs")
         self.SpaceValue  = tkinter.IntVar(self.SpaceFrame)
         self.SpaceSlider = ttk.Scale(
             self.SpaceFrame,
@@ -609,6 +767,20 @@ class GUI():
         # Change axis
         self.plot.set_axis(ylabel=self.YaxisOptions.get())
 
+        # Remove sliders and desactivate X-axis if Y-axis is F(t) (instead of F(t,r))
+        if self.plot.ylabel in self.data.general_metrics:
+            self.SpaceFrame.tkraise()
+            self.TimeFrame.grid_remove()
+            self.SpaceFrame.grid_remove()
+            self.XaxisMenu.configure(state="disabled")
+            self.XaxisMenu.set(self.data.time_label)
+            self.plot.set_idx()
+            self.plot.set_axis(xlabel=self.XaxisOptions.get())
+        else:
+            self.TimeFrame.grid()
+            self.SpaceFrame.grid()
+            self.XaxisMenu.configure(state="readonly")
+
         # Reset Time slider
         if self.plot.xlabel == self.data.space_label:
             self.TimeSlider.set(0)
@@ -622,7 +794,7 @@ class GUI():
         """
         # Change index value
         value = self.TimeValue.get()
-        self.TimeLabel.config(text=f"{self.data.time_label} = {self.data.time[value]:.4f}")
+        self.TimeLabel.config(text=f"{self.data.time_label} = {self.data.time[value]:.4f}s")
 
         if not self.plot.animation or self.plot.isPaused:
             self.plot.set_idx(time_idx=value)
@@ -639,7 +811,7 @@ class GUI():
 
         # Change index value
         value = self.SpaceValue.get()
-        self.SpaceLabel.config(text=f"{self.data.space_label} = {self.data.space[value]:.4f}")
+        self.SpaceLabel.config(text=f"{self.data.space_label} = {self.data.space[value]:.2f} Rs")
         self.plot.set_idx(space_idx=value)
 
         # Update plot
@@ -710,77 +882,17 @@ class GUI():
     - time_max=xxx : on élimine les données telles qu'on n'aura plus que TIME > time_max
 """
 
+if __name__ == "__main__":
+    # Parser
+    parser = argparse.ArgumentParser(
+        description="Affiche les données obtenues par la simulation.",
+        allow_abbrev=True)
+    parser.add_argument("output",
+                         help="Nom du fichier de sortie (Ex: [data.out])")
 
-# Récupérer le fichier de sortie
-data = DataHandler(FILENAME)
+    args = parser.parse_args()
 
-# Plot les données
-init_plotting()
-data.plot()
-
-
-##Dichotomie pour tau_eff=constante
-
-range_sigma=np.linspace(2000,15000,200) #abscisse: range de Sigmas a tracer
-
-liste_tau_ff_level=[1] #liste des niveaux de tau_ff qu'on veut tracer
-
-#future liste des temperatures telles que tau_ff=tau_ff_level
-liste_temp=np.zeros((len(data.space),len(liste_tau_ff_level),len(range_sigma))) 
-
-##Pour récupérer Omega si on ne l'a pas sorti
-M=1.989e30 #masse solaire (p-e a modifier pour recuperer celle de la simu si jamais elle est differente de 1 masse solaire)
-Omega=np.sqrt(6.6743e-11*M/data.space**3)
-
-
-
-def tau_ff(Temp, Sigma, space_idx, tau_ff_level):
-#renvoie (tau_ff(Temp, Sigma) au rayon space_idx) MOINS (tau_ff_level) : on cherche donc le zéro de cette fonction
-#calculs en dimensionné, SI
-
-    R=(1.380649e-23)/(1.67262192369e-27) #cste R
-
-    a=0.5*Omega[space_idx]**2*Sigma
-    b=-1/3*7.56573085e-16*Temp**4
-    c=-R*Temp*Sigma/(2*0.6173)
-
-    H=(-b+np.sqrt(b**2-4*a*c))/(2*a)
-    rho=Sigma/(2*H)
-    K_e=0.34e-1
-    K_ff=6.13e18*rho*Temp**(-3.5)
-    tau_ff=0.5*Sigma*np.sqrt(K_e*K_ff)
-
-    return(tau_ff-tau_ff_level)
-
-
-for space_idx in range(len(data.space)): #boucle sur les rayons
-
-    for level_idx in range(len(liste_tau_ff_level)): #boucle sur les niveaux a tracer
-        tau_ff_level=liste_tau_ff_level[level_idx]
-
-        for sigma_idx in range(len(range_sigma)): #boucle sur la range de sigma
-            
-            Current_Sigma=range_sigma[sigma_idx]
-
-            #initialisation des températures basses et hautes pour la dicho:
-            a=0.1e7
-            b=7e7
-            tau_c=1
-
-            while abs(tau_c)>0.001:
-
-                c=(a+b)/2 #c est le point milieu
-                tau_a=tau_ff(a, Current_Sigma, space_idx, tau_ff_level)
-                tau_b=tau_ff(b, Current_Sigma, space_idx, tau_ff_level)
-                tau_c=tau_ff(c, Current_Sigma, space_idx, tau_ff_level)
-
-                if tau_a*tau_b>0: #si on est hors du domaine de la solution: poser Température=0 et sortir de la boucle
-                    print('pas de solution a Sigma=', Current_Sigma)
-                    tau_c=0
-                    c=0
-                if tau_a*tau_c>0: #si solution entre c et b: a devient c
-                    a=c
-                else: #si solution entre a et c: b devient c
-                    b=c
-
-            liste_temp[space_idx,level_idx,sigma_idx]=c #ajout de la temperature solution c
+    # Plot data
+    data = DataHandler(args.output)
+    init_plotting()
+    data.plot()
