@@ -13,7 +13,7 @@ import io
 
 #============================================================
 # FILENAME
-FILENAME = "data_pluslong.out"
+FILENAME = "data.out"
 """ TODO
     - Animation quand xlabel /= radius
     - Ajouter le temps sur le graphe matplotlib lors d'une animation (ou même dès qu'on a Y(r))
@@ -717,3 +717,70 @@ data = DataHandler(FILENAME)
 # Plot les données
 init_plotting()
 data.plot()
+
+
+##Dichotomie pour tau_eff=constante
+
+range_sigma=np.linspace(2000,15000,200) #abscisse: range de Sigmas a tracer
+
+liste_tau_ff_level=[1] #liste des niveaux de tau_ff qu'on veut tracer
+
+#future liste des temperatures telles que tau_ff=tau_ff_level
+liste_temp=np.zeros((len(data.space),len(liste_tau_ff_level),len(range_sigma))) 
+
+##Pour récupérer Omega si on ne l'a pas sorti
+M=1.989e30 #masse solaire (p-e a modifier pour recuperer celle de la simu si jamais elle est differente de 1 masse solaire)
+Omega=np.sqrt(6.6743e-11*M/data.space**3)
+
+
+
+def tau_ff(Temp, Sigma, space_idx, tau_ff_level):
+#renvoie (tau_ff(Temp, Sigma) au rayon space_idx) MOINS (tau_ff_level) : on cherche donc le zéro de cette fonction
+#calculs en dimensionné, SI
+
+    R=(1.380649e-23)/(1.67262192369e-27) #cste R
+
+    a=0.5*Omega[space_idx]**2*Sigma
+    b=-1/3*7.56573085e-16*Temp**4
+    c=-R*Temp*Sigma/(2*0.6173)
+
+    H=(-b+np.sqrt(b**2-4*a*c))/(2*a)
+    rho=Sigma/(2*H)
+    K_e=0.34e-1
+    K_ff=6.13e18*rho*Temp**(-3.5)
+    tau_ff=0.5*Sigma*np.sqrt(K_e*K_ff)
+
+    return(tau_ff-tau_ff_level)
+
+
+for space_idx in range(len(data.space)): #boucle sur les rayons
+
+    for level_idx in range(len(liste_tau_ff_level)): #boucle sur les niveaux a tracer
+        tau_ff_level=liste_tau_ff_level[level_idx]
+
+        for sigma_idx in range(len(range_sigma)): #boucle sur la range de sigma
+            
+            Current_Sigma=range_sigma[sigma_idx]
+
+            #initialisation des températures basses et hautes pour la dicho:
+            a=0.1e7
+            b=7e7
+            tau_c=1
+
+            while abs(tau_c)>0.001:
+
+                c=(a+b)/2 #c est le point milieu
+                tau_a=tau_ff(a, Current_Sigma, space_idx, tau_ff_level)
+                tau_b=tau_ff(b, Current_Sigma, space_idx, tau_ff_level)
+                tau_c=tau_ff(c, Current_Sigma, space_idx, tau_ff_level)
+
+                if tau_a*tau_b>0: #si on est hors du domaine de la solution: poser Température=0 et sortir de la boucle
+                    print('pas de solution a Sigma=', Current_Sigma)
+                    tau_c=0
+                    c=0
+                if tau_a*tau_c>0: #si solution entre c et b: a devient c
+                    a=c
+                else: #si solution entre a et c: b devient c
+                    b=c
+
+            liste_temp[space_idx,level_idx,sigma_idx]=c #ajout de la temperature solution c
