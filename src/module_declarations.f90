@@ -40,7 +40,7 @@ REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
 
 !! PARAMÈTRES SPATIAUX
-INTEGER,PARAMETER :: NX = 500        !! Nombre de points de discrétisation spatiale
+INTEGER,PARAMETER :: NX = 100        !! Nombre de points de discrétisation spatiale
 REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
 REAL(KIND=XP)     :: X_MIN           !! Rayon minimal adimensionné
 REAL(KIND=XP)     :: X_MAX           !! Rayon maximal adimensionné
