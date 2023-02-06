@@ -25,15 +25,15 @@ CALL INIT_FILES()
 !---------------------------------
 
 IF (COURBE_EN_S == 1) THEN
-   WRITE(*,"(48('-'))")
    WRITE(*, "('Calcul des courbes en S')")
    CALL S_CURVE()
    WRITE(*, "('Calcul des points critiques')")
    CALL POINTS_CRITIQUES()
-   Temp_min_AD=1.0e-1
-   Temp_max_AD=1.0e1
-   Sg_AD = 790._xp * 10 / S_0 * X_AD(10)
-   CALL map_QpmQm(Temp_min_AD, Temp_max_AD, Sg_AD, 100)
+   Temp_min_AD = 5.0e-2
+   Temp_max_AD = 5.0e0
+   Sg_AD = 1.0e0
+   Sd_AD = 1.0e3
+   CALL map_QpmQm(Temp_min_AD, Temp_max_AD, Sg_AD, Sd_AD, 100)
 ENDIF
 
 CALL LECTURE_POINTS_CRITIQUES()

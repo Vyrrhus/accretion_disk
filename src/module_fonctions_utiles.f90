@@ -377,32 +377,56 @@ SUBROUTINE calc_QpmQm (Temp_S_AD, S_S_AD, ipos, QpmQm)
 END SUBROUTINE calc_QpmQm
 !---------------------------------------------------------------------------------------------------
 
-SUBROUTINE map_QpmQm (T_min_map_AD, T_max_map_AD, S_map_AD, n_map)
+SUBROUTINE map_QpmQm (T_min_map_AD, T_max_map_AD, S_min_map_AD, S_max_map_AD, n_map)
 !---------------------------------------------------------------------------------------------------
 !> Subroutine qui calcula la carte des valeurs de Q+ - Q- à tous les rayons dans l'espace Temp-Sigma
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-    REAL(KIND=xp), INTENT(in)  :: T_min_map_AD, T_max_map_AD
-    REAL(KIND=xp), INTENT(in)  :: S_map_AD
-    INTEGER,       INTENT(in)  :: n_map
+    REAL(KIND=xp), INTENT(in)                          :: T_min_map_AD, T_max_map_AD
+    REAL(KIND=xp), INTENT(in)                          :: S_min_map_AD, S_max_map_AD
+    INTEGER,       INTENT(in)                          :: n_map
 
-    REAL(KIND=xp)              :: QpmQm_map
-    REAL(KIND=xp)              :: T_map_AD
-    INTEGER                    :: j, ipos
+    REAL(KIND=xp), DIMENSION(n_map)                    :: QpmQm_map
+    REAL(KIND=xp)                                      :: T_map_AD
+    REAL(KIND=xp)                                      :: S_map_AD
+    INTEGER                                            :: j, ipos, k
 
     OPEN (unit=10, file="./output/scurve/map.out", status="unknown")
 
     DO ipos=1,NX
 
         T_map_AD = T_min_map_AD
+        S_map_AD = S_min_map_AD
 
-        DO j=1, n_map
+        CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(1))
 
-            CALL calc_QpmQm (T_map_AD, S_map_AD, ipos, QpmQm_map)
-            WRITE(10,*) T_map_AD * Temp_0, S_map_AD * S_0 / X_AD(ipos) * 1E-1, QpmQm_map, X_AD(ipos)
-            T_map_AD = T_map_AD + ( T_max_map_AD - T_min_map_AD ) / n_map
+        DO j=2,n_map
+            
+            S_map_AD = S_map_AD + ( S_max_map_AD - S_min_map_AD ) / n_map
+            CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(j))
 
         ENDDO
+            
+        WRITE(10,*) QpmQm_map
+
+        DO k=2,n_map
+            
+            T_map_AD = T_map_AD + ( T_max_map_AD - T_min_map_AD ) / n_map
+            S_map_AD = S_min_map_AD
+
+            CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(1))
+
+            DO j=2,n_map
+            
+                S_map_AD = S_map_AD + ( S_max_map_AD - S_min_map_AD ) / n_map
+                CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(j))
+
+            ENDDO
+
+            WRITE(10,*) QpmQm_map
+
+        ENDDO
+
     ENDDO
 
     CLOSE(10)
