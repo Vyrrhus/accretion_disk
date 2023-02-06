@@ -53,17 +53,21 @@ WRITE(*, "('--------------DEBUT DE SIMULATION---------------')")
 ! ascension de la branche épaisse
 CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
 
-!approche du point critique
-CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
-!suivi de la spirale
-CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
-!branche mince et redescente
-CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
-!ascension de la branche épaisse à nouveau
-CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+!instabilité si equilibre non-atteint
+IF (MOTIF_SORTIE_BRANCHE_EPAISSE>0) THEN
+   !approche du point critique
+   CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
+   !suivi de la spirale
+   CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
+   !branche mince et redescente
+   CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
+   !ascension de la branche épaisse à nouveau
+   CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+ENDIF
 
 WRITE(*,"(48('-'))")
 WRITE(*, "('----------------FIN DE SIMULATION---------------')")
+WRITE(*,"(48('-'))")
 
 CALL CLOSE_OUTPUT()	
 !========================================================================

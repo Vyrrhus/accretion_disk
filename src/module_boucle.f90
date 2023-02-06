@@ -30,6 +30,8 @@ REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 5.0E-4_xp   !! Fraction 
 REAL(KIND=XP), PARAMETER, PRIVATE :: PRECISION_MDOT   = 1.0e-3_xp   !! Précision attendue sur Mdot == 1
 
 INTEGER, PRIVATE                  :: NB_ITE_THERMIQUE               !! Nombre d'itérations réalisées dans boucle_thermique
+INTEGER                           :: MOTIF_SORTIE_BRANCHE_EPAISSE   !! Raison d'arret de BOUCLE_BRANCHE_EPAISSE:
+                                                                    !! 0=equilibre, 1=point critique, 2=nb d'ite maximal atteint
 
 !===================================================================================================
             CONTAINS    
@@ -184,22 +186,35 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         IF (mode_arret == 0) THEN
             CALL ADIM_TO_PHYSIQUE
             !on teste si la prochaine itération (estimée par l'ancienne) dépasserait le seuil, ou si M_dot=1
-            IF (    (MAXVAL(SIGMA + (SIGMA - SIGMA_SAVE) - SIGMA_CRITIQUE * FACTEUR_SECURITE) >= 0.0_xp) &
-             &  .or.(ECART_M_DOT <= PRECISION_MDOT)) THEN
+            IF (MAXVAL(SIGMA + (SIGMA - SIGMA_SAVE) - SIGMA_CRITIQUE * FACTEUR_SECURITE) >= 0.0_xp) THEN
+                MOTIF_SORTIE_BRANCHE_EPAISSE=1
+                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+                WRITE(*,"('MOTIF: SEUIL CRITIQUE ATTEINT')")
+                EXIT
+            ELSE IF (ECART_M_DOT <= PRECISION_MDOT) THEN
+                MOTIF_SORTIE_BRANCHE_EPAISSE=0
+                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+                WRITE(*,"('MOTIF: EQUILIBRE ATTEINT')")
                 EXIT
             ENDIF
 
         ! Cas mode_arret=i : verification de l'equilibre ou que l'on a fait les i itérations voulues
         ELSE
-            IF ((ITE > mode_arret).or.(ECART_M_DOT <= PRECISION_MDOT)) THEN
+            IF (ECART_M_DOT <= PRECISION_MDOT) THEN
+                MOTIF_SORTIE_BRANCHE_EPAISSE=0
+                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+                WRITE(*,"('MOTIF: EQUILIBRE ATTEINT')")
+                EXIT
+            ELSE IF (ITE > mode_arret) THEN
+                MOTIF_SORTIE_BRANCHE_EPAISSE=2
+                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+                WRITE(*,"('MOTIF: NOMBRE D ITERATIONS MAX ATTEINT')")
                 EXIT
             ENDIF
         ENDIF
             
     ENDDO
-
     ! AFFICHAGE SORTANT ----------------------------------------------------------------------------
-    WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
     WRITE(*, "('Nombre d iterations : ',I0)") ITE-1
     WRITE(*,"(48('-'))")
 !---------------------------------------------------------------------------------------------------
