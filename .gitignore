@@ -4,6 +4,7 @@
 *.png
 *.dSYM
 *.ipynb
+*.mp4
 .DS_Store
 
 # Executables
@@ -18,8 +19,3 @@ python/plot.py
 test.py
 .bashrc
 3d.py
-anim.mp4
-python/__pycache__/disk.cpython-310.pyc
-fl.mp4
-3d.mp4
-2d.mp4
