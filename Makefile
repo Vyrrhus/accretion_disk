@@ -29,20 +29,16 @@ MODULE_SRC 	:= 	module_declarations.f90 \
                 module_boucle.f90
 
 MAIN_SRC 	:= main.f90
-SCHEMA_SRC  := program_schema.f90
 
 # EXECUTABLES
 MAIN_EXE := disk
-SCHEMA_EXE := schema
 
 # CREATE OBJECTS
 MODULE_SRC := $(foreach file,$(MODULE_SRC),$(SRCDIR)/$(file))
 MAIN_SRC   := $(foreach file,$(MAIN_SRC),$(SRCDIR)/$(file))
-SCHEMA_SRC := $(foreach file,$(SCHEMA_SRC),$(SRCDIR)/$(file))
 
 MODULE_OBJ := $(patsubst $(SRCDIR)/%,$(BINDIR)/%,$(MODULE_SRC:.f90=.o))
 MAIN_OBJ   := $(patsubst $(SRCDIR)/%,$(BINDIR)/%,$(MAIN_SRC:.f90=.o))
-SCHEMA_OBJ := $(patsubst $(SRCDIR)/%,$(BINDIR)/%,$(SCHEMA_SRC:.f90=.o))
 
 FFLAGS  += -J $(BINDIR)
 ifneq ($(BINDIR),)
@@ -66,12 +62,7 @@ default: $(MAIN_EXE)
 
 all: $(MAIN_EXE) $(SCURVE_EXE)
 
-schema: $(SCHEMA_EXE)
-
 $(MAIN_EXE): $(MODULE_OBJ) $(MAIN_OBJ)
-	$(F90) $(FFLAGS) $^ -o $@ $(LIB)
-
-$(SCHEMA_EXE): $(MODULE_OBJ) $(SCHEMA_OBJ) 
 	$(F90) $(FFLAGS) $^ -o $@ $(LIB)
 
 $(BINDIR)/%.o: $(SRCDIR)/%.f90
