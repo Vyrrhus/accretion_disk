@@ -266,8 +266,8 @@ class DataHandler():
         
         # Change units
         self.normalize_data(self.space_label, self.constantes["R_S"])
-        self.normalize_data("M_DOT", self.constantes["M_0_DOT"])
-        self.normalize_data("L_STEFAN", self.constantes["L_EDD"])
+        if "M_DOT" in self.var:                 self.normalize_data("M_DOT", self.constantes["M_0_DOT"])
+        if "L_STEFAN" in self.general_metrics:  self.normalize_data("L_STEFAN", self.constantes["L_EDD"])
 
     def read_data(self):
         """ Read data for initialization
