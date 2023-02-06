@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-T_epais,S_epais,positions=np.loadtxt("./../output/results_epais.out",unpack=True,usecols=(0,1,2))
-T_mince,S_mince,positions2=np.loadtxt("./../output/results_mince.out",unpack=True,usecols=(0,1,2))
+T_epais,S_epais,positions=np.loadtxt("./../output/scurve/epais.out",unpack=True,usecols=(0,1,3))
+T_mince,S_mince,positions2=np.loadtxt("./../output/scurve/mince.out",unpack=True,usecols=(0,1,3))
 
 p=[]
 for i in positions : 
@@ -29,6 +29,6 @@ for i in range(0,len(p)):
     plt.xlabel(r"$log(\Sigma)$")
     plt.ylabel("$log(T)$")
     plt.legend()
-    plt.xlim([2,3.5])
+    plt.xlim([3,4.5])
     plt.ylim([5.5,7.6])
     plt.show()
