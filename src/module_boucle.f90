@@ -28,7 +28,7 @@ REAL(KIND=xp), PARAMETER, PRIVATE :: FRACTION_DT_TH   = 1.0E-1_xp   !! Fraction 
 REAL(KIND=XP), PARAMETER, PRIVATE :: FRACTION_DT_VISQ = 5.0E-4_xp   !! Fraction du pas de temps visqueux
 REAL(KIND=XP), PARAMETER, PRIVATE :: PRECISION_MDOT   = 1.0e-4_xp   !! Précision attendue sur Mdot == 1
 
-INTEGER, PRIVATE :: NB_ITE_THERMIQUE    !! Nombre d'itérations réalisées dans le régime thermique
+INTEGER, PRIVATE                  :: NB_ITE_THERMIQUE    !! Nombre d'itérations réalisées dans le régime thermique
 
 !===================================================================================================
             CONTAINS    
@@ -50,7 +50,7 @@ SUBROUTINE BOUCLE_THERMIQUE()
     
     DO WHILE( MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD)) > SWITCH_THERMIQUE)
 
-        CALL ITERATION_TEMP_AD()   ! on appelle le schéma de l'équation de T
+        CALL SCHEMA_TEMP_EPAIS()   ! on appelle le schéma de l'équation de T
         CALL COMPUTE_EQS()         ! on calcule le reste des variables
         
         ! Affichage pour observer l'évolution du système ( q+-q- et m_dot)
@@ -250,8 +250,6 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
     WRITE(*,"(48('-'))")
     WRITE(*,"('BOUCLE INSTABLE            DELTA_T_INSTABLE_AD = ',1pE12.4)") DELTA_T_INSTABLE_AD
     WRITE(*,"('FRACTION DE TEMP_CRITIQUE D ARRET = ',1pE12.4)") FACTEUR_SECURITE
-    WRITE(*,"(48('-'))")
-    WRITE(*,"(48('-'))")
 
     DO
         ! CALCUL DE LA CONDITION D'ARRET---------------------------------------------------------------------------
@@ -342,8 +340,6 @@ SUBROUTINE BOUCLE_TEMP_A_ATTEINDRE(FRACTION_DT_INSTABLE,ECRIT_PAS,T_TO_REACH,I)
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
     WRITE(*,"('BOUCLE INSTABLE            DELTA_T_INSTABLE_AD = ',1pE12.4)") DELTA_T_INSTABLE_AD
-    WRITE(*,"(48('-'))")
-    WRITE(*,"(48('-'))")
     
     iterateur = 1
     DO WHILE( TIME_AD/OMEGA_MAX <= T_TO_REACH)

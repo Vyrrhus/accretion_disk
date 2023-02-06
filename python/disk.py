@@ -63,9 +63,9 @@ class DataScurve():
         self.constantes    = constantes
         self.optical_depth = optical_depth
 
-        self.epais    = pd.read_csv(filename["epais"],     header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
-        self.mince    = pd.read_csv(filename["mince"],     header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
-        self.critique = pd.read_csv(filename["critiques"], header=None, delim_whitespace=True, names=['T', 'Sigma', 'RADIUS', 'X_AD'])
+        self.epais    = pd.read_csv(filename["epais"],     header=None, delim_whitespace=True, names=['TEMP', 'SIGMA', 'RADIUS', 'X_AD'])
+        self.mince    = pd.read_csv(filename["mince"],     header=None, delim_whitespace=True, names=['TEMP', 'SIGMA', 'RADIUS', 'X_AD'])
+        self.critique = pd.read_csv(filename["critiques"], header=None, delim_whitespace=True, names=['TEMP', 'SIGMA', 'RADIUS', 'X_AD'])
 
     def get(self, radius, radius_label, isFrom="epais"):
         if   isFrom == "epais":
@@ -78,8 +78,8 @@ class DataScurve():
         closest_value = min(data[radius_label].unique(), key=lambda x:abs(x - radius * self.constantes["R_S"]))
         scurve = data[data[radius_label] == closest_value]
 
-        temp  = scurve["T"].to_numpy()
-        sigma = scurve["Sigma"].to_numpy()
+        temp  = scurve["TEMP"].to_numpy()
+        sigma = scurve["SIGMA"].to_numpy()
         return temp, sigma
     
     def plot(self, ax, radius, radius_label, plot_epais=True, plot_mince=True, plot_critique=True, plot_optical=True):
@@ -266,8 +266,8 @@ class DataHandler():
         
         # Change units
         self.normalize_data(self.space_label, self.constantes["R_S"])
-        self.normalize_data("M_DOT", self.constantes["M_0_DOT"])
-        self.normalize_data("L_STEFAN", self.constantes["L_EDD"])
+        if "M_DOT" in self.var:                 self.normalize_data("M_DOT", self.constantes["M_0_DOT"])
+        if "L_STEFAN" in self.general_metrics:  self.normalize_data("L_STEFAN", self.constantes["L_EDD"])
 
     def read_data(self):
         """ Read data for initialization
@@ -564,20 +564,39 @@ class Plot():
         if self.ylabel == "TEMP" and self.xlabel == "SIGMA":
             self.plotScurve()
             self.ax.legend(title=r"Courbe en S ($Q_{+} - Q_{-} = 0$)")
+        elif self.ylabel in ["TEMP", "SIGMA"] and self.xlabel == self.data.space_label:
+            self.plotCritique()
+            if self.optional_lines:
+                self.ax.legend()
         elif self.legend:
             self.legend.remove()
     
+    def plotCritique(self):
+        """ Add axhline & axvline for critical values of Temp / Sigma
+        """
+        # Get critical dataframe
+        critique = self.data.scurve.critique
+
+        # F(r) at t
+        if self.xlabel == self.data.space_label:
+            temp   = critique["TEMP"].to_numpy()
+            sigma  = critique["SIGMA"].to_numpy()
+            radius = critique[self.data.space_label].to_numpy() / self.data.constantes["R_S"]
+            if self.ylabel == "TEMP":
+                line,  = self.ax.plot(radius, temp, linestyle='-.', lw=0.8, alpha=0.8, color='black', label=f'{self.data.LaTeX["TEMP"][0]} critique')
+            elif self.ylabel == "SIGMA":
+                line,  = self.ax.plot(radius, sigma, linestyle='-.', lw=0.8, alpha=0.8, color='black', label=f'{self.data.LaTeX["SIGMA"][0]} critique')
+            else:
+                return
+            
+        self.optional_lines += [line]
+
     def plotScurve(self):
         """ Add S-Curve lines and Optical Depth line
         """
         # S-Curve
         lines = self.data.scurve.plot(self.ax, self.data.space[self.space_idx], self.data.space_label)
         self.optional_lines += list(lines)
-
-        # Optical depth
-        sigma = self.data.get("SIGMA", space_idx=self.space_idx)
-        H     = self.data.get("H", space_idx=self.space_idx)
-        Ke    = self.data.constantes["KAPPA_E"]
 
     def start_animation(self, slider_to_update=None):
         """ Animation func

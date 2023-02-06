@@ -2,14 +2,14 @@
             MODULE MODULE_SCHEMAS_SIGMA
 !===================================================================================================
 !> Ce module contient :
-!> Le schéma implicite pour le calcul de S
+!> SCHEMA_IMPLICITE_S: Un schéma implicite pour le calcul de S
+!> SCHEMA_CN_S: Un schéma de Crank-Nicolson pour le calcul de S
+!> CREER_LAMBDA: Une routine à appeler une fois avant d'utiliser les schémas pour initialiser les tableaux.
+!> CREER_MATRICE_TRIDIAGONALE: Une routine utilisée par les schémas pour générer les matrices A et B
 !===================================================================================================
 USE module_declarations
 
 IMPLICIT NONE
-
-!!REELS
-!REAL(KIND=xp) :: DELTA_T_VISQ ! pas de temps visqueux
 
 !!TABLEAUX
 REAL(KIND=xp), DIMENSION(Nx) :: LAMBDA             !! Tableaux des lambda_i
@@ -21,7 +21,7 @@ REAL(KIND=xp), DIMENSION(Nx) :: MATRICE_A_D !! diagonale centrale
 REAL(KIND=xp), DIMENSION(Nx-1) :: MATRICE_A_DU !! sur diagonale
 REAL(KIND=xp), DIMENSION(Nx-2) :: MATRICE_A_DUU !! sur sur diagonale  (pour lapack)
 
-!matrice B pour Crank-Nicholson
+!matrice B pour Crank-Nicolson
 REAL(KIND=xp), DIMENSION(Nx-1) :: MATRICE_B_DL  !! sous diagonale
 REAL(KIND=xp), DIMENSION(Nx) :: MATRICE_B_D !! diagonale centrale
 REAL(KIND=xp), DIMENSION(Nx-1) :: MATRICE_B_DU !! sur diagonale
@@ -38,11 +38,11 @@ SUBROUTINE SCHEMA_IMPLICITE_S(NU_AD_bis)
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
-    !!variables d'entrée
+    !variables d'entrée
     REAL(KIND=xp), DIMENSION(Nx), INTENT(in) :: NU_AD_bis
 
 
-    REAL(KIND=xp), DIMENSION(Nx) :: IPIV !! indices de pivots (pour lapack)
+    REAL(KIND=xp), DIMENSION(Nx) :: IPIV ! indices de pivots (pour lapack)
     INTEGER :: INFO !pour LAPACK
 
 
@@ -50,20 +50,19 @@ SUBROUTINE SCHEMA_IMPLICITE_S(NU_AD_bis)
     CALL CREER_MATRICE_TRIDIAGONALE(MATRICE_A_DL, MATRICE_A_D, MATRICE_A_DU, MATRICE_A_DUU, -1.0_xp*LAMBDA, NU_AD_bis)
 
     
-    !!On calcule le membre de gauche du schéma implicite : il faut ajouter le terme de bord au dernier indice
+    !On calcule le membre de gauche du schéma implicite : il faut ajouter le terme de bord au dernier indice
     S_AD(Nx) = S_AD(Nx) + DX*LAMBDA(Nx)
 
-    !!On doit inverser le systeme pour obtenir S_AD au temps suivant:
+    !On doit inverser le systeme pour obtenir S_AD au temps suivant:
 
-    !! factorisation LU
+    !factorisation LU
     CALL DGTTRF(Nx, MATRICE_A_DL, MATRICE_A_D, MATRICE_A_DU, MATRICE_A_DUU, IPIV, INFO)
 
-    
-    !!resolution
+    !resolution
     CALL DGTTRS('N', Nx, 1, MATRICE_A_DL, MATRICE_A_D, MATRICE_A_DU, MATRICE_A_DUU, IPIV, S_AD, NX, INFO)
 
     
-    !!S_AD est maintenant au temps suivant
+    !S_AD est maintenant au temps suivant
 
 
 !---------------------------------------------------------------------------------------------------
@@ -74,7 +73,7 @@ END SUBROUTINE SCHEMA_IMPLICITE_S
 SUBROUTINE SCHEMA_CN_S(NU_AD_bis, PARAM_CN)
 !---------------------------------------------------------------------------------------------------
 !>    Cette routine prend en entrée les valeurs de NU_AD_bis (viscosité) pour calculer au pas de temps
-!>    visqueux suivant la densité surfacique S_AD, avec un Crank-Nicholson de parametre PARAM_CN
+!>    visqueux suivant la densité surfacique S_AD, avec un Crank-Nicolson de parametre PARAM_CN
 !>    entre 0 et 1.
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
@@ -102,25 +101,26 @@ SUBROUTINE SCHEMA_CN_S(NU_AD_bis, PARAM_CN)
     
     CALL DGBMV('N', NX, NX, 1, 1, 1.0_xp, MATRICE_B_BLAS, 3, S_AD, 1, 0.0_xp, S_AD_temp, 1)
 
-    S_AD=S_AD_temp !S_AD_temp contient le résultat de B * S_AD
+    !S_AD_temp contient le résultat de B * S_AD
+
+    S_AD=S_AD_temp 
     
     !!puis ajouter le terme de condition initiale
 
     S_AD(Nx) = S_AD(Nx) + DX*LAMBDA(Nx)
 
     
-
     !!On doit inverser la matrice A pour obtenir S_AD au temps suivant:
 
-    !! factorisation LU
+    !factorisation LU
     CALL DGTTRF(Nx, MATRICE_A_DL, MATRICE_A_D, MATRICE_A_DU, MATRICE_A_DUU, IPIV, INFO)
 
     
-    !!resolution
+    !resolution
     CALL DGTTRS('N', Nx, 1, MATRICE_A_DL, MATRICE_A_D, MATRICE_A_DU, MATRICE_A_DUU, IPIV, S_AD, NX, INFO)
 
     
-    !!S_AD est maintenant au temps suivant
+    !S_AD est maintenant au temps suivant
 
 
 !---------------------------------------------------------------------------------------------------
