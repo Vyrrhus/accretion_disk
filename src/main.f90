@@ -25,6 +25,7 @@ CALL INIT_FILES()
 !---------------------------------
 
 IF (COURBE_EN_S == 1) THEN
+   WRITE(*,"(48('-'))")
    WRITE(*, "('Calcul des courbes en S')")
    CALL S_CURVE()
    WRITE(*, "('Calcul des points critiques')")
@@ -46,6 +47,9 @@ CALL CREATION_CONDITIONS_INITIALES()
 !----------------------------------
 !-- BOUCLES DE CALCULS
 !----------------------------------
+WRITE(*,"(48('-'))")
+WRITE(*, "('--------------DEBUT DE SIMULATION---------------')")
+
 ! ascension de la branche épaisse
 CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
 
@@ -57,6 +61,9 @@ CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
 CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
 !ascension de la branche épaisse à nouveau
 CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+
+WRITE(*,"(48('-'))")
+WRITE(*, "('----------------FIN DE SIMULATION---------------')")
 
 CALL CLOSE_OUTPUT()	
 !========================================================================
