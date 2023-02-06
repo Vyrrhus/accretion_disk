@@ -5,6 +5,7 @@
 *.dSYM
 *.ipynb
 *.mp4
+*.mod
 .DS_Store
 
 # Executables
@@ -14,8 +15,10 @@ run
 cleanup
 
 # Folders
+.vscode
 doc/
 python/plot.py
+src/program_schema copy.f90
 test.py
 .bashrc
 3d.py

@@ -1,2 +1,6 @@
 *.pyc
 __pycache__/
+
+plot_M0dot.py
+plot_Q_adv.py
+Evolution_T_Scurve.py
