@@ -102,13 +102,6 @@ REAL(KIND=XP) :: C_AD(NX)            !! Coefficient c du trinôme pour le calcul
 
 REAL(KIND=XP) :: L_STEFAN_AD         !! Luminosité Adimensionnée
 
-!! VARIABLES AVEC CONDITIONS
-REAL(KIND=XP) :: Q_MOINS(NX)     !! Chaleur Dissipée
-REAL(KIND=XP) :: F_Z(NX)         !! Flux Adimensionnée
-REAL(KIND=XP) :: TAU_EFF(NX)     !! Profondeur Optique Effective
-REAL(KIND=XP) :: KAPPA_FF(NX)    !! Opacité Free-Free
-REAL(KIND=XP) :: EPSILON_FF(NX)  !! Emissivité Free-Free
-
 !! VARIABLES 
 REAL(KIND=XP) :: TIME             !! Temps
 REAL(KIND=XP) :: RADIUS(NX)       !! Rayon
@@ -127,6 +120,12 @@ REAL(KIND=XP) :: TEMP(NX)         !! Température
 REAL(KIND=XP) :: Q_PLUS(NX)       !! Chaleur Apportée
 REAL(KIND=XP) :: Q_ADV(NX)        !! Chaleur Advectée
 REAL(KIND=XP) :: C_V(NX)          !! Capacité Calorifique
+REAL(KIND=XP) :: Q_MOINS(NX)     !! Chaleur Dissipée
+REAL(KIND=XP) :: F_Z(NX)         !! Flux Adimensionnée
+REAL(KIND=XP) :: TAU_EFF(NX)     !! Profondeur Optique Effective
+REAL(KIND=XP) :: KAPPA_FF(NX)    !! Opacité Free-Free
+REAL(KIND=XP) :: EPSILON_FF(NX)  !! Emissivité Free-Free
+
 
 REAL(KIND=XP) :: L_STEFAN         !! Luminosité
 

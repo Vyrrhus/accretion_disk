@@ -19,15 +19,15 @@ SUBROUTINE FRAME(VAR,INDEX)
 !> Cette subroutine est appelée en mettant frame_cond = 1 en input.config
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-    INTEGER, INTENT(IN) :: INDEX
-    REAL(KIND=XP),INTENT(IN),DIMENSION(NX) :: VAR
-    INTEGER,PARAMETER :: SIZE = 2*NX
-    INTEGER :: CENTER,I,J,IND,UNTY
-    REAL(KIND=XP),DIMENSION(SIZE,SIZE) :: IMG 
-    CHARACTER(LEN=1024) :: FRAME_NAME
-    CHARACTER(LEN=1024) :: NUMB
-    REAL(KIND=XP):: NAN_VALUE 
-    CHARACTER(LEN=30):: FMT_frame
+    INTEGER, INTENT(IN)                       :: INDEX
+    REAL(KIND=XP),INTENT(IN),DIMENSION(NX)    :: VAR
+    INTEGER,PARAMETER                         :: SIZE = 2*NX
+    INTEGER                                   :: CENTER,I,J,IND,UNTY
+    REAL(KIND=XP),DIMENSION(SIZE,SIZE)        :: IMG 
+    CHARACTER(LEN=1024)                       :: FRAME_NAME
+    CHARACTER(LEN=1024)                       :: NUMB
+    REAL(KIND=XP)                             :: NAN_VALUE 
+    CHARACTER(LEN=30)                         :: FMT_frame
     
     ! Condition pour utiliser la subroutine
     IF (FRAME_COND /= 1) RETURN
@@ -57,6 +57,7 @@ SUBROUTINE FRAME(VAR,INDEX)
         ENDDO
     ENDDO
     
+    ! écriture dans le fichier de sortie
     OPEN(NEWUNIT=UNTY,FILE="frame_array/"//TRIM(ADJUSTL(FRAME_NAME)),ACTION='WRITE')
     DO I=1,SIZE
         WRITE(UNTY,FMT_frame) IMG(I,:)
