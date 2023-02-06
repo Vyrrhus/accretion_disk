@@ -18,7 +18,7 @@ cleanup
 .vscode
 doc/
 python/plot.py
-src/program_schema copy.f90
+src/program_schema.f90
 test.py
 .bashrc
 3d.py
