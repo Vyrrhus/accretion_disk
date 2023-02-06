@@ -250,8 +250,6 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
     WRITE(*,"(48('-'))")
     WRITE(*,"('BOUCLE INSTABLE            DELTA_T_INSTABLE_AD = ',1pE12.4)") DELTA_T_INSTABLE_AD
     WRITE(*,"('FRACTION DE TEMP_CRITIQUE D ARRET = ',1pE12.4)") FACTEUR_SECURITE
-    WRITE(*,"(48('-'))")
-    WRITE(*,"(48('-'))")
 
     DO
         ! CALCUL DE LA CONDITION D'ARRET---------------------------------------------------------------------------
@@ -342,8 +340,6 @@ SUBROUTINE BOUCLE_TEMP_A_ATTEINDRE(FRACTION_DT_INSTABLE,ECRIT_PAS,T_TO_REACH,I)
     WRITE(*,"(48('-'))")
     WRITE(*,"(48('-'))")
     WRITE(*,"('BOUCLE INSTABLE            DELTA_T_INSTABLE_AD = ',1pE12.4)") DELTA_T_INSTABLE_AD
-    WRITE(*,"(48('-'))")
-    WRITE(*,"(48('-'))")
     
     iterateur = 1
     DO WHILE( TIME_AD/OMEGA_MAX <= T_TO_REACH)
