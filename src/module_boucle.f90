@@ -37,6 +37,71 @@ INTEGER                           :: MOTIF_SORTIE_BRANCHE_EPAISSE   !! Raison d'
             CONTAINS    
 !===================================================================================================
 
+SUBROUTINE EVOLUTION_SYSTEM(mode_cycle,nombre_cycles)
+!---------------------------------------------------------------------------------------------------
+!> mode_cycle = 0     
+!> Cette subroutine fait évoluer le système jusqu'à un atteindre le temps TIME_TO_REACH
+!> mode_cycle = 1
+!> La subroutine fait évoluer le système pour faire nombres_cycles 
+!---------------------------------------------------------------------------------------------------
+
+    IMPLICIT NONE
+
+    INTEGER :: I
+    
+    INTEGER,INTENT(IN) :: mode_cycle
+    INTEGER,INTENT(IN) :: nombre_cycles
+    
+    IF (mode_cycle==0) THEN
+    
+        DO WHILE (TIME<=TIME_TO_REACH)
+                 
+                 ! ascension de la branche épaisse
+                 CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+                 
+                 !instabilité si equilibre non-atteint
+                 
+                 IF (MOTIF_SORTIE_BRANCHE_EPAISSE>0) THEN
+                         !approche du point critique
+                         CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
+                         !suivi de la spirale
+                         CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
+                         !branche mince et redescente
+                         CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
+                         !ascension de la branche épaisse à nouveau
+                         CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+                 ENDIF
+        ENDDO
+
+    ENDIF
+
+    IF (mode_cycle==1) THEN 
+
+        DO I=1,nombre_cycles 
+
+            ! ascension de la branche épaisse
+            CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+                 
+            !instabilité si equilibre non-atteint
+            
+            IF (MOTIF_SORTIE_BRANCHE_EPAISSE>0) THEN
+                    !approche du point critique
+                    CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
+                    !suivi de la spirale
+                    CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
+                    !branche mince et redescente
+                    CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
+                    !ascension de la branche épaisse à nouveau
+                    CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+            ENDIF
+        
+        ENDDO 
+    ENDIF 
+
+
+END SUBROUTINE EVOLUTION_SYSTEM
+!---------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------
 SUBROUTINE BOUCLE_THERMIQUE()
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine itère la température jusqu'à converger vers Q+ - Q- = 0.

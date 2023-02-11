@@ -39,6 +39,9 @@ REAL(KIND=XP)  :: ALPHA              !! Paramètre phénoménologique (taux de p
 REAL(KIND=XP)  :: X_FRAC             !! Abondance H
 REAL(KIND=XP)  :: Y_FRAC             !! Abondance He
 
+!! PARAMÈTRE DE TEMPS À ATTEINDRE
+REAL(KIND=XP) :: TIME_TO_REACH       !! Temps dimensionné à atteindre par la simulation 
+
 !! PARAMÈTRES SPATIAUX
 INTEGER,PARAMETER :: NX = 100        !! Nombre de points de discrétisation spatiale
 REAL(KIND=XP)     :: DX              !! Pas de discrétisation spatiale
@@ -166,7 +169,8 @@ SUBROUTINE APPEL_PARAM_INPUT()
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: FILE_ID
-    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC, COURBE_EN_S, TEMP_MIN_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S, FRAME_COND
+    NAMELIST /INPUT/ MASS,F_ACCRETION,R_MAX,ALPHA,X_FRAC,Y_FRAC,&
+    & TIME_TO_REACH, COURBE_EN_S, TEMP_MIN_AD,TEMP_MAX_AD,SG_AD,SD_AD,N_S, FRAME_COND
 
     ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
     MASS          = 1._xp      ! [M_{sol}]
@@ -175,7 +179,9 @@ SUBROUTINE APPEL_PARAM_INPUT()
     ALPHA         = 1._xp
     X_FRAC        = 0.7_xp
     Y_FRAC        = 0.28_xp
-
+    
+    TIME_TO_REACH = 125.0_xp
+    
     COURBE_EN_S   = 1
     
     TEMP_MIN_AD   = 5.0e-2_xp
@@ -204,6 +210,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     WRITE(*,"('ALPHA                                          = ',F12.2)") ALPHA
     WRITE(*,"('X                                              = ',F12.2)") X_FRAC
     WRITE(*,"('Y                                              = ',F12.2)") Y_FRAC
+    WRITE(*,"('TIME_TO_REACH                                  = ',F12.4)") TIME_TO_REACH
     WRITE(*,"('NB POINTS DE DISCRETISATION SPATIALE           = ',I12)") NX
     
     ! CONVERSION UNITES SI
