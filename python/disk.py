@@ -638,7 +638,10 @@ class Plot():
         if self.animationLine:
             self.animationLine.set_data([], [])
             self.animationLine = None
-
+    
+    def Savefig(self,name):
+        self.figure.savefig('data_pictures/%s.png'%name,dpi=80)
+           
 #============================================================
 # GUI CLASS
     
@@ -733,7 +736,11 @@ class GUI():
             command=self.event_animation
         )
         self.animationButton.grid(row=0, column=5, sticky=tkinter.W, padx=20, pady=5)
-
+        
+        # Toolbar > Savefig button
+        self.SavefigButton = ttk.Button(self.toolbar, text='Savefig',command = self.event_Savefig)
+        self.SavefigButton.grid(row=1,column=5,sticky=tkinter.W ,padx=20,pady=5)
+        
         # Configure style
         self.style = ttk.Style(self.root)
         # self.style.configure('TFrame', )
@@ -741,7 +748,35 @@ class GUI():
             self.style.theme_use('alt')
         except:
             pass
+        
+    def event_Savefig(self):
+        """ Take a screenshot of the current plot
+        """
+        self.animationButton.selection_clear()
 
+        value_space = f"{self.data.space[self.SpaceValue.get()]:.2f}"
+        value_time = f"{self.data.time[self.TimeValue.get()]:.2f}"
+        mdot = str(self.data.constantes['M_0_DOT'])
+        
+        if self.plot.xlabel == self.data.space_label and self.plot.ylabel!='L_STEFAN':
+            name = self.XaxisOptions.get()+'_'+self.YaxisOptions.get()+'_'+value_time+'s_ALL_R'#+'_'+mdot
+        elif self.plot.ylabel == 'L_STEFAN':
+            name = self.XaxisOptions.get()+'_'+self.YaxisOptions.get()
+
+        else:
+            name = self.XaxisOptions.get()+'_'+self.YaxisOptions.get()+'_'+value_space+'Rs_ALL_T'#mdot
+     
+        if self.plot.animation:
+            if self.plot.isPaused:
+                self.plot.Savefig(name)
+            else :
+                self.plot.animation.pause()
+                self.plot.Savefig(name)
+                self.plot.animation.resume()
+        else :
+            self.plot.Savefig(name)
+                
+        
     def event_xaxis(self, event):
         """ Change in X-axis event
         """
@@ -859,7 +894,7 @@ class GUI():
             self.animationButton.configure(text="Pause")
             self.plot.start_animation(slider_to_update=self.TimeSlider)
             self.canvas.draw()
-
+  
     def update(self):
         """ Mise à jour du plot """
         self.plot.update()
