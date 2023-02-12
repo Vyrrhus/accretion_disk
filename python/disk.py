@@ -5,7 +5,7 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 import matplotlib.animation as animation
 import argparse
 
-import tkinter,os
+import tkinter
 from tkinter import ttk
 import pandas as pd
 
@@ -639,10 +639,8 @@ class Plot():
             self.animationLine.set_data([], [])
             self.animationLine = None
     
-    def Savefig(self,name):
-        if not os.path.exists('data_pictures'):
-            os.makedirs('data_pictures')
-        self.figure.savefig('data_pictures/%s.png'%name,dpi=100)
+    def savefig(self, name):
+        self.figure.savefig(f"image/{name}.png", dpi=100)
            
 #============================================================
 # GUI CLASS
@@ -738,10 +736,14 @@ class GUI():
             command=self.event_animation
         )
         self.animationButton.grid(row=0, column=5, sticky=tkinter.W, padx=20, pady=5)
-        
+
         # Toolbar > Savefig button
-        self.SavefigButton = ttk.Button(self.toolbar, text='Savefig',command = self.event_Savefig)
-        self.SavefigButton.grid(row=1,column=5,sticky=tkinter.W ,padx=20,pady=5)
+        self.savefigButton = ttk.Button(
+            self.toolbar, 
+            text='Savefig',
+            command = self.event_savefig
+        )
+        self.savefigButton.grid(row=1, column=5, sticky=tkinter.W, padx=20, pady=5)
         
         # Configure style
         self.style = ttk.Style(self.root)
@@ -750,23 +752,22 @@ class GUI():
             self.style.theme_use('alt')
         except:
             pass
-        
-    def event_Savefig(self):
+
+    def event_savefig(self):
         """ Take a screenshot of the current plot
         """
-        self.animationButton.selection_clear()
+        self.savefigButton.selection_clear()
 
         value_space = f"{self.data.space[self.SpaceValue.get()]:.2f}"
-        value_time = f"{self.data.time[self.TimeValue.get()]:.2f}"
-        mdot = str(self.data.constantes['M_0_DOT'])
+        value_time  = f"{self.data.time[self.TimeValue.get()]:.2f}"
+        mdot        = self.data.constantes['M_0_DOT']
         
-        if self.plot.xlabel == self.data.space_label and self.plot.ylabel!='L_STEFAN':
-            name = self.XaxisOptions.get()+'_'+self.YaxisOptions.get()+'_'+value_time+'s_ALL_R'#+'_'+mdot
+        if self.plot.xlabel == self.data.space_label and self.plot.ylabel != 'L_STEFAN':
+            name = f"{self.XaxisOptions.get()}_{self.YaxisOptions.get()}_{value_time}s_ALL_R"   #+'_'+mdot
         elif self.plot.ylabel == 'L_STEFAN':
-            name = self.XaxisOptions.get()+'_'+self.YaxisOptions.get()
-
+            name = f"{self.XaxisOptions.get()}_{self.YaxisOptions.get()}"
         else:
-            name = self.XaxisOptions.get()+'_'+self.YaxisOptions.get()+'_'+value_space+'Rs_ALL_T'#mdot
+            name = f"{self.XaxisOptions.get()}_{self.YaxisOptions.get()}_{value_space}Rs_ALL_T" #mdot
      
         if self.plot.animation:
             if self.plot.isPaused:
@@ -776,9 +777,8 @@ class GUI():
                 self.plot.Savefig(name)
                 self.plot.animation.resume()
         else :
-            self.plot.Savefig(name)
-                
-        
+            self.plot.savefig(name)
+
     def event_xaxis(self, event):
         """ Change in X-axis event
         """
@@ -896,7 +896,7 @@ class GUI():
             self.animationButton.configure(text="Pause")
             self.plot.start_animation(slider_to_update=self.TimeSlider)
             self.canvas.draw()
-  
+
     def update(self):
         """ Mise à jour du plot """
         self.plot.update()
