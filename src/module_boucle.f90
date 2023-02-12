@@ -204,7 +204,7 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         CALL ECRITURE_DIM()
         ! Ecriture frame
         FRAME_ID = FRAME_ID + 1
-        CALL FRAME(TEMP, FRAME_ID)
+        CALL FRAME(TEMP)
         
         !CALCUL TEMPERATURE-----------------------------------------
         ! Actualisation de T jusqu'à l'equilibre thermique
@@ -216,7 +216,7 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         CALL ECRITURE_DIM()
         ! Ecriture frame
         FRAME_ID = FRAME_ID + 1
-        CALL FRAME(TEMP, FRAME_ID)
+        CALL FRAME(TEMP)
 
         !CALCUL DE S ------------------------------------------------
         !sauvegarde de la densité avant itération
@@ -397,8 +397,8 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
         ! Mode ecrit_pas > 0: écriture tout les ecrit_pas
         IF (ECRIT_PAS > 0) THEN
             IF (MODULO(iterateur, ECRIT_PAS) == 0) THEN
-                CALL FRAME(TEMP, FRAME_ID)
                 FRAME_ID = FRAME_ID + 1
+                CALL FRAME(TEMP)
                 CALL ECRITURE_DIM()
                 COMPTE_ECRITURE = COMPTE_ECRITURE + 1
             ENDIF
@@ -412,8 +412,8 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
         ELSE
             IF (MAXVAL((ABS((TEMP - TEMP_DERNIERE_ECRITURE)) / 5e5_xp) &
                         &   +(ABS((SIGMA - SIGMA_DERNIERE_ECRITURE)) / 2500.0_xp)) > 1.0_xp / PRECISION_ECRITURE) THEN
-                CALL FRAME(TEMP, FRAME_ID)
                 FRAME_ID = FRAME_ID + 1
+                CALL FRAME(TEMP)
                 CALL ECRITURE_DIM()
                 TEMP_DERNIERE_ECRITURE  = TEMP
                 SIGMA_DERNIERE_ECRITURE = SIGMA
