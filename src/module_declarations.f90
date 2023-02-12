@@ -39,8 +39,9 @@ REAL(KIND=xp)  :: ALPHA              !! Paramètre phénoménologique (taux de p
 REAL(KIND=xp)  :: X_FRAC             !! Abondance H
 REAL(KIND=xp)  :: Y_FRAC             !! Abondance He
 
-! PARAMÈTRE DE TEMPS À ATTEINDRE
-REAL(KIND=xp) :: TIME_TO_REACH       !! Temps dimensionné à atteindre par la simulation 
+! PARAMÈTRE DE FIN DE SIMULATION
+REAL(KIND=xp) :: TIME_TO_REACH       !! Temps dimensionné maximal pour la simulation
+INTEGER       :: NB_BOUCLES_MAX      !! Nombre maximal de boucles à réaliser
 
 ! PARAMÈTRES SPATIAUX
 INTEGER,PARAMETER :: NX = 100       !! Nombre de points de discrétisation spatiale
@@ -161,11 +162,11 @@ SUBROUTINE APPEL_PARAM_INPUT()
     IMPLICIT NONE
     INTEGER :: FILE_ID
     NAMELIST /INPUT/ MASS, F_ACCRETION, R_MAX, ALPHA, X_FRAC, Y_FRAC,           &
-                &    TIME_TO_REACH,                                             &
+                &    TIME_TO_REACH, NB_BOUCLES_MAX,                             &
                 &    COURBE_EN_S, TEMP_MIN_AD, TEMP_MAX_AD, SG_AD, SD_AD, N_S,  &
                 &    FRAME_COND
 
-    ! VALEURS PAR DEFAUT DES PARAMETRES D'ENTREE
+    ! VALEURS PAR DEFAUT - DES PARAMETRES D'ENTREE
     MASS          = 1._xp      ! [M_{sol}]
     f_accretion   = 0.001_xp
     r_max         = 100._xp    ! [r_{Schwarzschild}]
@@ -173,8 +174,11 @@ SUBROUTINE APPEL_PARAM_INPUT()
     X_FRAC        = 0.7_xp
     Y_FRAC        = 0.28_xp
     
-    TIME_TO_REACH = 125.0_xp
+    ! VALEURS PAR DEFAUT - PARAMETRES FIN DE SIMULATION
+    TIME_TO_REACH  = 125.0_xp
+    NB_BOUCLES_MAX = 1
     
+    ! VALEURS PAR DEFAUT - PARAMETRES COURBES EN S
     COURBE_EN_S   = 1
     TEMP_MIN_AD   = 5.0e-2_xp
     TEMP_MAX_AD   = 5.0e1_xp
@@ -182,6 +186,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     SD_AD         = 1.0e6_xp
     N_S           = 5000
     
+    ! VALEURS PAR DEFAUT - FRAMES 2D
     FRAME_COND = 0
     FRAME_ID = 0
 
@@ -202,6 +207,7 @@ SUBROUTINE APPEL_PARAM_INPUT()
     WRITE(*,"('X                                              = ',F12.2)") X_FRAC
     WRITE(*,"('Y                                              = ',F12.2)") Y_FRAC
     WRITE(*,"('TIME_TO_REACH                                  = ',F12.4)") TIME_TO_REACH
+    WRITE(*,"('NB_BOUCLES_MAX                                 = ',I12)") NB_BOUCLES_MAX
     WRITE(*,"('NB POINTS DE DISCRETISATION SPATIALE           = ',I12)") NX
     
     ! CONVERSION UNITES SI
