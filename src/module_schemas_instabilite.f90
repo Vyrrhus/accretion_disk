@@ -96,7 +96,7 @@ SUBROUTINE COMPUTE_Q_ADV_AD(DT, S_AD_SAVE)
         DS_AD_DX(1) = (S_AD(1)) / DX
     END IF
 
-    DS_AD_DX(NX) = S_AD(NX)-S_AD(NX-1) / DX ! bord externe: on ne respecte pas la condition upwind mais pas d'influence
+    DS_AD_DX(NX) = (S_AD(NX)-S_AD(NX-1)) / DX ! bord externe: on ne respecte pas la condition upwind mais pas d'influence
 
     ! Dérivée spatiale de TEMP_AD
     DO i = 2, NX-1
