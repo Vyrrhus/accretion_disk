@@ -5,7 +5,7 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationTool
 import matplotlib.animation as animation
 import argparse
 
-import tkinter
+import tkinter,os
 from tkinter import ttk
 import pandas as pd
 
@@ -640,7 +640,9 @@ class Plot():
             self.animationLine = None
     
     def Savefig(self,name):
-        self.figure.savefig('data_pictures/%s.png'%name,dpi=80)
+        if not os.path.exists('data_pictures'):
+            os.makedirs('data_pictures')
+        self.figure.savefig('data_pictures/%s.png'%name,dpi=100)
            
 #============================================================
 # GUI CLASS
