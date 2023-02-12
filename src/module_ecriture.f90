@@ -10,17 +10,14 @@
 USE MODULE_DECLARATIONS
 IMPLICIT NONE
 
-INTEGER :: PAS_ECRITURE_SPATIAL
-INTEGER :: PAS_ECRITURE_TEMPOREL
+INTEGER          :: PAS_ECRITURE_SPATIAL   !! Pas d'écriture du fichier de sortie
 
-INTEGER, PRIVATE :: UNT,UNT_AD
-INTEGER, PRIVATE :: PRECISION
-
-CHARACTER(LEN=30) :: FMT
-CHARACTER(LEN=30) :: FMT_SINGLE_VALUE
-
-INTEGER,PARAMETER, PRIVATE :: NB_VARIABLES = 21
-INTEGER, PRIVATE :: LIST(NB_VARIABLES)
+INTEGER, PRIVATE           :: PRECISION           !! Nb de décimales après la virgule pour les variables écrites
+INTEGER, PRIVATE           :: UNT, UNT_AD         !! Unit des fichiers de sortie
+CHARACTER(LEN=30), PRIVATE :: FMT                 !! Format pour écrire un vecteur de dimension NX
+CHARACTER(LEN=30), PRIVATE :: FMT_SINGLE_VALUE    !! Format pour écrire un float
+INTEGER,PARAMETER, PRIVATE :: NB_VARIABLES = 21   !! Nombre de variables pouvant être écrites
+INTEGER, PRIVATE           :: LIST(NB_VARIABLES)  !! Liste des variables
                  
 !===================================================================================================
             CONTAINS 
@@ -32,7 +29,7 @@ SUBROUTINE INIT_FILES()
 !> Ceux-ci sont générés à partir des fichiers de config/.config
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-    INTEGER :: OUTPUT_CONFIG_UNT, INPUT_CONFIG_UNT, ID_WANTED_VARIABLES
+    INTEGER :: OUTPUT_CONFIG_UNT, INPUT_CONFIG_UNT, ID_WANTED_VARIABLES 
     INTEGER :: IOS
     INTEGER :: IDX
     CHARACTER(LEN=1024) :: LINE
@@ -67,7 +64,6 @@ SUBROUTINE INIT_FILES()
 
         ! Pas d'écriture & précision
         PAS_ECRITURE_SPATIAL  = parse_int(LINE, "dx", PAS_ECRITURE_SPATIAL)
-        PAS_ECRITURE_TEMPOREL = parse_int(LINE, "dt", PAS_ECRITURE_TEMPOREL)
         PRECISION             = parse_int(LINE, "prec", PRECISION)
         
         ! Ajout du header au fichier de sortie
@@ -303,8 +299,8 @@ FUNCTION parse_int(STRING, KEY, CURRENT_VALUE) result(VALUE)
 
 !---------------------------------------------------------------------------------------------------
 END FUNCTION
-!--------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------
 
-!--------------------------------------------------------------------------------------------------
-                                  END MODULE MODULE_ECRITURE
-!--------------------------------------------------------------------------------------------------
+!===================================================================================================
+END MODULE MODULE_ECRITURE
+!===================================================================================================

@@ -37,71 +37,68 @@ INTEGER                           :: MOTIF_SORTIE_BRANCHE_EPAISSE   !! Raison d'
             CONTAINS    
 !===================================================================================================
 
-SUBROUTINE EVOLUTION_SYSTEM(mode_cycle,nombre_cycles)
+SUBROUTINE EVOLUTION_SYSTEM(mode_cycle, nombre_cycles)
 !---------------------------------------------------------------------------------------------------
 !> mode_cycle = 0     
 !> Cette subroutine fait évoluer le système jusqu'à un atteindre le temps TIME_TO_REACH
 !> mode_cycle = 1
 !> La subroutine fait évoluer le système pour faire nombres_cycles 
 !---------------------------------------------------------------------------------------------------
-
     IMPLICIT NONE
-
-    INTEGER :: I
-    
     INTEGER,INTENT(IN) :: mode_cycle
     INTEGER,INTENT(IN) :: nombre_cycles
+
+    INTEGER :: I
+
+    WRITE(*,"(48('-'))")
+    WRITE(*, "('--------------DEBUT DE SIMULATION---------------')")
     
-    IF (mode_cycle==0) THEN
+    ! Evolution jusqu'au temps maximal
+    IF (mode_cycle == 0) THEN
     
-        DO WHILE (TIME<=TIME_TO_REACH)
-                 
-                 ! ascension de la branche épaisse
-                 CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
-                 
-                 !instabilité si equilibre non-atteint
-                 
-                 IF (MOTIF_SORTIE_BRANCHE_EPAISSE>0) THEN
-                         !approche du point critique
-                         CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
-                         !suivi de la spirale
-                         CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
-                         !branche mince et redescente
-                         CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
-                         !ascension de la branche épaisse à nouveau
-                         CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
-                 ENDIF
-        ENDDO
-
-    ENDIF
-
-    IF (mode_cycle==1) THEN 
-
-        DO I=1,nombre_cycles 
-
+        DO WHILE (TIME <= TIME_TO_REACH)             
             ! ascension de la branche épaisse
             CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
-                 
-            !instabilité si equilibre non-atteint
             
-            IF (MOTIF_SORTIE_BRANCHE_EPAISSE>0) THEN
+            ! instabilité si equilibre non-atteint
+            IF (MOTIF_SORTIE_BRANCHE_EPAISSE > 0) THEN
                     !approche du point critique
                     CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
                     !suivi de la spirale
                     CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
                     !branche mince et redescente
                     CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
-                    !ascension de la branche épaisse à nouveau
-                    CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
             ENDIF
-        
+        ENDDO
+    ENDIF
+
+    ! Evolution jusqu'à atteindre le bon nombre de cycles
+    IF (mode_cycle == 1) THEN 
+
+        DO I=1, nombre_cycles 
+            ! ascension de la branche épaisse
+            CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
+                 
+            ! instabilité si equilibre non-atteint
+            IF (MOTIF_SORTIE_BRANCHE_EPAISSE > 0) THEN
+                !approche du point critique
+                CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
+                !suivi de la spirale
+                CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
+                !branche mince et redescente
+                CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
+            ENDIF
         ENDDO 
     ENDIF 
 
+    WRITE(*,"(48('-'))")
+    WRITE(*, "('----------------FIN DE SIMULATION---------------')")
+    WRITE(*,"(48('-'))")
 
+!---------------------------------------------------------------------------------------------------
 END SUBROUTINE EVOLUTION_SYSTEM
 !---------------------------------------------------------------------------------------------------
-!---------------------------------------------------------------------------------------------------
+
 SUBROUTINE BOUCLE_THERMIQUE()
 !---------------------------------------------------------------------------------------------------
 !> Cette subroutine itère la température jusqu'à converger vers Q+ - Q- = 0.
@@ -125,7 +122,7 @@ SUBROUTINE BOUCLE_THERMIQUE()
         TIME_AD = TIME_AD + DELTA_T_TH_AD     ! actualisation du temps
         NB_ITE_THERMIQUE = NB_ITE_THERMIQUE+1 ! actualisation du nombre d'itérations réalisées
 
-        !AFFICHAGE ---------------------------------------------------------
+        !AFFICHAGE --------------------------------------------------------
         ! Affichage pour observer l'évolution du système si l'equilibre n'est pas atteint rapidement
         IF (MODULO(NB_ITE_THERMIQUE,100000) == 99999) THEN
             WRITE (*,"('Q+-Q- = ',1pE12.4)") MAXVAL(ABS(Q_PLUS_AD - Q_MOINS_AD))
@@ -404,7 +401,7 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
             ENDIF
             !on affiche egalament sur la console tous les 100 ECRIT_PAS
             IF (MODULO(iterateur, 100 * ECRIT_PAS) == 0) THEN
-                PRINT*,'---Nombre d iterations :', iterateur,'   TEMPS AD : ',TIME_AD
+                PRINT*,'---Nombre d iterations :', iterateur,'   TEMPS : ', TIME
                 PRINT*,'---Ecart a la valeur d arret : ', MAXVAL(TEMP-FACTEUR_SECURITE*TEMP_CRITIQUE)
             ENDIF
 
@@ -421,7 +418,7 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
             ENDIF
             ! on écrit sur la console tous les millions de pas de temps
             IF ((ECRIT_PAS == 0).and.(MODULO(iterateur, 1000000) == 0)) THEN
-                PRINT*,'---Nombre d iterations :', iterateur,'   TEMPS AD =  ',TIME_AD
+                PRINT*,'---Nombre d iterations :', iterateur,'   TEMPS =  ',TIME
                 PRINT*,'---Ecart a la valeur d arret : ', MAXVAL(TEMP-FACTEUR_SECURITE*TEMP_CRITIQUE)
                 WRITE(*,"(48('-'))")
             ENDIF
@@ -441,7 +438,6 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
 END SUBROUTINE BOUCLE_PARALLELE
 !---------------------------------------------------------------------------------------------------
 
-
 !===================================================================================================
-            END MODULE MODULE_BOUCLE
+END MODULE MODULE_BOUCLE
 !===================================================================================================
