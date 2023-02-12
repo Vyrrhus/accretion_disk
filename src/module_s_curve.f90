@@ -8,9 +8,9 @@ USE MODULE_DECLARATIONS
 USE MODULE_DICHO
 IMPLICIT NONE
 
-CHARACTER(LEN=*), PRIVATE, PARAMETER :: FMT_SCURVE     = "(4(1pE19.12, X))"
-CHARACTER(LEN=*),          PARAMETER :: FILENAME_EPAIS = "./output/scurve/epais.out"
-CHARACTER(LEN=*),          PARAMETER :: FILENAME_MINCE = "./output/scurve/mince.out"
+CHARACTER(LEN=*), PRIVATE, PARAMETER :: FMT_SCURVE     = "(4(1pE19.12, X))"             !! Format
+CHARACTER(LEN=*),          PARAMETER :: FILENAME_EPAIS = "./output/scurve/epais.out"    !! Path fichier de sortie branche épaisse
+CHARACTER(LEN=*),          PARAMETER :: FILENAME_MINCE = "./output/scurve/mince.out"    !! Path fichier de sortie branche mince
 
 !===================================================================================================
             CONTAINS 
@@ -29,6 +29,13 @@ SUBROUTINE S_CURVE()
     REAL(KIND=xp), DIMENSION(N_S)  :: TEMP_MINCE_AD  !! Tableau des températures pour la branche mince
 
     REAL(KIND=xp) :: Sa_AD, Sb_AD, Sc_AD   !! Points de gauche, droite et milieu pour la dicho
+
+    REAL(KIND=xp) :: TEMP_DICHO_MIN_AD  !! Borne inférieure température
+    REAL(KIND=xp) :: TEMP_DICHO_MAX_AD  !! Borne supérieure température
+    REAL(KIND=xp) :: S_MIN_AD           !! Borne inférieure densité de surface
+    REAL(KIND=xp) :: S_MAX_AD           !! Borne supérieure densité de surface
+    REAL(KIND=xp) :: TEMP_MIN_T_AD
+    REAL(KIND=xp) :: S_OLD_AD
     
     LOGICAL  :: mince     !! Booléen pour changer de branche
     LOGICAL  :: ecriture  !! Booléen pour écrire ou non dans le fichier
@@ -53,8 +60,7 @@ SUBROUTINE S_CURVE()
         first = .true.
         positif = .true.
 
-
-        CALL DICHOTOMIE(TEMP_EPAIS_AD(1), Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
+        CALL DICHOTOMIE_S(TEMP_EPAIS_AD(1), Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
 
         ! Si la dichotomie trouve un zéro, on écrit dans le fichier en [SI]
         IF (ecriture .eqv. .true.) THEN
@@ -69,14 +75,14 @@ SUBROUTINE S_CURVE()
 
         DO WHILE( positif .eqv. .true. .and. i .le. N_S )
 
-            ! Reset des bornes de la dichotomie (qui changent à chaque CALL DICHOTOMIE())
+            ! Reset des bornes de la dichotomie (qui changent à chaque CALL DICHOTOMIE_S())
             Sa_AD = Sg_AD
             Sb_AD = Sd_AD
 
             ! Itération sur la température suivante
             TEMP_EPAIS_AD(i) = TEMP_EPAIS_AD(i-1) + (TEMP_MAX_AD - TEMP_MIN_AD) / N_S
 
-            CALL DICHOTOMIE(TEMP_EPAIS_AD(i), Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
+            CALL DICHOTOMIE_S(TEMP_EPAIS_AD(i), Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
 
             ! Si la dichotomie trouve un zéro, on écrit dans le fichier en [SI]
             IF (ecriture .eqv. .true.) THEN
@@ -100,7 +106,7 @@ SUBROUTINE S_CURVE()
                     S_MAX_AD = S_OLD_AD
 
                     !On prend le dernier T comme borne inférieure de T pour la dichotomie sur T
-                    Temp_MIN_T_AD = Temp_epais_AD(i)
+                    TEMP_MIN_T_AD = Temp_epais_AD(i)
 
                     !On revient au i précédent pour annuler le i+1
                     i=i-1
@@ -152,7 +158,7 @@ SUBROUTINE S_CURVE()
         ! Calcul pour la 1ere température
         TEMP_MINCE_AD(1) = TEMP_MIN_AD
 
-        CALL DICHOTOMIE(TEMP_MINCE_AD(1), Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
+        CALL DICHOTOMIE_S(TEMP_MINCE_AD(1), Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
 
         ! Si la dichotomie trouve un zéro, on écrit dans le fichier en [SI]
         IF (ecriture .eqv. .true.) THEN
@@ -162,14 +168,14 @@ SUBROUTINE S_CURVE()
         ! Températures suivantes
         DO i=2,N_S
 
-            ! Reset des bornes de la dichotomie (qui changent à chaque CALL DICHOTOMIE())
+            ! Reset des bornes de la dichotomie (qui changent à chaque CALL DICHOTOMIE_S())
             Sa_AD = Sg_AD
             Sb_AD = Sd_AD
 
             ! Itération sur la température suivante
             TEMP_MINCE_AD(i) = TEMP_MINCE_AD(i-1) + ( TEMP_MAX_AD - TEMP_MIN_AD ) / N_S
 
-            CALL DICHOTOMIE(TEMP_MINCE_AD(i), Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
+            CALL DICHOTOMIE_S(TEMP_MINCE_AD(i), Sa_AD, Sb_AD, ipos, mince, Sc_AD, ecriture)
 
             ! Si la dichotomie trouve un zéro, on écrit dans le fichier en [SI]
             IF (ecriture .eqv. .true.) THEN

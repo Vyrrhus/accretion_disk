@@ -1,10 +1,10 @@
 !===================================================================================================
             MODULE MODULE_FONCTIONS_UTILES
 !===================================================================================================
-!>  Pour le calcul des courbes en S, la fonction à annuler par dichotomie pour chaque branche
-!>  épaisse ou mince est de la forme :
-!>  alpha * (Pgaz + Prad) + beta * third_terme = 0
-!>  Ce module permet de calculer les différents termes selon les méthodes de dichotomie
+!> Pour le calcul des courbes en S, la fonction à annuler par dichotomie pour chaque branche
+!> épaisse ou mince est de la forme :
+!> alpha * (Pgaz + Prad) + beta * third_terme = 0
+!> Ce module permet de calculer les différents termes selon les méthodes de dichotomie
 !===================================================================================================
 
 USE MODULE_DECLARATIONS
@@ -14,48 +14,7 @@ IMPLICIT NONE
             CONTAINS 
 !===================================================================================================
 
-REAL(kind=xp) FUNCTION trinome(a, b, c)
-!---------------------------------------------------------------------------------------------------
-!> Cette fonction calcule la racine positive d'un trinôme du second degré :
-!> a * x**2 + b * x + c = 0
-!> La fonction affiche une erreur lorsque le déterminant Delta est négatif
-!---------------------------------------------------------------------------------------------------
-    IMPLICIT NONE
-    REAL(kind=xp), INTENT(IN) :: a,b,c
-    REAL(kind=xp)             :: Delta
-    
-        Delta = b**2._xp - 4._xp * a * c
-    
-        IF (Delta < 0) THEN
-            PRINT *,'Déterminant négatif' ! Message d'erreur
-        ENDIF
-    
-        trinome = (-b + (SQRT(Delta)) / (2._xp*a))
-
-!---------------------------------------------------------------------------------------------------
-END FUNCTION
-!---------------------------------------------------------------------------------------------------
-
-SUBROUTINE calc_H(TEMP_AD, X_AD, OMEGA_AD, S_AD, H_AD)
-!---------------------------------------------------------------------------------------------------
-!> Calcul de H_AD en résolvant le trinôme :
-!> H_AD**2 - B_0 * B_AD - C_0 * C_AD = 0
-!---------------------------------------------------------------------------------------------------
-    IMPLICIT NONE
-    REAL(kind=xp) , INTENT(IN)      :: TEMP_AD, X_AD, OMEGA_AD, S_AD
-    REAL(kind=xp)                   :: B_AD, C_AD
-    REAL(kind=xp) , INTENT(OUT)     :: H_AD
-    
-        B_AD = (TEMP_AD**4._xp * X_AD) / (OMEGA_AD**2._xp * S_AD)
-        C_AD = TEMP_AD / OMEGA_AD**2._xp
-
-        H_AD = trinome(1._xp, -B_0 * B_AD, -C_0 * C_AD)
-
-!---------------------------------------------------------------------------------------------------
-END SUBROUTINE calc_H
-!---------------------------------------------------------------------------------------------------
-
-SUBROUTINE calc_H2 (TEMP_AD_, X_AD_, OMEGA_AD_, S_AD_, H_AD_)
+SUBROUTINE calc_H(TEMP_AD_, X_AD_, OMEGA_AD_, S_AD_, H_AD_)
 !---------------------------------------------------------------------------------------------------
 !> Calcul de H_AD en résolvant le trinôme :
 !> H_AD**2 - B_0 * B_AD - C_0 * C_AD = 0
@@ -84,7 +43,7 @@ SUBROUTINE calc_H2 (TEMP_AD_, X_AD_, OMEGA_AD_, S_AD_, H_AD_)
     H_AD_ = H_AD_ / R_S
 
 !---------------------------------------------------------------------------------------------------
-END SUBROUTINE calc_H2
+END SUBROUTINE calc_H
 !---------------------------------------------------------------------------------------------------
 
 SUBROUTINE AddToList(list, element)
@@ -120,196 +79,176 @@ END SUBROUTINE AddToList
 !---------------------------------------------------------------------------------------------------
 
 SUBROUTINE POINTS_CRITIQUES()
-    !---------------------------------------------------------------------------------------------------
-    !> Donne les points critiques de la branche épaisse des courbes en S correspondant à chaque rayon du disque
-    !> n_lines donne le nombre de lignes du fichier csv utilisé
-    !> n_per_radius donne le nombre de lignes par rayon du fichier CSV
-    !> n_radii donne le nombre de rayons différents
-    !---------------------------------------------------------------------------------------------------
-        IMPLICIT NONE
-        REAL , ALLOCATABLE   :: S_DATA(:,:,:)
-        INTEGER, ALLOCATABLE :: POS_TAB(:), GAP_TAB(:)
-        REAL, ALLOCATABLE    :: PC_TAB(:,:)
-        INTEGER              :: i, j, k, rc, n_lines, n_per_radius, n_radii, GAP_MAX, GAP, j_max
-        REAL                 :: junk1, junk2, junk3, old_radius, new_radius, max_sigma
-    
-        OPEN (UNIT = 1, FILE = "./output/scurve/epais.out", IOSTAT = rc)
-    
-        !--------------------------------------------------------------------------------------------------------------------------------
-        ! On détecte le nombre de lignes dans le fichier csv
-        !--------------------------------------------------------------------------------------------------------------------------------
-    
-        n_lines = 0
-    
-        DO
-            READ(1, *, IOSTAT = rc)
-    
-            IF (rc/=0) EXIT
-            n_lines = n_lines + 1
-        END DO
-    
-        CLOSE(1)
-    
-    
-        OPEN (UNIT = 10, FILE = "./output/scurve/epais.out")
-    
-        !--------------------------------------------------------------------------------------------------------------------------------
-        ! On détecte la position de changement de rayon dans le fichier que l'on stocke dans l'array POS_TAB
-        !--------------------------------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------
+!> Donne les points critiques de la branche épaisse des courbes en S correspondant à chaque rayon du disque
+!> n_lines donne le nombre de lignes du fichier csv utilisé
+!> n_per_radius donne le nombre de lignes par rayon du fichier CSV
+!> n_radii donne le nombre de rayons différents
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+    REAL, ALLOCATABLE    :: S_DATA(:,:,:)
+    INTEGER, ALLOCATABLE :: POS_TAB(:), GAP_TAB(:)
+    REAL, ALLOCATABLE    :: PC_TAB(:,:)
+    INTEGER              :: i, j, k, rc, n_lines, n_per_radius, n_radii, GAP_MAX, GAP, j_max
+    REAL                 :: junk1, junk2, junk3, old_radius, new_radius, max_sigma
+
+    !--------------------------------------------------------------------------------------------------------------------------------
+    ! On détecte le nombre de lignes dans le fichier csv
+    !--------------------------------------------------------------------------------------------------------------------------------
+    OPEN (UNIT = 1, FILE = "./output/scurve/epais.out", IOSTAT = rc)
+    n_lines = 0
+
+    DO
+        READ(1, *, IOSTAT = rc)
+        IF (rc /= 0) EXIT
+
+        n_lines = n_lines + 1
+    END DO
+
+    CLOSE(1)
+
+    !--------------------------------------------------------------------------------------------------------------------------------
+    ! On détecte la position de changement de rayon dans le fichier que l'on stocke dans l'array POS_TAB
+    !--------------------------------------------------------------------------------------------------------------------------------
+    OPEN (UNIT = 10, FILE = "./output/scurve/epais.out")
+    READ(10 ,*) junk1, junk2, junk3, old_radius
+    CLOSE(10)
+
+    OPEN (UNIT = 1, FILE = "./output/scurve/epais.out")
+    i=1
+    n_per_radius = 0
+
+    DO
+        READ(1, *, IOSTAT = rc) junk1, junk2, junk3, new_radius
+        IF (rc/=0) EXIT
+
+        IF (new_radius .NE. old_radius) THEN
+            CALL AddToList(POS_TAB, i)
+            old_radius = new_radius
+        END IF
+
+        i = i + 1
         
-        READ(10 ,*) junk1, junk2, junk3, old_radius
+    END DO
+
+    CLOSE(1)
+
+    !--------------------------------------------------------------------------------------------------------------------------------
+    ! A partir de cet array, on détecte le nombre d'éléments par rayon (dans GAP_TAB) et le nombre d'éléments maximal (dans GAP_MAX)
+    !--------------------------------------------------------------------------------------------------------------------------------
+    i = 2
+    GAP_MAX = POS_TAB(1)
+    ALLOCATE(GAP_TAB(1))
+    GAP_TAB(1) = POS_TAB(1) - 1
     
-        CLOSE(10)
-    
-        OPEN (UNIT = 1, FILE = "./output/scurve/epais.out")
-    
-        i=1
-        n_per_radius = 0
-    
-        DO
-            READ(1, *, IOSTAT = rc) junk1, junk2, junk3, new_radius
-    
-            IF (rc/=0) EXIT
-    
-            IF (new_radius .NE. old_radius) THEN
-    
-                CALL AddToList(POS_TAB, i)
-    
-                old_radius = new_radius
-    
-            END IF
-    
-            i = i + 1
-            
-        END DO
-    
-        CLOSE(1)
-    
-        !--------------------------------------------------------------------------------------------------------------------------------
-        ! A partir de cet array, on détecte le nombre d'éléments par rayon (dans GAP_TAB) et le nombre d'éléments maximal (dans GAP_MAX)
-        !--------------------------------------------------------------------------------------------------------------------------------
-    
-        i = 2
-        GAP_MAX = POS_TAB(1)
-        ALLOCATE(GAP_TAB(1))
-        GAP_TAB(1) = POS_TAB(1)-1
+    DO WHILE(i <= SIZE(POS_TAB)) 
         
-        DO WHILE(i <= SIZE(POS_TAB)) 
-            
-            GAP=POS_TAB(i)-POS_TAB(i-1)
-            CALL AddToList(GAP_TAB, GAP)
+        GAP = POS_TAB(i) - POS_TAB(i-1)
+        CALL AddToList(GAP_TAB, GAP)
+
+        IF (GAP > GAP_MAX) THEN
+            GAP_MAX = GAP
+        END IF
+        i = i + 1
+
+    END DO
+
+    ! Traitement du dernier point
+    CALL AddToList(GAP_TAB, n_lines-POS_TAB(SIZE(POS_TAB)))
+
+    !--------------------------------------------------------------------------------------------------------------------------------
+    ! On construit d'abord le tableau correspondant au fichier en sortie de la subroutine s_curve
+    ! Ce tableau est en 3D, avec:
+    ! 1ère dimension T, Sigma, x_ad, r, dimension 4
+    ! 2ème dimension la courbe en S pour un rayon, dimension GAP_MAX
+    ! 3ème dimension le rayon, dimension n_radii
+    !--------------------------------------------------------------------------------------------------------------------------------
+    OPEN (UNIT = 1, FILE = "./output/scurve/epais.out")
+
+    n_radii = SIZE(POS_TAB) + 1  ! +1 pour compter le dernier point
+
+    ALLOCATE(S_DATA(4, GAP_MAX, n_radii))
+    i = 1
+    j = 1
     
-            IF (GAP > GAP_MAX) THEN
-                GAP_MAX=GAP
+    DO WHILE (j <= n_radii)
+
+        k = 1
+
+        DO WHILE (k <= GAP_MAX)
+
+            IF (k <= GAP_TAB(j)) THEN
+                READ(1, *) S_DATA(1, k, j ), S_DATA(2, k, j), S_DATA(3, k, j), S_DATA(4, k, j)
+
+            !------------------------------------------------------------------------------------------------------------------------
+            ! Pour les courbes en S avec moins de données, on remplit chaque sous-tableau par des 0 jusqu'à GAP_MAX
+            !------------------------------------------------------------------------------------------------------------------------
+
+            ELSE IF (k > GAP_TAB(j)) THEN
+                S_DATA(1, k, j ) = 0
+                S_DATA(2, k, j ) = 0
+                S_DATA(3, k, j ) = 0
+                S_DATA(4, k, j ) = 0
+
             END IF
-            i = i + 1
-    
+
+            k = k + 1
+
         END DO
-    
-        ! Traitement du dernier point
-    
-        CALL AddToList(GAP_TAB, n_lines-POS_TAB(SIZE(POS_TAB)))
-    
-        !--------------------------------------------------------------------------------------------------------------------------------
-        ! On construit d'abord le tableau correspondant au fichier en sortie de la subroutine s_curve
-        ! Ce tableau est en 3D, avec:
-        ! 1ère dimension T, Sigma, x_ad, r, dimension 4
-        ! 2ème dimension la courbe en S pour un rayon, dimension GAP_MAX
-        ! 3ème dimension le rayon, dimension n_radii
-        !--------------------------------------------------------------------------------------------------------------------------------
-    
-        OPEN (UNIT = 1, FILE = "./output/scurve/epais.out")
-    
-        n_radii = SIZE(POS_TAB) + 1
-    
-        ! +1 pour compter le dernier point
-    
-        ALLOCATE(S_DATA(4, GAP_MAX, n_radii))
-        i = 1
+
+        j = j + 1
+
+    END DO
+
+    CLOSE (1)
+
+    !--------------------------------------------------------------------------------------------------------------------------------
+    ! On construit ensuite un autre array PC_TAB avec la position des points critiques pour chaque rayon 
+    ! en calculant le max en sigma de chaque courbe en S
+    !--------------------------------------------------------------------------------------------------------------------------------
+    ALLOCATE(PC_TAB(4, n_radii))
+    i=1
+
+    DO WHILE (i <= n_radii)
         j = 1
+        MAX_SIGMA = S_DATA(2, 1, i)
+        j_max = 1
+
+        DO WHILE (j < GAP_MAX)
+
+            IF (S_DATA(2, j, i) > MAX_SIGMA) THEN
+
+                MAX_SIGMA = S_DATA(2, j, i)
+                j_max = j
+
+            END IF
         
-        DO WHILE (j <= n_radii)
-    
-            k = 1
-    
-            DO WHILE (k <= GAP_MAX)
-    
-                IF (k <= GAP_TAB(j)) THEN
-    
-                    READ(1, *) S_DATA(1, k, j ), S_DATA(2, k, j), S_DATA(3, k, j), S_DATA(4, k, j)
-    
-                !------------------------------------------------------------------------------------------------------------------------
-                ! Pour les courbes en S avec moins de données, on remplit chaque sous-tableau par des 0 jusqu'à GAP_MAX
-                !------------------------------------------------------------------------------------------------------------------------
-    
-                ELSE IF (k > GAP_TAB(j)) THEN
-                    
-                    S_DATA(1, k, j ) = 0
-                    S_DATA(2, k, j ) = 0
-                    S_DATA(3, k, j ) = 0
-                    S_DATA(4, k, j ) = 0
-    
-                END IF
-    
-                k = k + 1
-    
-            END DO
-    
             j = j + 1
-    
+        
         END DO
-    
-        CLOSE (1)
-    
-        !--------------------------------------------------------------------------------------------------------------------------------
-        ! On construit ensuite un autre array PC_TAB avec la position des points critiques pour chaque rayon 
-        ! en calculant le max en sigma de chaque courbe en S
-        !--------------------------------------------------------------------------------------------------------------------------------
-    
-        ALLOCATE(PC_TAB(4, n_radii))
-        i=1
-    
-        DO WHILE (i <= n_radii)
-    
-            j = 1
-            MAX_SIGMA = S_DATA(2, 1, i)
-            j_max = 1
-    
-            DO WHILE (j < GAP_MAX)
-    
-                IF (S_DATA(2, j, i) > MAX_SIGMA) THEN
-    
-                    MAX_SIGMA = S_DATA(2, j, i)
-                    j_max = j
-    
-                END IF
-            
-                j = j + 1
-            
-            END DO
-            PC_TAB(:, i) = S_DATA(:, j_max, i)
-    
-            i = i + 1
-    
-        END DO
-    
-        !--------------------------------------------------------------------------------------------------------------------------------
-        ! On écrit dans un fichier spécifique les coordonnées du point d'inflexion de la branche épaisse des courbes en S.
-        ! Cela correspond à un array de dimension (n_radii, 4)
-        !--------------------------------------------------------------------------------------------------------------------------------
-        OPEN (UNIT = 5, FILE = "./output/scurve/coord_turning_points.out")
-    
-        DO i=1, n_radii
-    
-            WRITE(5, *) PC_TAB(:, i)
-    
-        END DO
-    
-        CLOSE(5)
-    
-    !---------------------------------------------------------------------------------------------------
-    END SUBROUTINE POINTS_CRITIQUES
-    !---------------------------------------------------------------------------------------------------
+        PC_TAB(:, i) = S_DATA(:, j_max, i)
+
+        i = i + 1
+
+    END DO
+
+    !--------------------------------------------------------------------------------------------------------------------------------
+    ! On écrit dans un fichier spécifique les coordonnées du point d'inflexion de la branche épaisse des courbes en S.
+    ! Cela correspond à un array de dimension (n_radii, 4)
+    !--------------------------------------------------------------------------------------------------------------------------------
+    OPEN (UNIT = 5, FILE = "./output/scurve/coord_turning_points.out")
+
+    DO i=1, n_radii
+
+        WRITE(5, *) PC_TAB(:, i)
+
+    END DO
+
+    CLOSE(5)
+
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE POINTS_CRITIQUES
+!---------------------------------------------------------------------------------------------------
 
 SUBROUTINE LECTURE_POINTS_CRITIQUES()
 !---------------------------------------------------------------------------------------------------
@@ -320,23 +259,17 @@ SUBROUTINE LECTURE_POINTS_CRITIQUES()
     INTEGER :: I, UNTC
     LOGICAL :: EXI
 
-    ! On vérifie que le fichier existe
+    ! On vérifie que le fichier existe. Sinon, on le crée.
     INQUIRE(FILE="output/scurve/coord_turning_points.out", EXIST=EXI)
     IF (.not.EXI) CALL POINTS_CRITIQUES()
 
     ! Ouvre le fichier
     OPEN(newunit=UNTC, file='output/scurve/coord_turning_points.out', status='old', action='read')
 
-    ! Lecture points critiques (à corriger plus tard)
-    DO I=1,NX-2 
+    ! Lecture points critiques
+    DO I=1,NX
         READ(UNTC, *) TEMP_CRITIQUE(I), SIGMA_CRITIQUE(I)
     ENDDO
-
-    TEMP_CRITIQUE(NX-1)  = TEMP_CRITIQUE(NX-2)
-    TEMP_CRITIQUE(NX)    = TEMP_CRITIQUE(NX-2)
-
-    SIGMA_CRITIQUE(NX-1) = SIGMA_CRITIQUE(NX-2)
-    SIGMA_CRITIQUE(NX)   = SIGMA_CRITIQUE(NX-2)
 
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE LECTURE_POINTS_CRITIQUES
@@ -362,7 +295,7 @@ SUBROUTINE calc_QpmQm (Temp_S_AD, S_S_AD, ipos, QpmQm)
     REAL(KIND=xp) :: Q_moins_S
 
     ! Calculs pour obtenir Q+ et Q-, branche épaisse
-    CALL calc_H2(Temp_S_AD, X_AD(ipos), OMEGA_AD(ipos), S_S_AD, H_S_AD)
+    CALL calc_H(Temp_S_AD, X_AD(ipos), OMEGA_AD(ipos), S_S_AD, H_S_AD)
     rho_S_AD  = S_S_AD / ( X_AD(ipos) * H_S_AD )
     nu_S_AD   = 0.5_xp * OMEGA_AD(ipos) * H_S_AD**2._xp
     Kff_S     = 6.13E18 * rho_S_AD * Temp_S_AD**(-7._xp/2._xp) * rho_0 * TEMP_0 **(-7._xp/2._xp)
@@ -434,5 +367,7 @@ SUBROUTINE map_QpmQm (T_min_map_AD, T_max_map_AD, S_min_map_AD, S_max_map_AD, n_
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE map_QpmQm
 !---------------------------------------------------------------------------------------------------
-    
+
+!===================================================================================================
 END MODULE module_fonctions_utiles
+!===================================================================================================
