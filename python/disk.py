@@ -236,6 +236,8 @@ class DataHandler():
 
         # Variables LaTeX and units
         self.LaTeX = {
+            "MASS"    : (r"$Mass$",             r"$M_\odot$"),
+            "M_0_DOT" : (r"$\dot{M_0}$",        r"$M_\odot \cdot yr^{-1}$"),
             "T"       : (r"$t$",                r"$s$"), 
             "RADIUS"  : (r"$r$",                r"$R_s$"),
             "OMEGA"   : (r"$\Omega$",           r"$s^{-1}$"),
@@ -401,7 +403,7 @@ class Plot():
         line,       = self.ax.plot([], [], '.-')
         self.line   = line
         self.optional_lines = []
-        self.annot  = None
+        self.annotation = []
         self.legend = None
 
         # Plot options
@@ -523,22 +525,40 @@ class Plot():
 
     def set_annotation(self):
         """ Add text to show radius or time
+            Add text to show Mass and M_0_DOT
         """
         # Erase previous artist
-        if self.annot:
-            self.annot.remove()
-            self.annot = None
+        for el in self.annotation:
+            el.remove()
+        self.annotation = []
 
-        # Text
+        # Radius / Time text
         if self.time_idx is not None:       text = f"$t = {self.data.time[self.time_idx]:.4f}\, s$"         # Time
         elif self.space_idx is not None:    text = f"$r = {self.data.space[self.space_idx]:.2f} \,R_s$"     # Space
-        else:                               return                                                          # Other
+        else:                               text = None                                                     # Other
 
-        self.annot = self.ax.annotate(
-            text, (0.99,1.015), 
-            xycoords='axes fraction', 
-            verticalalignment='baseline', horizontalalignment='right',
-            fontsize=11)
+        if text:
+            rightNote = self.ax.annotate(
+                text, (0.99,1.015), 
+                xycoords='axes fraction', 
+                verticalalignment='baseline', horizontalalignment='right',
+                fontsize=10)
+            self.annotation.append(rightNote)
+        
+        # Mass & M_0_dot
+        massValue = self.data.constantes["MASS"] / 1.989e30                      # in Solar Mass
+        mdotValue = self.data.constantes["M_0_DOT"] / 1.989e30 * 86400 * 365.25  # in Solar Mass / Myr
+        print(mdotValue)
+        print(self.data.constantes["M_CRIT_DOT"] / 1.989e30 * 86400 * 365.25)
+        leftNote = self.ax.annotate(
+            f"{self.data.LaTeX['MASS'][0]} = {massValue:.2f} {self.data.LaTeX['MASS'][1]}"  \
+            + "\n"                                                                          \
+            + f"{self.data.LaTeX['M_0_DOT'][0]} = {mdotValue:.2e} {self.data.LaTeX['M_0_DOT'][1]}",
+            (0.05, 1.015),
+            xycoords='axes fraction',
+            verticalalignment='baseline', horizontalalignment='left',
+            fontsize=10)
+        self.annotation.append(leftNote)
 
     def update(self):
         """ Update plot
