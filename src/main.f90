@@ -48,7 +48,7 @@ CALL CREATION_CONDITIONS_INITIALES()
 !----------------------------------
 !-- BOUCLES DE CALCULS
 !----------------------------------
-CALL EVOLUTION_SYSTEM(1,3)
+CALL EVOLUTION_SYSTEM()
 CALL CLOSE_OUTPUT()
 
 !========================================================================

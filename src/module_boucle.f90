@@ -31,51 +31,49 @@ REAL(KIND=XP), PARAMETER, PRIVATE :: PRECISION_MDOT   = 1.0e-3_xp   !! Précisio
 
 INTEGER, PRIVATE                  :: NB_ITE_THERMIQUE               !! Nombre d'itérations réalisées dans boucle_thermique
 INTEGER                           :: MOTIF_SORTIE_BRANCHE_EPAISSE   !! Raison d'arret de BOUCLE_BRANCHE_EPAISSE:
-                                                                    !! 0=equilibre, 1=point critique, 2=nb d'ite maximal atteint
+                                                                    !! -1=durée maximale atteinte
+                                                                    !!  0=equilibre,
+                                                                    !!  1=point critique, 
+                                                                    !!  2=nb d'ite maximal atteint
 
 !===================================================================================================
             CONTAINS    
 !===================================================================================================
 
-SUBROUTINE EVOLUTION_SYSTEM(mode_cycle, nombre_cycles)
+SUBROUTINE EVOLUTION_SYSTEM()
 !---------------------------------------------------------------------------------------------------
-!> mode_cycle = 0     
-!> Cette subroutine fait évoluer le système jusqu'à un atteindre le temps TIME_TO_REACH
-!> mode_cycle = 1
-!> La subroutine fait évoluer le système pour faire nombres_cycles 
+!> Cette subroutine fait évoluer le système à partir de conditions initiales.
+!> La simulation s'arrête lorsque :
+!> -    la solution d'équilibre a été atteinte (M_DOT = 1.0)
+!> - OU la durée maximale TIME_TO_REACH a été atteinte
+!> - OU le nombre de boucles maximal NB_BOUCLES_MAX a été atteint
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-    INTEGER,INTENT(IN) :: mode_cycle
-    INTEGER,INTENT(IN) :: nombre_cycles
-
     INTEGER :: I
 
     WRITE(*,"(48('-'))")
     WRITE(*, "('--------------DEBUT DE SIMULATION---------------')")
     
-    ! Evolution jusqu'au temps maximal
-    IF (mode_cycle == 0) THEN
-    
+    ! Evolution jusqu'à atteindre la durée maximale
+    IF (NB_BOUCLES_MAX == 0) THEN
         DO WHILE (TIME <= TIME_TO_REACH)             
             ! ascension de la branche épaisse
             CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
             
             ! instabilité si equilibre non-atteint
             IF (MOTIF_SORTIE_BRANCHE_EPAISSE > 0) THEN
-                    !approche du point critique
-                    CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
-                    !suivi de la spirale
-                    CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
-                    !branche mince et redescente
-                    CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
+                !approche du point critique
+                CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
+                !suivi de la spirale
+                CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
+                !branche mince et redescente
+                CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
             ENDIF
         ENDDO
-    ENDIF
 
     ! Evolution jusqu'à atteindre le bon nombre de cycles
-    IF (mode_cycle == 1) THEN 
-
-        DO I=1, nombre_cycles 
+    ELSE
+        DO I=1, NB_BOUCLES_MAX
             ! ascension de la branche épaisse
             CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
                  
@@ -87,6 +85,11 @@ SUBROUTINE EVOLUTION_SYSTEM(mode_cycle, nombre_cycles)
                 CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
                 !branche mince et redescente
                 CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
+            ENDIF
+
+            ! Durée maximale atteinte
+            IF (TIME >= TIME_TO_REACH) THEN
+                EXIT
             ENDIF
         ENDDO 
     ENDIF 
@@ -202,9 +205,18 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         ! Ecriture frame
         FRAME_ID = FRAME_ID + 1
         CALL FRAME(TEMP)
+
+        !INTERRUPTION SIMULATION------------------------------------
+        ! Interruption si durée maximale atteinte
+        IF (TIME >= TIME_TO_REACH) THEN
+            MOTIF_SORTIE_BRANCHE_EPAISSE=-1
+            WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+            WRITE(*,"('MOTIF: DUREE MAXIMALE ATTEINTE')")
+            EXIT
+        ENDIF
         
         !CALCUL TEMPERATURE-----------------------------------------
-        ! Actualisation de T jusqu'à l'equilibre thermique
+        ! Actualisation de TEMP jusqu'à l'equilibre thermique
         CALL BOUCLE_THERMIQUE()
 
         !ECRITURE---------------------------------------------------
@@ -219,7 +231,7 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         !sauvegarde de la densité avant itération
         S_SAVE = S_AD                                ! sauvegarde de l'ancienne S_AD (pour Q_adv)
         SIGMA_SAVE = SIGMA                           ! sauvegarde de l'ancien SIGMA (pour la condition d'arret)
-         !Actualisation de S
+         !Actualisation de SIGMA
         CALL SCHEMA_IMPLICITE_S(NU_AD)
         ! Calcul de Q_ADV (non pris en compte)
         CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ_AD,S_SAVE)
@@ -382,6 +394,12 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
             IF ((ITERATEUR > mode_arret)) THEN
                 EXIT
             ENDIF
+        ENDIF
+        ! Durée max de simulation atteinte (+ écriture du dernier point)
+        IF (TIME >= TIME_TO_REACH) THEN
+            CALL ADIM_TO_PHYSIQUE()
+            CALL ECRITURE_DIM()
+            EXIT
         ENDIF
 
         ! ACTUALISATION DES GRANDEURS PHYSIQUES: ITERATION DES SCHEMAS--------------------------------------------
