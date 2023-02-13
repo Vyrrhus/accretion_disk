@@ -1,5 +1,5 @@
 !===================================================================================================
-            MODULE MODULE_CONDITIONS_INITIALES
+            MODULE CONDITIONS_INITIALES
 !===================================================================================================
 !> Ce module contient :
 !> - Les conditions initiales sur TEMP_AD, S_AD et H_AD.
@@ -9,9 +9,9 @@
 !>   Les valeurs initiales sont alors lues depuis ./config/conditions_initiales.config
 !===================================================================================================
 
-USE MODULE_DECLARATIONS
-USE MODULE_FUNCTION
-USE MODULE_ECRITURE
+USE DECLARATIONS
+USE EQUATIONS
+USE ECRITURE
 USE DIMENSIONNEMENT
 IMPLICIT NONE
 
@@ -112,5 +112,5 @@ END SUBROUTINE REPRISE_CONDITIONS_INITIALES
 !---------------------------------------------------------------------------------------------------
 
 !===================================================================================================
-END MODULE MODULE_CONDITIONS_INITIALES
+END MODULE CONDITIONS_INITIALES
 !===================================================================================================

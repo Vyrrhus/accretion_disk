@@ -1,5 +1,5 @@
 !===================================================================================================
-            MODULE MODULE_FONCTIONS_UTILES
+            MODULE SCURVE_UTILS
 !===================================================================================================
 !> Pour le calcul des courbes en S, la fonction à annuler par dichotomie pour chaque branche
 !> épaisse ou mince est de la forme :
@@ -7,7 +7,7 @@
 !> Ce module permet de calculer les différents termes selon les méthodes de dichotomie
 !===================================================================================================
 
-USE MODULE_DECLARATIONS
+USE DECLARATIONS
 IMPLICIT NONE
     
 !===================================================================================================
@@ -369,5 +369,5 @@ END SUBROUTINE map_QpmQm
 !---------------------------------------------------------------------------------------------------
 
 !===================================================================================================
-END MODULE module_fonctions_utiles
+END MODULE SCURVE_UTILS
 !===================================================================================================

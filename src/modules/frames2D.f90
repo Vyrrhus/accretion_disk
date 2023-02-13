@@ -6,7 +6,7 @@
 !> Ces tableaux sont utilisés pour l'affichage en 2D par Python.
 !===================================================================================================
 
-USE MODULE_DECLARATIONS
+USE DECLARATIONS
 IMPLICIT NONE
 
 !===================================================================================================

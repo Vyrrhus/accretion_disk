@@ -3,12 +3,12 @@
 !========================================================================
 !> Programme principal
 !========================================================================
-USE MODULE_DECLARATIONS
-USE MODULE_CONDITIONS_INITIALES
-USE MODULE_ECRITURE
-USE MODULE_BOUCLE
-USE MODULE_FONCTIONS_UTILES
-USE MODULE_S_CURVE
+USE DECLARATIONS
+USE ECRITURE
+USE CONDITIONS_INITIALES
+USE BOUCLES
+USE SCURVE_UTILS
+USE SCURVE
 
 IMPLICIT NONE
 

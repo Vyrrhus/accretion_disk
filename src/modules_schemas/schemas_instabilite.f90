@@ -1,14 +1,14 @@
 !===================================================================================================
-            MODULE MODULE_SCHEMAS_INSTABILITE
+            MODULE SCHEMAS_INSTABILITE
 !===================================================================================================
 !> Ce module contient :
 !> SCHEMA_INSTABLE_TS: Un schéma couplé solvant S et T en parallèle avec un pas de temps DELTA_T_INSTABLE_AD
 !> SETUP_SCHEMA_INSTABLE_TS : Routine à appeler avant l'utilisation du schéma
 !> COMPUTE_Q_ADV_AD: La routine du calcul de Q_adv
 !===================================================================================================
-USE MODULE_DECLARATIONS
-USE MODULE_SCHEMAS_SIGMA
-USE MODULE_SCHEMAS_T
+USE DECLARATIONS
+USE SCHEMAS_SIGMA
+USE SCHEMAS_TEMP
 IMPLICIT NONE
 
 ! REELS
@@ -122,5 +122,5 @@ END SUBROUTINE COMPUTE_Q_ADV_AD
 !---------------------------------------------------------------------------------------------------
 
 !===================================================================================================
-END MODULE MODULE_SCHEMAS_INSTABILITE
+END MODULE SCHEMAS_INSTABILITE
 !===================================================================================================

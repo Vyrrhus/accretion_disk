@@ -1,5 +1,5 @@
 !===================================================================================================
-            MODULE MODULE_BOUCLE 
+            MODULE BOUCLES 
 !===================================================================================================
 !> Ce module permet de calculer l'évolution des variables du disque d'accrétion au cours du temps.
 !> Il contient plusieurs subroutines :
@@ -13,14 +13,14 @@
 !>   du disques soient redescendus sous la température critique (fin de l'instabilité)
 !===================================================================================================
 
-USE MODULE_DECLARATIONS
+USE DECLARATIONS
 USE DIMENSIONNEMENT
 USE FRAMES_2D
-USE MODULE_FUNCTION
-USE MODULE_ECRITURE
-USE MODULE_SCHEMAS_T
-USE MODULE_SCHEMAS_SIGMA
-USE MODULE_SCHEMAS_INSTABILITE
+USE EQUATIONS
+USE ECRITURE
+USE SCHEMAS_TEMP
+USE SCHEMAS_SIGMA
+USE SCHEMAS_INSTABILITE
 
 IMPLICIT NONE
 
@@ -457,5 +457,5 @@ END SUBROUTINE BOUCLE_PARALLELE
 !---------------------------------------------------------------------------------------------------
 
 !===================================================================================================
-END MODULE MODULE_BOUCLE
+END MODULE BOUCLES
 !===================================================================================================

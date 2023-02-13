@@ -1,5 +1,5 @@
 !===================================================================================================
-            MODULE MODULE_ECRITURE
+            MODULE ECRITURE
 !===================================================================================================
 !> Ce module écrit dans des fichiers .dat les tableaux de variables qu'on veut pouvoir étudier
 !>  Mettre en argument le nombres de valeurs qu'on veut à chaque pas de temps (finissant par 01) et le temps t
@@ -7,7 +7,7 @@
 !>          >>> /config/wanted_variables
 !>              >>>> mettre 1 pour écrire une variables et 0 pour l'inverse
 !===================================================================================================
-USE MODULE_DECLARATIONS
+USE DECLARATIONS
 IMPLICIT NONE
 
 INTEGER          :: PAS_ECRITURE_SPATIAL   !! Pas d'écriture du fichier de sortie
@@ -302,5 +302,5 @@ END FUNCTION
 !---------------------------------------------------------------------------------------------------
 
 !===================================================================================================
-END MODULE MODULE_ECRITURE
+END MODULE ECRITURE
 !===================================================================================================

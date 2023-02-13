@@ -12,21 +12,22 @@ SRCDIR     := src
 BINDIR     := bin
 CONFIGDIR  := config
 DEFAULTDIR := default
+VPATH := $(SRCDIR) $(dir $(wildcard $(SRCDIR)/*/.))
 
 # SOURCES
-MODULE_SRC 	:= 	module_declarations.f90 \
-                dimensionnement.f90 \
-                frames2D.f90 \
-                module_fonctions_utiles.f90 \
-                module_function.f90 \
-                module_ecriture.f90 \
-                module_dicho.f90 \
-                module_conditions_initiales.f90 \
-                module_schemas_sigma.f90 \
-                module_schemas_T.f90 \
-                module_s_curve.f90 \
-                module_schemas_instabilite.f90\
-                module_boucle.f90
+MODULE_SRC 	:= 	modules/declarations.f90 \
+                modules/dimensionnement.f90 \
+                modules/ecriture.f90 \
+                modules_scurve/scurve_utils.f90 \
+                modules_scurve/dichotomie.f90 \
+                modules_scurve/scurve.f90 \
+                modules/equations.f90 \
+                modules/conditions_initiales.f90 \
+                modules/frames2D.f90 \
+                modules_schemas/schemas_temp.f90 \
+                modules_schemas/schemas_sigma.f90 \
+                modules_schemas/schemas_instabilite.f90 \
+                modules/boucles.f90
 
 MAIN_SRC 	:= main.f90
 
@@ -37,8 +38,8 @@ MAIN_EXE := disk
 MODULE_SRC := $(foreach file,$(MODULE_SRC),$(SRCDIR)/$(file))
 MAIN_SRC   := $(foreach file,$(MAIN_SRC),$(SRCDIR)/$(file))
 
-MODULE_OBJ := $(patsubst $(SRCDIR)/%,$(BINDIR)/%,$(MODULE_SRC:.f90=.o))
-MAIN_OBJ   := $(patsubst $(SRCDIR)/%,$(BINDIR)/%,$(MAIN_SRC:.f90=.o))
+MODULE_OBJ := $(patsubst %,$(BINDIR)/%,$(notdir $(MODULE_SRC:.f90=.o)))
+MAIN_OBJ   := $(patsubst %,$(BINDIR)/%,$(notdir $(MAIN_SRC:.f90=.o)))
 
 FFLAGS  += -J $(BINDIR)
 ifneq ($(BINDIR),)
@@ -65,7 +66,7 @@ all: $(MAIN_EXE) $(SCURVE_EXE)
 $(MAIN_EXE): $(MODULE_OBJ) $(MAIN_OBJ)
 	$(F90) $(FFLAGS) $^ -o $@ $(LIB)
 
-$(BINDIR)/%.o: $(SRCDIR)/%.f90
+$(BINDIR)/%.o: %.f90
 	$(F90) $(FFLAGS) -c -o $@ $<
 
 # CLEAN

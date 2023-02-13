@@ -1,5 +1,5 @@
 !===================================================================================================
-            MODULE MODULE_SCHEMAS_SIGMA
+            MODULE SCHEMAS_SIGMA
 !===================================================================================================
 !> Ce module contient :
 !> SCHEMA_IMPLICITE_S: Un schéma implicite pour le calcul de S
@@ -8,7 +8,7 @@
 !> CREER_MATRICE_TRIDIAGONALE: Une routine utilisée par les schémas pour générer les matrices A et B
 !===================================================================================================
 
-USE MODULE_DECLARATIONS
+USE DECLARATIONS
 IMPLICIT NONE
 
 ! TABLEAUX
@@ -175,5 +175,5 @@ END SUBROUTINE CREER_MATRICE_TRIDIAGONALE
 !---------------------------------------------------------------------------------------------------
 
 !===================================================================================================
-END MODULE MODULE_SCHEMAS_SIGMA
+END MODULE SCHEMAS_SIGMA
 !===================================================================================================
