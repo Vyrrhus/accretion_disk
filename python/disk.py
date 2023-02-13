@@ -17,7 +17,7 @@ import io
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (8, 5)
-    plt.rcParams['font.size'] = 10
+    plt.rcParams['font.size'] = 12
     # plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = 1.5*plt.rcParams['font.size']
@@ -260,6 +260,7 @@ class DataHandler():
             "TAU_EFF" : (r"$\tau_{eff}$",       r""),
             "K_FF"    : (r"$\kappa_{ff}$",      r"$m^{2} \cdot kg^{-1}$"),
             "E_FF"    : (r"$\epsilon_{ff}$",    r"$$"),
+            "C_V"     : (r"$C_v$",              r"$m^{2} \cdot s^{2} K^{-1}$"),
             "L_STEFAN": (r"$L$",                r"$L_{Edd}$"),
             }
 
@@ -548,8 +549,8 @@ class Plot():
         # Mass & M_0_dot
         massValue = self.data.constantes["MASS"] / 1.989e30                      # in Solar Mass
         mdotValue = self.data.constantes["M_0_DOT"] / 1.989e30 * 86400 * 365.25  # in Solar Mass / Myr
-        print(mdotValue)
-        print(self.data.constantes["M_CRIT_DOT"] / 1.989e30 * 86400 * 365.25)
+        #print(mdotValue)
+        #print(self.data.constantes["M_CRIT_DOT"] / 1.989e30 * 86400 * 365.25)
         leftNote = self.ax.annotate(
             f"{self.data.LaTeX['MASS'][0]} = {massValue:.2f} {self.data.LaTeX['MASS'][1]}"  \
             + "\n"                                                                          \
@@ -791,10 +792,10 @@ class GUI():
      
         if self.plot.animation:
             if self.plot.isPaused:
-                self.plot.Savefig(name)
+                self.plot.savefig(name)
             else :
                 self.plot.animation.pause()
-                self.plot.Savefig(name)
+                self.plot.savefig(name)
                 self.plot.animation.resume()
         else :
             self.plot.savefig(name)
