@@ -5,7 +5,6 @@
 !> SCHEMA_TEMP_EPAIS et SCHEMA_EULER: Le schéma pour le calcul de T hors instabilité (pas de Q_adv)
 !===================================================================================================
 USE MODULE_DECLARATIONS
-USE MODULE_SCHEMAS_SIGMA
 IMPLICIT NONE
 
 !===================================================================================================
