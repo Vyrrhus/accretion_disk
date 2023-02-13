@@ -11,14 +11,13 @@ import os,gc
 # animation 2D -> disque
 def anim_trial(list_frame,interval):
     
-    for i in liste_frame:
+    for i in list_frame:
         img = np.loadtxt('frame_array/frame_%s.out'%i)
         plt.figure(figsize=(15,15))
         plt.imshow(img,cmap='hot',vmin=interval[0],vmax=interval[1])
         plt.axis('off')
         plt.grid(visible=False)
         cbar = plt.colorbar()
-        plt.annotate('%s s'%time[i], (1.05,1.05), xycoords=cbar.ax.transAxes, va="baseline", ha="center") 
         plt.savefig(f'frame/frame_%s.png'%i)
         plt.close()
     return None
@@ -35,7 +34,6 @@ def anim_3d(list_frame,interval):
         plt.axis('off')
         plt.grid(visible=False)
         cbar = plt.colorbar()
-        plt.annotate('%s s'%time[i], (1.05,1.05), xycoords=cbar.ax.transAxes, va="baseline", ha="center")
         plt.savefig(f'frame_3d/frame_%s.png'%i)
         plt.close()
     return None
@@ -45,12 +43,11 @@ def anim_h(variable,a,b,nb):
         a,b = int(a),int(b)
         list_frame = np.arange(a,b,int((b-a)/nb))
         #data_f = data.get(variable).flatten()
-        time = data.time
-        middle = int(N/2)
-        index = int(space/100)
-        
-        # ouvre les données et set les constantes d'image 2D
         data = DataHandler(args.output)
+        
+        print('Nombre de pas de temps : ',len(data.time))
+        # ouvre les données et set les constantes d'image 2D
+        
         H = data.get('H').flatten()
         space = 500
         dist = int(3/100 * space)
@@ -58,21 +55,28 @@ def anim_h(variable,a,b,nb):
         N = int((space+dist)*2/4.6)
         interval = [3.0e5,2.5e7]
     
+        time = data.time
+        
+        middle = int(N/2)
+        index = int(space/100)
         # créer le background stellaire
         star = np.zeros((N,2*(space+dist)))
         idx = np.array([(i,j) for i in range(N) for j in range(2*(space+dist))])
         random_x = np.random.choice(np.arange(N*2*(space+dist)),size=50000,replace=False)
         m_idx = idx[random_x]
         for [i,j] in m_idx:
-	     star[i,j]=interval[1]
+	        star[i,j]=interval[1] 
+        
         star[star==0] = np.nan
         
         plt.style.use('dark_background')
         
         for j in list_frame:
             
+            
             # récupère données de temp à chaque pas de temps
             temp = data.get(variable,time_idx=j)
+            
             # récupère données de demi-hauteur à chaque pas de temps
             h = data.get('H',time_idx=j)
             # initialiser a matrice 2D
@@ -83,7 +87,7 @@ def anim_h(variable,a,b,nb):
                 frame[middle-half_height:half_height+middle,dist+i*index:dist+index*(i+1)] = temp[i]
             frame[frame==0] = np.nan
             frame = np.concatenate((frame[:,::-1],frame),axis=1)
-            fig,ax = plt.subplots(1,1,figsize=(50,20))
+            fig,ax = plt.subplots(1,1,figsize=(40,15))
             # le trou noir
             circle = Circle( (space+dist,middle), dist/3, alpha=1,color='blue')
             ax.add_patch(circle)
@@ -103,7 +107,7 @@ def anim_h(variable,a,b,nb):
                         va="baseline", ha="center",color='white')
                         
             # enregistrement frame
-            plt.savefig(f'frame_h/frame_%s.png'%int((j*nb/(b-a))),dpi=50)
+            plt.savefig(f'frame_h/frame_%s.png'%int((j*nb/(b-a))),dpi=65)
             plt.close()
         return None
 	
@@ -136,7 +140,7 @@ if __name__ == "__main__":
     variable = 'TEMP'
     
     # nombre de frame sur l'intervalle de temps
-    nb=300
+    nb=2
     
     # animation avec background
     if args.h:
@@ -147,7 +151,7 @@ if __name__ == "__main__":
         data = DataHandler(args.output)
         data_f = data.get(variable).flatten()
         interval = [np.log10(min(data_f)),np.log10(max(data_f))]
-        anim_3d(liste_frame,interval)
+        anim_3d(args.a,args.b,interval)
     
     #animation 3D
     if args.trial:
@@ -155,4 +159,4 @@ if __name__ == "__main__":
         data_f = data.get(variable).flatten()
         # normalisation de la température
         interval = [np.log10(min(data_f)),np.log10(max(data_f))]
-        anim_trial(liste_frame,interval)
+        anim_trial(args.a,args.b,interval)
