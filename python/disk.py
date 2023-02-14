@@ -452,7 +452,7 @@ class Plot():
 
         # Remove saved lines
         for line in self.saved_lines:
-            line.remove()
+            line["line"].remove()
         self.saved_lines = []
 
         # Set labels
@@ -551,7 +551,33 @@ class Plot():
                 verticalalignment='baseline', horizontalalignment='right',
                 fontsize=10)
             self.annotation.append(rightNote)
-        
+
+        # Annotations saved lines
+        if self.saved_lines:
+            notesOffset = (0, (self.ax.get_ylim()[1] - self.ax.get_ylim()[0]) * 0.02)
+            notesKwargs = {
+                "verticalalignment": "baseline", 
+                "horizontalalignment": "right",
+                "fontsize": 12
+                }
+            for el in self.saved_lines:
+                x = el["line"].get_xdata()
+                y = el["line"].get_ydata()
+                note = self.ax.annotate(
+                    el["note"], 
+                    (x[-1] + notesOffset[0], y[-1] + notesOffset[1]), **notesKwargs)
+                self.annotation.append(note)
+            
+            if self.space_idx is not None:  textCurrentLine = f"${self.data.space[self.space_idx]:.2f} \,R_s$"
+            else:                           textCurrentLine = f"${self.data.time[self.time_idx]:.4f}\, s$"
+
+            x = self.line.get_xdata()
+            y = self.line.get_ydata()
+            noteCurrentLine = self.ax.annotate(
+                textCurrentLine,
+                (x[-1] + notesOffset[0], y[-1] + notesOffset[1]), **notesKwargs)
+            self.annotation.append(noteCurrentLine)
+
         # Mass & M_0_dot
         massValue = self.data.constantes["MASS"] / 1.989e30                      # in Solar Mass
         mdotValue = self.data.constantes["M_0_DOT"] / 1.989e30 * 86400 * 365.25  # in Solar Mass / Myr
@@ -595,39 +621,26 @@ class Plot():
                 self.ax.legend()
         elif self.legend:
             self.legend.remove()
-        
-        # Saved lines
-        if self.saved_lines:
-            if self.space_idx is not None:  self.line.set_label(f"$r = {self.data.space[self.space_idx]:.2f} \,R_s$")
-            else:                           self.line.set_label(f"$t = {self.data.time[self.time_idx]:.4f}\, s$")
-            
-            self.ax.legend()
 
-    
     def save_data(self):
         """ Save current self.line for this Y(X) sketch and add legend
         """
         # Y(t)
         if self.space_idx is not None:
-            if self.xlabel == self.data.time_label:
-                x = self.x
-            else:
-                x = self.x[:, self.space_idx]
-            y = self.y[:, self.space_idx]
-            label = f"$r = {self.data.space[self.space_idx]:.2f} \,R_s$"
+            note = f"${self.data.space[self.space_idx]:.2f} \,R_s$"
         
         # Y(x)
         elif self.time_idx is not None:
-            x = self.x
-            y = self.y[self.time_idx, :]
-            label = f"$t = {self.data.time[self.time_idx]:.4f}\, s$"
+            note = f"${self.data.time[self.time_idx]:.4f}\, s$"
         
         # L_Stefan
         else:
             return
 
-        line, = self.ax.plot(x, y, '.-', label=label)
-        self.saved_lines += [line]
+        x = self.line.get_xdata()
+        y = self.line.get_ydata()
+        line, = self.ax.plot(x, y, '.-')
+        self.saved_lines += [{"line": line, "note": note}]
 
     def plotCritique(self):
         """ Add axhline & axvline for critical values of Temp / Sigma
