@@ -17,7 +17,7 @@ import io
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (8, 5)
-    plt.rcParams['font.size'] = 12
+    plt.rcParams['font.size'] = 14
     # plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = 1.5*plt.rcParams['font.size']
@@ -549,7 +549,7 @@ class Plot():
                 text, (0.99,1.015), 
                 xycoords='axes fraction', 
                 verticalalignment='baseline', horizontalalignment='right',
-                fontsize=10)
+                fontsize=15)
             self.annotation.append(rightNote)
         
         # Mass & M_0_dot
@@ -562,7 +562,7 @@ class Plot():
             (0.05, 1.015),
             xycoords='axes fraction',
             verticalalignment='baseline', horizontalalignment='left',
-            fontsize=10)
+            fontsize=15)
         self.annotation.append(leftNote)
 
     def update(self):
