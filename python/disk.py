@@ -568,10 +568,6 @@ class Plot():
     def update(self):
         """ Update plot
         """
-        # Plot
-        self.set_annotation()
-        self.set_data()
-
         # Grid
         if self.hasGrid:    self.ax.grid(True)
         else:               self.ax.grid(False)
@@ -597,33 +593,29 @@ class Plot():
             self.legend.remove()
         
         # Saved lines
-        if self.saved_lines and False:
-            if self.space_idx is not None:  
-                self.line.set_label(f"{self.data.space[self.space_idx]:.2f} \,R_s$")
-            else:        
-                self.line.set_label(f"{self.data.time[self.time_idx]:.4f}\, s$")
-        
+        if self.saved_lines:
+            if self.space_idx is not None:  self.line.set_label(f"${self.data.space[self.space_idx]:.2f} \,R_s$")
+            else:                           self.line.set_label(f"${self.data.time[self.time_idx]:.4f}\, s$")
+
+
+        # Plot
+        self.set_annotation()
+        self.set_data()
+
         if self.ax.get_legend():
             self.legend = self.ax.legend()
     
     def save_data(self):
         """ Save current self.line for this Y(X) sketch and add legend
         """
-        # Y(t)
-        if self.space_idx is not None:
-            note = f"${self.data.space[self.space_idx]:.2f} \,R_s$"
+        # Labels
+        if self.space_idx is not None:  label = f"${self.data.space[self.space_idx]:.2f} \,R_s$"
+        elif self.time_idx is not None: label = f"${self.data.time[self.time_idx]:.4f}\, s$"
+        else:                           return
         
-        # Y(x)
-        elif self.time_idx is not None:
-            note = f"${self.data.time[self.time_idx]:.4f}\, s$"
-        
-        # L_Stefan
-        else:
-            return
-
         x = self.line.get_xdata()
         y = self.line.get_ydata()
-        line, = self.ax.plot(x, y, '.-') # label=note
+        line, = self.ax.plot(x, y, '.-', label=label)
         self.saved_lines += [line]
 
     def plotCritique(self):
