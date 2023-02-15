@@ -616,6 +616,7 @@ class Plot():
         x = self.line.get_xdata()
         y = self.line.get_ydata()
         line, = self.ax.plot(x, y, '.-', label=label)
+        self.ax.legend()
         self.saved_lines += [line]
 
     def plotCritique(self):
