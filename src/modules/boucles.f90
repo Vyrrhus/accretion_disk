@@ -219,16 +219,16 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
 
         ! Cas mode_arret=0 : verification de la proximité des points critiques ou de l'equilibre
         IF (mode_arret == 0) THEN
-            !on teste si la prochaine itération (estimée par l'ancienne) dépasserait le seuil, ou si M_dot=1
-            IF (MAXVAL(SIGMA + (SIGMA - SIGMA_SAVE) - SIGMA_CRITIQUE * FACTEUR_SECURITE) >= 0.0_xp) THEN
-                MOTIF_SORTIE_BRANCHE_EPAISSE=1
-                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
-                WRITE(*,"('MOTIF: PROXIMITE D UN POINT CRITIQUE')")
-                EXIT
-            ELSE IF (ECART_M_DOT <= PRECISION_MDOT) THEN
+            !on teste si si M_dot=1 ou si la prochaine itération (estimée par l'ancienne) dépasserait le seuil
+            IF (ECART_M_DOT <= PRECISION_MDOT) THEN
                 MOTIF_SORTIE_BRANCHE_EPAISSE=0
                 WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
                 WRITE(*,"('MOTIF: EQUILIBRE ATTEINT')")
+                EXIT
+            ELSE IF (MAXVAL(SIGMA + (SIGMA - SIGMA_SAVE) - SIGMA_CRITIQUE * FACTEUR_SECURITE) >= 0.0_xp) THEN
+                MOTIF_SORTIE_BRANCHE_EPAISSE=1
+                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+                WRITE(*,"('MOTIF: PROXIMITE D UN POINT CRITIQUE')")
                 EXIT
             ENDIF
 
@@ -419,6 +419,12 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
                 WRITE(*,"('MOTIF: TOUS LES POINTS SOUS LA TEMPERATURE CRITIQUE')")
                 EXIT
             ENDIF
+        ENDIF
+        ! Test de l'équilibre
+        IF (ABS(MINVAL(M_DOT_AD-1.0_xp))<=PRECISION_MDOT) THEN
+            WRITE(*,"('SORTIE DE BOUCLE PARALLELE')")
+            WRITE(*,"('MOTIF: EQUILIBRE ATTEINT')")
+            EXIT
         ENDIF
         ! Durée max de simulation atteinte (+ écriture du dernier point)
         IF (TIME >= TIME_TO_REACH) THEN
