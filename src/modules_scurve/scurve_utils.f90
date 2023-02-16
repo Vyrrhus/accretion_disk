@@ -40,6 +40,8 @@ SUBROUTINE calc_H(TEMP_AD_, X_AD_, OMEGA_AD_, S_AD_, H_AD_)
 
     ! Racine positive du trinôme
     H_AD_ = -0.5_xp * (B2 + SIGN(SQRT(DELTA),B2)) / A2
+
+    ! Adimensionnement
     H_AD_ = H_AD_ / R_S
 
 !---------------------------------------------------------------------------------------------------
@@ -277,7 +279,7 @@ END SUBROUTINE LECTURE_POINTS_CRITIQUES
 
 SUBROUTINE calc_QpmQm (Temp_S_AD, S_S_AD, ipos, QpmQm)
 !---------------------------------------------------------------------------------------------------
-!> Subroutine qui calcule Q+ - Q- pour un triplet (Temp, Sigma, ipos) donné
+!> Subroutine qui calcule Q+ - Q- pour un triplet (Temp, Sigma, ipos) donné pour la branche épaisse
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     REAL(KIND=xp),  INTENT(in)  :: Temp_S_AD
@@ -312,50 +314,61 @@ END SUBROUTINE calc_QpmQm
 
 SUBROUTINE map_QpmQm (T_min_map_AD, T_max_map_AD, S_min_map_AD, S_max_map_AD, n_map)
 !---------------------------------------------------------------------------------------------------
-!> Subroutine qui calcula la carte des valeurs de Q+ - Q- à tous les rayons dans l'espace Temp-Sigma
+!> Subroutine qui calcule la carte des valeurs de Q+ - Q- à tous les rayons dans l'espace Temp-Sigma
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
-    REAL(KIND=xp), INTENT(in)                          :: T_min_map_AD, T_max_map_AD
-    REAL(KIND=xp), INTENT(in)                          :: S_min_map_AD, S_max_map_AD
-    INTEGER,       INTENT(in)                          :: n_map
+    REAL(KIND=xp), INTENT(in)                          :: T_min_map_AD, T_max_map_AD   !! Températures minimales et maximales où calculer Q+-Q-
+    REAL(KIND=xp), INTENT(in)                          :: S_min_map_AD, S_max_map_AD   !! Densités de surface minimales et maximales où calculer Q+-Q-
+    INTEGER,       INTENT(in)                          :: n_map                        !! Nombre de températures et de densités de surface où calculer Q+-Q-
 
-    REAL(KIND=xp), DIMENSION(n_map)                    :: QpmQm_map
-    REAL(KIND=xp)                                      :: T_map_AD
-    REAL(KIND=xp)                                      :: S_map_AD
-    INTEGER                                            :: j, ipos, k
+    REAL(KIND=xp), DIMENSION(n_map)                    :: QpmQm_map                    !! Tableau de Q+-Q- à une température fixe
+    REAL(KIND=xp)                                      :: T_map_AD                     !! Température où Q+-Q- est calculé
+    REAL(KIND=xp)                                      :: S_map_AD                     !! Densité de surface où Q+-Q- est calculé
+    INTEGER                                            :: j, k                         !! Indices de boucles
+    INTEGER                                            :: ipos                         !! Indice pour la position
 
     OPEN (unit=10, file="./output/scurve/map.out", status="unknown")
 
+    ! On parcourt les positions dans le disque
     DO ipos=1,NX
 
+        ! On initialise T et S
         T_map_AD = T_min_map_AD
         S_map_AD = S_min_map_AD
 
         CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(1))
 
+        ! On parcourt les densités de surface à T fixé et on calcule Q+-Q-
         DO j=2,n_map
             
             S_map_AD = S_map_AD + ( S_max_map_AD - S_min_map_AD ) / n_map
+
             CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(j))
 
         ENDDO
-            
+        
+        ! On écrit les Q+-Q- à une température fixée
         WRITE(10,*) QpmQm_map
 
+        ! On parcourt les températures
         DO k=2,n_map
             
+            ! On incrémente T et on réinitialise S
             T_map_AD = T_map_AD + ( T_max_map_AD - T_min_map_AD ) / n_map
             S_map_AD = S_min_map_AD
 
             CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(1))
 
+            ! On parcourt les densités de surface à T fixé et on calcule Q+-Q-
             DO j=2,n_map
             
                 S_map_AD = S_map_AD + ( S_max_map_AD - S_min_map_AD ) / n_map
+
                 CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(j))
 
             ENDDO
 
+            ! On écrit les Q+-Q- à une température fixée
             WRITE(10,*) QpmQm_map
 
         ENDDO

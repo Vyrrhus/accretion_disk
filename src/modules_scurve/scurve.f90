@@ -30,18 +30,20 @@ SUBROUTINE S_CURVE()
 
     REAL(KIND=xp) :: Sa_AD, Sb_AD, Sc_AD   !! Points de gauche, droite et milieu pour la dicho
     
-    REAL(KIND=xp) :: TEMP_DICHO_MIN_AD  !! Borne inférieure température
-    REAL(KIND=xp) :: TEMP_DICHO_MAX_AD  !! Borne supérieure température
+    REAL(KIND=xp) :: TEMP_DICHO_MIN_AD  !! Borne inférieure température pour la dichotomie sur T (modifiée dans DICHOTOMIE_TEMP)
+    REAL(KIND=xp) :: TEMP_DICHO_MAX_AD  !! Borne supérieure température pour la dichotomie sur T
+    REAL(KIND=xp) :: TEMP_MIN_T_AD      !! Borne inférieure température pour la dichotomie sur T (pas modifiée dans DICHOTOMIE_TEMP)
     REAL(KIND=xp) :: S_MIN_AD           !! Borne inférieure densité de surface
     REAL(KIND=xp) :: S_MAX_AD           !! Borne supérieure densité de surface
-    REAL(KIND=xp) :: TEMP_MIN_T_AD
-    REAL(KIND=xp) :: S_OLD_AD
+    REAL(KIND=xp) :: S_OLD_AD           !! Valeur de S trouvée à la dichotomie précédente
     
     LOGICAL  :: mince     !! Booléen pour changer de branche
     LOGICAL  :: ecriture  !! Booléen pour écrire ou non dans le fichier
     LOGICAL  :: positif   !! Booléen pour changer de méthode de dichotomie
     LOGICAL  :: first     !! Booléen pour savoir si c'est le premier S trouvé par la dichotomie
-    INTEGER  :: ipos, i, reste
+    INTEGER  :: ipos      !! Indice pour la position dans le disque
+    INTEGER  :: i         !! Compteur de boucles
+    INTEGER  :: reste     !! Nombre d'itérations restantes pour la dichotomie sur T pour atteindre N_S
     INTEGER  :: UNT_MINCE, UNT_EPAIS
 
     !-----------------------------------------------------------------------------------------------
@@ -49,6 +51,7 @@ SUBROUTINE S_CURVE()
     mince = .false.
     OPEN (newunit=UNT_EPAIS, file=FILENAME_EPAIS, status="unknown")
 
+    ! On parcourt toutes les positions du disque
     DO ipos=1,NX
     
         ! 1ère température
@@ -86,9 +89,12 @@ SUBROUTINE S_CURVE()
 
             ! Si la dichotomie trouve un zéro, on écrit dans le fichier en [SI]
             IF (ecriture .eqv. .true.) THEN
+
                 IF ( Sc_AD > S_OLD_AD )THEN
+
                     WRITE(UNT_EPAIS, FMT_SCURVE) TEMP_EPAIS_AD(i) * TEMP_0, Sc_AD * S_0 / X_AD(ipos), X_AD(ipos)**2._xp * R_S,&
-                     X_AD(ipos)
+                    X_AD(ipos)
+
                     S_OLD_AD = Sc_AD
 
                     !Si Sc est le premier S trouvé on le prend pour borne inférieure de S pour la dichotomie sur T
