@@ -29,7 +29,7 @@ SUBROUTINE S_CURVE()
     REAL(KIND=xp), DIMENSION(N_S)  :: TEMP_MINCE_AD  !! Tableau des températures pour la branche mince
 
     REAL(KIND=xp) :: Sa_AD, Sb_AD, Sc_AD   !! Points de gauche, droite et milieu pour la dicho
-
+    
     REAL(KIND=xp) :: TEMP_DICHO_MIN_AD  !! Borne inférieure température
     REAL(KIND=xp) :: TEMP_DICHO_MAX_AD  !! Borne supérieure température
     REAL(KIND=xp) :: S_MIN_AD           !! Borne inférieure densité de surface
@@ -41,7 +41,7 @@ SUBROUTINE S_CURVE()
     LOGICAL  :: ecriture  !! Booléen pour écrire ou non dans le fichier
     LOGICAL  :: positif   !! Booléen pour changer de méthode de dichotomie
     LOGICAL  :: first     !! Booléen pour savoir si c'est le premier S trouvé par la dichotomie
-    INTEGER  :: ipos, i
+    INTEGER  :: ipos, i, reste
     INTEGER  :: UNT_MINCE, UNT_EPAIS
 
     !-----------------------------------------------------------------------------------------------
@@ -116,6 +116,9 @@ SUBROUTINE S_CURVE()
             i=i+1
 
         ENDDO
+        
+        ! Nombre d'itérations restantes pour atteindre N_S
+        reste = N_S - i
 
         DO WHILE( i .le. N_S )
             
@@ -124,7 +127,7 @@ SUBROUTINE S_CURVE()
             TEMP_DICHO_MIN_AD = TEMP_MIN_T_AD
 
             !On calcule le nouveau S
-            S_OLD_AD = S_OLD_AD - ( S_MAX_AD - S_MIN_AD ) / N_S
+            S_OLD_AD = S_OLD_AD - ( S_MAX_AD - S_MIN_AD ) / reste
 
             CALL DICHOTOMIE_TEMP( S_OLD_AD, TEMP_DICHO_MIN_AD, TEMP_DICHO_MAX_AD, ipos, TEMP_EPAIS_AD(i), ecriture )
 
