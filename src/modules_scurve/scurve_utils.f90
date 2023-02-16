@@ -381,6 +381,54 @@ SUBROUTINE map_QpmQm (T_min_map_AD, T_max_map_AD, S_min_map_AD, S_max_map_AD, n_
 END SUBROUTINE map_QpmQm
 !---------------------------------------------------------------------------------------------------
 
+SUBROUTINE coupe_QpmQm (T_min_map_AD, T_max_map_AD, S_coupe_AD, n_map)
+!---------------------------------------------------------------------------------------------------
+!> Subroutine qui calcule une coupe à Sigma fixé des valeurs de Q+ - Q- à tous les rayons dans l'espace Temp-Sigma
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+    REAL(KIND=xp), INTENT(in)                          :: T_min_map_AD, T_max_map_AD   !! Températures minimales et maximales où calculer Q+-Q-
+    REAL(KIND=xp), INTENT(in)                          :: S_coupe_AD                   !! Densité de surface où Q+-Q- est calculé
+    INTEGER,       INTENT(in)                          :: n_map                        !! Nombre de températures où calculer Q+-Q-
+
+    REAL(KIND=xp)                                      :: QpmQm_coupe                  !! Valeur de Q+-Q- à (T,S)
+    REAL(KIND=xp)                                      :: T_map_AD                     !! Température où Q+-Q- est calculé
+    INTEGER                                            :: j                            !! Indice de boucle
+    INTEGER                                            :: ipos                         !! Indice pour la position
+
+    OPEN (unit=10, file="./output/scurve/coupe.out", status="unknown")
+
+    ! On parcourt les positions dans le disque
+    DO ipos=1,NX
+
+        ! On initialise T
+        T_map_AD = T_min_map_AD
+
+        CALL calc_QpmQm(T_map_AD, S_coupe_AD, ipos, QpmQm_coupe)
+
+        ! On écrit dans le fichier de sortie T, S Q+-Q-, X_AD et r en [SI]
+        WRITE(10,*) T_map_AD*TEMP_0, S_coupe_AD * S_0 / X_AD(ipos), QpmQm_coupe, X_AD(ipos), X_AD(ipos)**2._xp * R_S
+
+        ! On parcourt les températures
+        DO j=2,n_map
+            
+            ! On incrémente T et on réinitialise S
+            T_map_AD = T_map_AD + ( T_max_map_AD - T_min_map_AD ) / n_map
+
+            CALL calc_QpmQm(T_map_AD, S_coupe_AD, ipos, QpmQm_coupe)
+
+            ! On écrit dans le fichier de sortie T, S Q+-Q-, X_AD et r en [SI]
+            WRITE(10,*) T_map_AD*TEMP_0, S_coupe_AD * S_0 / X_AD(ipos), QpmQm_coupe, X_AD(ipos), X_AD(ipos)**2._xp * R_S
+
+        ENDDO
+
+    ENDDO
+
+    CLOSE(10)
+
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE coupe_QpmQm
+!---------------------------------------------------------------------------------------------------
+
 !===================================================================================================
 END MODULE SCURVE_UTILS
 !===================================================================================================

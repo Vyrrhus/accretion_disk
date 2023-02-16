@@ -34,6 +34,8 @@ IF (COURBE_EN_S == 1) THEN
    Sg_AD       = 1.0e0
    Sd_AD       = 1.0e3
    CALL map_QpmQm(Temp_min_AD, Temp_max_AD, Sg_AD, Sd_AD, 100)
+   Sg_AD = 790 * 10 * X_AD(11) / S_0                                !! Valeur de S où calculer la coupe de Q+-Q- qui est la même que l'article de Pelat et Lasota
+   CALL coupe_QpmQm(Temp_min_AD, Temp_max_AD, Sg_AD, 100)
 ENDIF
 
 CALL LECTURE_POINTS_CRITIQUES()
