@@ -45,9 +45,9 @@ CALL CREATION_CONDITIONS_INITIALES()
 ! CALL REPRISE_CONDITIONS_INITIALES(PRECISION)
 
 !----------------------------------
-!-- BOUCLES DE CALCULS
+!-- SIMULATION
 !----------------------------------
-CALL EVOLUTION_SYSTEM()
+CALL EVOLUTION_DISQUE()
 CALL CLOSE_OUTPUT()
 
 !========================================================================

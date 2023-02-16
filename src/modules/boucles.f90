@@ -40,13 +40,16 @@ INTEGER                           :: MOTIF_SORTIE_BRANCHE_EPAISSE   !! Raison d'
             CONTAINS    
 !===================================================================================================
 
-SUBROUTINE EVOLUTION_SYSTEM()
+SUBROUTINE EVOLUTION_DISQUE()
 !---------------------------------------------------------------------------------------------------
-!> Cette subroutine fait évoluer le système à partir de conditions initiales.
-!> La simulation s'arrête lorsque :
-!> -    la solution d'équilibre a été atteinte (M_DOT = 1.0)
-!> - OU la durée maximale TIME_TO_REACH a été atteinte
-!> - OU le nombre de boucles maximal NB_BOUCLES_MAX a été atteint
+!> Cette subroutine est la subroutine principale du code: elle simule le disque à partir de conditions initiales.
+!> Deux modes d'arret sont possibles:
+!> -Si NB_BOUCLES_MAX=0: (spécifié dans input.config)
+!>  La simulation s'arrete soit lorsque l'équilibre stationnaire a été atteint (M_DOT_AD = 1.0),
+!>  soit lorsque le temps (dimensionné) TIME_TO_REACH a été atteint
+!> -Si NB_BOUCLES_MAX>0:
+!>  La simulation s'arrete soit lorsque l'équilibre stationnaire a été atteint (M_DOT_AD = 1.0),
+!>  soit lorsque NB_BOUCLES_MAX cycles d'instabilités ont été réalisés, ou que TIME_TO_REACH a été atteint
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     INTEGER :: I
@@ -54,13 +57,13 @@ SUBROUTINE EVOLUTION_SYSTEM()
     WRITE(*,"(48('-'))")
     WRITE(*, "('--------------DEBUT DE SIMULATION---------------')")
     
-    ! Evolution jusqu'à atteindre la durée maximale
+    ! CAS NB_BOUCLES_MAX=0: Evolution jusqu'à atteindre la durée maximale
     IF (NB_BOUCLES_MAX == 0) THEN
         DO WHILE (TIME <= TIME_TO_REACH)             
             ! ascension de la branche épaisse
             CALL BOUCLE_BRANCHE_EPAISSE(0, 0.99_xp)
             
-            ! instabilité si equilibre non-atteint
+            ! suivi de l'instabilité si point critique atteint
             IF (MOTIF_SORTIE_BRANCHE_EPAISSE > 0) THEN
                 !approche du point critique
                 CALL BOUCLE_PARALLELE(1.0E-7_xp, 0, 0, 1.00_xp)
@@ -68,10 +71,14 @@ SUBROUTINE EVOLUTION_SYSTEM()
                 CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
                 !branche mince et redescente
                 CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
+
+            ! arret de la simulation si equilibre atteint
+            ELSE IF (MOTIF_SORTIE_BRANCHE_EPAISSE == 0) THEN
+                EXIT
             ENDIF
         ENDDO
 
-    ! Evolution jusqu'à atteindre le bon nombre de cycles
+    ! CAS NB_BOUCLES_MAX>0: Evolution pendant NB_BOUCLES_MAX cylces d'instabilité ou jusqu'a TIME_TO_REACH
     ELSE
         DO I=1, NB_BOUCLES_MAX
             ! ascension de la branche épaisse
@@ -85,13 +92,17 @@ SUBROUTINE EVOLUTION_SYSTEM()
                 CALL BOUCLE_PARALLELE(5.0E-8_xp, 0, 0, 1.1_xp, 25.0_xp)
                 !branche mince et redescente
                 CALL BOUCLE_PARALLELE(1.0E-10_xp, 0, -1, 0.7_xp, 0.5_xp)
+
+            ! arret de la simulation si equilibre atteint
+            ELSE IF (MOTIF_SORTIE_BRANCHE_EPAISSE == 0) THEN
+                EXIT
             ENDIF
 
-            ! Durée maximale atteinte
+            ! Durée maximale atteinte (évite de faire les boucles restantes à vide)
             IF (TIME >= TIME_TO_REACH) THEN
                 EXIT
             ENDIF
-        ENDDO 
+        ENDDO
     ENDIF 
 
     WRITE(*,"(48('-'))")
@@ -99,7 +110,7 @@ SUBROUTINE EVOLUTION_SYSTEM()
     WRITE(*,"(48('-'))")
 
 !---------------------------------------------------------------------------------------------------
-END SUBROUTINE EVOLUTION_SYSTEM
+END SUBROUTINE EVOLUTION_DISQUE
 !---------------------------------------------------------------------------------------------------
 
 SUBROUTINE BOUCLE_THERMIQUE()
@@ -155,6 +166,8 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
 !> Si mode_arret>0: 
 !> Cette subroutine réalise un nombre mode_arret de pas de temps visqueux ou s'arrete a la situation
 !> d'equilibre (M_DOT_AD==1)
+!>
+!> De plus, la boucle s'arrete si le temps global de simulation TIME_TO_REACH est atteint.
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
@@ -179,7 +192,7 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         FACTEUR_SECURITE = 0.95_xp
     ENDIF
 
-    ! Initialisation pas de temps visqueux et thermique
+    ! Initialisation des pas de temps visqueux et thermique
     DELTA_T_VISQ_AD = FRACTION_DT_VISQ * MAXVAL( X_AD ** 4.0_xp / NU_AD )
     DELTA_T_TH_AD   = FRACTION_DT_TH / MAXVAL(OMEGA_AD)
     
@@ -193,11 +206,55 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
     WRITE(*,"('PAS DE TEMPS THERMIQUE           DELTA_T_TH_AD = ',1pE12.4)") DELTA_T_TH_AD
     WRITE(*,"(48('-'))")
     
-    ITE=1 ! ordinal de l'itération actuelle
+    !initialisation des variables de boucle
+    CALL ADIM_TO_PHYSIQUE()
+    ITE=1                                       ! ordinal de l'itération actuelle
+    SIGMA_SAVE = SIGMA                          ! sauvegarde initiale de SIGMA (sert au premier test de condition d'arret)
+    ECART_M_DOT = ABS(MINVAL(M_DOT_AD-1.0_xp))  ! écart initial à l'équilibre stationnaire (sert au premier test d'arret)
 
     ! BOUCLE ---------------------------------------------------------------------------------------
 
     DO
+        !CALCUL DE LA CONDITION D'ARRET ----------------------------
+
+        ! Cas mode_arret=0 : verification de la proximité des points critiques ou de l'equilibre
+        IF (mode_arret == 0) THEN
+            !on teste si si M_dot=1 ou si la prochaine itération (estimée par l'ancienne) dépasserait le seuil
+            IF (ECART_M_DOT <= PRECISION_MDOT) THEN
+                MOTIF_SORTIE_BRANCHE_EPAISSE=0
+                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+                WRITE(*,"('MOTIF: EQUILIBRE ATTEINT')")
+                EXIT
+            ELSE IF (MAXVAL(SIGMA + (SIGMA - SIGMA_SAVE) - SIGMA_CRITIQUE * FACTEUR_SECURITE) >= 0.0_xp) THEN
+                MOTIF_SORTIE_BRANCHE_EPAISSE=1
+                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+                WRITE(*,"('MOTIF: PROXIMITE D UN POINT CRITIQUE')")
+                EXIT
+            ENDIF
+
+        ! Cas mode_arret=i : verification de l'equilibre ou que l'on a fait les i itérations voulues
+        ELSE
+            IF (ECART_M_DOT <= PRECISION_MDOT) THEN
+                MOTIF_SORTIE_BRANCHE_EPAISSE=0
+                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+                WRITE(*,"('MOTIF: EQUILIBRE ATTEINT')")
+                EXIT
+            ELSE IF (ITE > mode_arret) THEN
+                MOTIF_SORTIE_BRANCHE_EPAISSE=2
+                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+                WRITE(*,"('MOTIF: NOMBRE D ITERATIONS MAX ATTEINT')")
+                EXIT
+            ENDIF
+        ENDIF
+
+        ! Interruption si TIME_TO_REACH atteint
+        IF (TIME >= TIME_TO_REACH) THEN
+            MOTIF_SORTIE_BRANCHE_EPAISSE=-1
+            WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
+            WRITE(*,"('MOTIF: DUREE MAXIMALE DE SIMULATION ATTEINTE')")
+            EXIT
+        ENDIF
+
         !ECRITURE --------------------------------------------------
         ! Ecriture avant itérations du schéma numérique thermique
         CALL ADIM_TO_PHYSIQUE()
@@ -205,15 +262,6 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         ! Ecriture frame
         FRAME_ID = FRAME_ID + 1
         CALL FRAME(TEMP)
-
-        !INTERRUPTION SIMULATION------------------------------------
-        ! Interruption si durée maximale atteinte
-        IF (TIME >= TIME_TO_REACH) THEN
-            MOTIF_SORTIE_BRANCHE_EPAISSE=-1
-            WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
-            WRITE(*,"('MOTIF: DUREE MAXIMALE ATTEINTE')")
-            EXIT
-        ENDIF
         
         !CALCUL TEMPERATURE-----------------------------------------
         ! Actualisation de TEMP jusqu'à l'equilibre thermique
@@ -231,7 +279,7 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         !sauvegarde de la densité avant itération
         S_SAVE = S_AD                                ! sauvegarde de l'ancienne S_AD (pour Q_adv)
         SIGMA_SAVE = SIGMA                           ! sauvegarde de l'ancien SIGMA (pour la condition d'arret)
-         !Actualisation de SIGMA
+        ! Actualisation de SIGMA
         CALL SCHEMA_IMPLICITE_S(NU_AD)
         ! Calcul de Q_ADV (non pris en compte)
         CALL COMPUTE_Q_ADV_AD(DELTA_T_VISQ_AD,S_SAVE)
@@ -253,40 +301,8 @@ SUBROUTINE BOUCLE_BRANCHE_EPAISSE(mode_arret, choix_facteur_securite)
         
         !Passage à l'itération suivante
         ITE = ITE + 1
+        CALL ADIM_TO_PHYSIQUE()
 
-        !CALCUL DE LA CONDITION D'ARRET ----------------------------
-
-        ! Cas mode_arret=0 : verification de la proximité des points critiques ou de l'equilibre
-        IF (mode_arret == 0) THEN
-            CALL ADIM_TO_PHYSIQUE
-            !on teste si la prochaine itération (estimée par l'ancienne) dépasserait le seuil, ou si M_dot=1
-            IF (MAXVAL(SIGMA + (SIGMA - SIGMA_SAVE) - SIGMA_CRITIQUE * FACTEUR_SECURITE) >= 0.0_xp) THEN
-                MOTIF_SORTIE_BRANCHE_EPAISSE=1
-                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
-                WRITE(*,"('MOTIF: SEUIL CRITIQUE ATTEINT')")
-                EXIT
-            ELSE IF (ECART_M_DOT <= PRECISION_MDOT) THEN
-                MOTIF_SORTIE_BRANCHE_EPAISSE=0
-                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
-                WRITE(*,"('MOTIF: EQUILIBRE ATTEINT')")
-                EXIT
-            ENDIF
-
-        ! Cas mode_arret=i : verification de l'equilibre ou que l'on a fait les i itérations voulues
-        ELSE
-            IF (ECART_M_DOT <= PRECISION_MDOT) THEN
-                MOTIF_SORTIE_BRANCHE_EPAISSE=0
-                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
-                WRITE(*,"('MOTIF: EQUILIBRE ATTEINT')")
-                EXIT
-            ELSE IF (ITE > mode_arret) THEN
-                MOTIF_SORTIE_BRANCHE_EPAISSE=2
-                WRITE(*,"('SORTIE DE BOUCLE BRANCHE EPAISSE')")
-                WRITE(*,"('MOTIF: NOMBRE D ITERATIONS MAX ATTEINT')")
-                EXIT
-            ENDIF
-        ENDIF
-            
     ENDDO
     ! AFFICHAGE SORTANT ----------------------------------------------------------------------------
     WRITE(*, "('Nombre d iterations : ',I0)") ITE-1
@@ -310,11 +326,14 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
 !>
 !> mode_arret > 0 : réalise mode_arret pas de temps 
 !>
+!> De plus, la boucle s'arrete si le temps global de simulation TIME_TO_REACH est atteint.
+!>
 !> Par défaut, choix_facteur_securite = 0.99
 !>
 !> ECRIT_PAS > 0 : Ecrit les données tous les ECRIT_PAS pas de temps.
 !> ECRIT_PAS = 0 : Ecrit les données quand les variables ont suffisamment changé, ajustable avec un facteur choix_precision_ecriture
 !> (par défaut 1.0_xp, correspond a environ un centieme de la taille caracteristique de T et Sigma)
+
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
 
@@ -382,23 +401,37 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
         ! Cas mode_arret = -1 : verification que tous les points sont sous facteur_securite*temp_critique
         IF (mode_arret == -1) THEN
             IF (MAXVAL(TEMP - FACTEUR_SECURITE * TEMP_CRITIQUE) < 0.0_xp) THEN
+                WRITE(*,"('SORTIE DE BOUCLE PARALLELE')")
+                WRITE(*,"('MOTIF: TOUS LES POINTS SOUS LA TEMPERATURE CRITIQUE')")
                 EXIT
             ENDIF
         ! Cas mode_arret = 0 : verification de la proximité des points critiques
         ELSE IF (mode_arret == 0) THEN
             IF (MAXVAL(TEMP - FACTEUR_SECURITE*TEMP_CRITIQUE) >= 0.0_xp) THEN
+                WRITE(*,"('SORTIE DE BOUCLE PARALLELE')")
+                WRITE(*,"('MOTIF: PROXIMITE DU POINT CRITIQUE')")
                 EXIT
             ENDIF
         ! Cas mode_arret = i > 0 : on fait i itérations
         ELSE
             IF ((ITERATEUR > mode_arret)) THEN
+                WRITE(*,"('SORTIE DE BOUCLE PARALLELE')")
+                WRITE(*,"('MOTIF: TOUS LES POINTS SOUS LA TEMPERATURE CRITIQUE')")
                 EXIT
             ENDIF
+        ENDIF
+        ! Test de l'équilibre
+        IF (ABS(MINVAL(M_DOT_AD-1.0_xp))<=PRECISION_MDOT) THEN
+            WRITE(*,"('SORTIE DE BOUCLE PARALLELE')")
+            WRITE(*,"('MOTIF: EQUILIBRE ATTEINT')")
+            EXIT
         ENDIF
         ! Durée max de simulation atteinte (+ écriture du dernier point)
         IF (TIME >= TIME_TO_REACH) THEN
             CALL ADIM_TO_PHYSIQUE()
             CALL ECRITURE_DIM()
+            WRITE(*,"('SORTIE DE BOUCLE PARALLELE')")
+            WRITE(*,"('MOTIF: DUREE MAXIMALE DE SIMULATION ATTEINTE')")
             EXIT
         ENDIF
 
@@ -448,7 +481,7 @@ SUBROUTINE BOUCLE_PARALLELE(FRACTION_DT_INSTABLE, ECRIT_PAS , mode_arret, choix_
     END DO
 
     ! AFFICHAGE SORTANT ----------------------------------------------------------------------------
-    WRITE(*,"('SORTIE DE BOUCLE PARALLELE')")
+    
     WRITE(*, "('Nombre d iterations : ',I0)") ITERATEUR-1
     WRITE(*, "('Nombre d ecritures  : ',I0)") COMPTE_ECRITURE
     WRITE(*,"(48('-'))")

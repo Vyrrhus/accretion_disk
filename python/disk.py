@@ -17,7 +17,7 @@ import io
 
 def init_plotting():
     plt.rcParams['figure.figsize'] = (8, 5)
-    plt.rcParams['font.size'] = 10
+    plt.rcParams['font.size'] = 14
     # plt.rcParams['font.family'] = 'Times New Roman'
     plt.rcParams['axes.labelsize'] = plt.rcParams['font.size']
     plt.rcParams['axes.titlesize'] = 1.5*plt.rcParams['font.size']
@@ -260,6 +260,7 @@ class DataHandler():
             "TAU_EFF" : (r"$\tau_{eff}$",       r""),
             "K_FF"    : (r"$\kappa_{ff}$",      r"$m^{2} \cdot kg^{-1}$"),
             "E_FF"    : (r"$\epsilon_{ff}$",    r"$$"),
+            "C_V"     : (r"$C_v$",              r"$m^{2} \cdot s^{2} K^{-1}$"),
             "L_STEFAN": (r"$L$",                r"$L_{Edd}$"),
             }
 
@@ -403,6 +404,7 @@ class Plot():
         line,       = self.ax.plot([], [], '.-')
         self.line   = line
         self.optional_lines = []
+        self.saved_lines = []
         self.annotation = []
         self.legend = None
 
@@ -447,6 +449,11 @@ class Plot():
         # No change
         if self.xlabel == xlabel and self.ylabel == ylabel:
             return
+
+        # Remove saved lines
+        for line in self.saved_lines:
+            line.remove()
+        self.saved_lines = []
 
         # Set labels
         if xlabel:
@@ -537,19 +544,17 @@ class Plot():
         elif self.space_idx is not None:    text = f"$r = {self.data.space[self.space_idx]:.2f} \,R_s$"     # Space
         else:                               text = None                                                     # Other
 
-        if text:
+        if text and not self.saved_lines:
             rightNote = self.ax.annotate(
                 text, (0.99,1.015), 
                 xycoords='axes fraction', 
                 verticalalignment='baseline', horizontalalignment='right',
-                fontsize=10)
+                fontsize=15)
             self.annotation.append(rightNote)
         
         # Mass & M_0_dot
         massValue = self.data.constantes["MASS"] / 1.989e30                      # in Solar Mass
         mdotValue = self.data.constantes["M_0_DOT"] / 1.989e30 * 86400 * 365.25  # in Solar Mass / Myr
-        print(mdotValue)
-        print(self.data.constantes["M_CRIT_DOT"] / 1.989e30 * 86400 * 365.25)
         leftNote = self.ax.annotate(
             f"{self.data.LaTeX['MASS'][0]} = {massValue:.2f} {self.data.LaTeX['MASS'][1]}"  \
             + "\n"                                                                          \
@@ -557,16 +562,12 @@ class Plot():
             (0.05, 1.015),
             xycoords='axes fraction',
             verticalalignment='baseline', horizontalalignment='left',
-            fontsize=10)
+            fontsize=15)
         self.annotation.append(leftNote)
 
     def update(self):
         """ Update plot
         """
-        # Plot
-        self.set_annotation()
-        self.set_data()
-
         # Grid
         if self.hasGrid:    self.ax.grid(True)
         else:               self.ax.grid(False)
@@ -590,7 +591,34 @@ class Plot():
                 self.ax.legend()
         elif self.legend:
             self.legend.remove()
+        
+        # Saved lines
+        if self.saved_lines:
+            if self.space_idx is not None:  self.line.set_label(f"${self.data.space[self.space_idx]:.2f} \,R_s$")
+            else:                           self.line.set_label(f"${self.data.time[self.time_idx]:.4f}\, s$")
+
+
+        # Plot
+        self.set_annotation()
+        self.set_data()
+
+        if self.ax.get_legend():
+            self.legend = self.ax.legend()
     
+    def save_data(self):
+        """ Save current self.line for this Y(X) sketch and add legend
+        """
+        # Labels
+        if self.space_idx is not None:  label = f"${self.data.space[self.space_idx]:.2f} \,R_s$"
+        elif self.time_idx is not None: label = f"${self.data.time[self.time_idx]:.4f}\, s$"
+        else:                           return
+        
+        x = self.line.get_xdata()
+        y = self.line.get_ydata()
+        line, = self.ax.plot(x, y, '.-', label=label)
+        self.ax.legend()
+        self.saved_lines += [line]
+
     def plotCritique(self):
         """ Add axhline & axvline for critical values of Temp / Sigma
         """
@@ -718,7 +746,7 @@ class GUI():
 
         # Toolbar > Sliders
         self.TimeFrame  = ttk.Frame(self.toolbar)
-        self.TimeFrame.grid(row=1, column=0, columnspan=4, sticky=tkinter.NSEW)
+        self.TimeFrame.grid(row=1, column=0, columnspan=5, sticky=tkinter.NSEW)
         self.TimeLabel  = ttk.Label(self.TimeFrame, text=f"{self.data.time_label} = {self.data.time[0]:.4f}s")
         self.TimeValue  = tkinter.IntVar(self.TimeFrame)
         self.TimeSlider = ttk.Scale(
@@ -733,7 +761,7 @@ class GUI():
             self.TimeSlider.pack(side=tkinter.LEFT, padx=20, pady=5, expand=True, fill=tkinter.X)
 
         self.SpaceFrame  = ttk.Frame(self.toolbar)
-        self.SpaceFrame.grid(row=1, column=0, columnspan=4, sticky=tkinter.NSEW)
+        self.SpaceFrame.grid(row=1, column=0, columnspan=5, sticky=tkinter.NSEW)
         self.SpaceLabel  = ttk.Label(self.SpaceFrame, text=f"{self.data.space_label} = {self.data.space[0]:.2f} Rs")
         self.SpaceValue  = tkinter.IntVar(self.SpaceFrame)
         self.SpaceSlider = ttk.Scale(
@@ -763,7 +791,15 @@ class GUI():
             text='Savefig',
             command = self.event_savefig
         )
-        self.savefigButton.grid(row=1, column=5, sticky=tkinter.W, padx=20, pady=5)
+        self.savefigButton.grid(row=1, column=6, sticky=tkinter.W, padx=20, pady=5)
+
+        # Toolbar > Add plot
+        self.addplotButton = ttk.Button(
+            self.toolbar,
+            text="Add plot",
+            command=self.event_addplot
+        )
+        self.addplotButton.grid(row=0, column=6, sticky=tkinter.W, padx=20, pady=5)
         
         # Configure style
         self.style = ttk.Style(self.root)
@@ -772,6 +808,12 @@ class GUI():
             self.style.theme_use('alt')
         except:
             pass
+
+    def event_addplot(self):
+        """ Add a new line to the plot and save the current one
+        """
+        self.addplotButton.selection_clear()
+        self.plot.save_data()
 
     def event_savefig(self):
         """ Take a screenshot of the current plot
@@ -791,10 +833,10 @@ class GUI():
      
         if self.plot.animation:
             if self.plot.isPaused:
-                self.plot.Savefig(name)
+                self.plot.savefig(name)
             else :
                 self.plot.animation.pause()
-                self.plot.Savefig(name)
+                self.plot.savefig(name)
                 self.plot.animation.resume()
         else :
             self.plot.savefig(name)

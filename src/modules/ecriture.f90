@@ -16,7 +16,7 @@ INTEGER, PRIVATE           :: PRECISION           !! Nb de décimales après la 
 INTEGER, PRIVATE           :: UNT, UNT_AD         !! Unit des fichiers de sortie
 CHARACTER(LEN=30), PRIVATE :: FMT                 !! Format pour écrire un vecteur de dimension NX
 CHARACTER(LEN=30), PRIVATE :: FMT_SINGLE_VALUE    !! Format pour écrire un float
-INTEGER,PARAMETER, PRIVATE :: NB_VARIABLES = 21   !! Nombre de variables pouvant être écrites
+INTEGER,PARAMETER, PRIVATE :: NB_VARIABLES = 22   !! Nombre de variables pouvant être écrites
 INTEGER, PRIVATE           :: LIST(NB_VARIABLES)  !! Liste des variables
                  
 !===================================================================================================
@@ -152,7 +152,8 @@ SUBROUTINE ECRITURE_ADIM()
         IF (LIST(18)==1) WRITE(UNT_AD, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL)
         IF (LIST(19)==1) WRITE(UNT_AD, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL)
         IF (LIST(20)==1) WRITE(UNT_AD, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL)
-        IF (LIST(21)==1) WRITE(UNT_AD, FMT_SINGLE_VALUE) "LSTEFAN_AD", L_STEFAN_AD
+        IF (LIST(21)==1) WRITE(UNT_AD, FMT) "C_V_AD    ", C_V_AD    (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(22)==1) WRITE(UNT_AD, FMT_SINGLE_VALUE) "LSTEFAN_AD", L_STEFAN_AD
 
     ELSE
         ! ESPACE
@@ -179,7 +180,8 @@ SUBROUTINE ECRITURE_ADIM()
         IF (LIST(18)==1) WRITE(UNT_AD, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL), TAU_EFF(NX)
         IF (LIST(19)==1) WRITE(UNT_AD, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL), KAPPA_FF(NX)
         IF (LIST(20)==1) WRITE(UNT_AD, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL), EPSILON_FF(NX)
-        IF (LIST(21)==1) WRITE(UNT_AD, FMT_SINGLE_VALUE) "LSTEFAN_AD", L_STEFAN_AD       
+        IF (LIST(21)==1) WRITE(UNT_AD, FMT) "C_V_AD    ", C_V_AD    (::PAS_ECRITURE_SPATIAL), C_V_AD(NX)
+        IF (LIST(22)==1) WRITE(UNT_AD, FMT_SINGLE_VALUE) "LSTEFAN_AD", L_STEFAN_AD       
     ENDIF
     WRITE(UNT_AD,*)
 
@@ -228,7 +230,8 @@ SUBROUTINE ECRITURE_DIM()
         IF (LIST(18)==1) WRITE(UNT, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL)
         IF (LIST(19)==1) WRITE(UNT, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL)
         IF (LIST(20)==1) WRITE(UNT, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL)
-        IF (LIST(21)==1) WRITE(UNT, FMT_SINGLE_VALUE) "L_STEFAN  ", L_STEFAN
+        IF (LIST(21)==1) WRITE(UNT, FMT) "C_V       ", C_V       (::PAS_ECRITURE_SPATIAL)
+        IF (LIST(22)==1) WRITE(UNT, FMT_SINGLE_VALUE) "L_STEFAN  ", L_STEFAN
     
     ELSE
         ! ESPACE
@@ -255,7 +258,8 @@ SUBROUTINE ECRITURE_DIM()
         IF (LIST(18)==1) WRITE(UNT, FMT) "TAU_EFF   ", TAU_EFF   (::PAS_ECRITURE_SPATIAL), TAU_EFF(NX)
         IF (LIST(19)==1) WRITE(UNT, FMT) "K_FF      ", KAPPA_FF  (::PAS_ECRITURE_SPATIAL), KAPPA_FF(NX)
         IF (LIST(20)==1) WRITE(UNT, FMT) "E_FF      ", EPSILON_FF(::PAS_ECRITURE_SPATIAL), EPSILON_FF(NX)
-        IF (LIST(21)==1) WRITE(UNT, FMT_SINGLE_VALUE) "L_STEFAN  ", L_STEFAN
+        IF (LIST(21)==1) WRITE(UNT, FMT) "C_V       ", C_V       (::PAS_ECRITURE_SPATIAL), C_V(NX)
+        IF (LIST(22)==1) WRITE(UNT, FMT_SINGLE_VALUE) "L_STEFAN  ", L_STEFAN
     
     ENDIF
     WRITE(UNT,*)
