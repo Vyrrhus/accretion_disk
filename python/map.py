@@ -1,29 +1,32 @@
-import matplotlib.pyplot as plt
+## This code displays the map of Q+-Q- stored in map.out
+
+# Import modules
+from numpy import loadtxt
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import colors
 
-n=100
+# Load data
+my_data = loadtxt("./../output/scurve/map2.out", unpack=True)
 
-T, S, QpmQm, x_ad, r=np.loadtxt("./../output/scurve/coupe.out", unpack=True)
+# Reshape the values into 2D arrays of shape (nmap, nmap)
+nmap=1000
+one_radius= np.reshape(my_data,(nmap,nmap))
 
-liste_T=[]
-liste_x_ad=[]
-liste_r=[]
+# Rotate the array so that the map corresponds to increasing T and Sigma
+# For a better understanding, data is separated into its negative and positive values, hence two imshows and cmaps
 
-for i in range(0,len(T)):
-    if T[i] not in liste_T:
-        liste_T.append(T[i])
-    if x_ad[i] not in liste_x_ad:
-        liste_x_ad.append(x_ad[i])
-    if r[i] not in liste_r:
-        liste_r.append(r[i])
+plt.imshow(np.flip(np.rot90(-one_radius,-1),1),cmap='Blues', norm=colors.LogNorm(), origin='lower')
+cbar1=plt.colorbar()
+cbar1.set_label('valeurs négatives', rotation=270)
 
-z=np.zeros(len(liste_T))
+plt.imshow(np.flip(np.rot90(one_radius,-1),1),cmap='Reds', norm=colors.LogNorm(), origin='lower')
+cbar2=plt.colorbar()
+cbar2.set_label('valeurs positives', rotation=270)
 
-for i in range(0,len(liste_x_ad)):
-   plt.plot(np.log10(liste_T),QpmQm[i*n:(i+1)*n],'b-')
-   plt.plot(np.log10(liste_T),z,'k-')
-   plt.title(r"Coupe de $Q_+-Q_-$ à r=%f cm"%(liste_r[i]*1e2))
-   plt.xlabel("T[K]")
-   plt.ylabel(r"$Q_+-Q_-[J/s/m^2]$")
-   plt.ylim([np.min(QpmQm[i*n:(i+1)*n]),-np.min(QpmQm[i*n:(i+1)*n])])
-   plt.show()
+# Legend
+plt.xlabel('Sigma (u.a.)')
+plt.ylabel('T (u.a.)')
+plt.title('Q+-Q- (J/s/m^2)')
+
+plt.show()
