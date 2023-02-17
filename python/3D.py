@@ -6,7 +6,8 @@ import numpy as np
 import cv2
 import argparse
 from matplotlib.patches import Circle
-import os,gc
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import os,gc,sys
 
 # animation 2D -> disque
 def anim_trial(list_frame,interval):
@@ -41,74 +42,63 @@ def anim_3d(list_frame,interval):
 # animation température-hauteur avec background stellaire
 def anim_h(variable,a,b,nb):
         a,b = int(a),int(b)
-        list_frame = np.arange(a,b,int((b-a)/nb))
-        #data_f = data.get(variable).flatten()
+        pas = int((b-a)/nb)
+        list_frame = np.arange(a,b,pas)
         data = DataHandler(args.output)
-        
-        print('Nombre de pas de temps : ',len(data.time))
-        # ouvre les données et set les constantes d'image 2D
-        
+        print('Nombre de pas de temps : ',len(data.time), 'et pas de temps : ',pas)
         H = data.get('H').flatten()
+        VARIABLE = data.get(variable).flatten()
+        height=8
+        lenght = int(height*4)
         space = 500
+        size = len(data.get('H',time_idx=0))
         dist = int(3/100 * space)
-        norm = 2*max(H)*4.6/2/(space+dist)
-        N = int((space+dist)*2/4.6)
-        interval = [3.0e5,2.5e7]
-    
+        R = int(space/100)
+        norm = max(H)*4.5/space
+        N = int(space*2/4.5)
+        interval = [min(VARIABLE),max(VARIABLE)]
         time = data.time
-        
         middle = int(N/2)
-        index = int(space/100)
-        # créer le background stellaire
-        star = np.zeros((N,2*(space+dist)))
-        idx = np.array([(i,j) for i in range(N) for j in range(2*(space+dist))])
-        random_x = np.random.choice(np.arange(N*2*(space+dist)),size=50000,replace=False)
+        index = int(space/size)
+        print('taille array : ',size,' | dist au trou noir : ',dist,' | rayon trou noir : ', R)
+        print('normalisation hauteur : ',norm, ' | interval de T : ',interval)
+        print('normalisation espace : ',index)
+        star = np.zeros((N,2*space))
+        idx = np.array([(i,j) for i in range(N) for j in range(2*space)])
+        random_x = np.random.choice(np.arange(N*2*space),size=300,replace=False)
         m_idx = idx[random_x]
+        s=1
         for [i,j] in m_idx:
-	        star[i,j]=interval[1] 
-        
+            star[i-s:i+s,j-s:j+s]=interval[1] 
         star[star==0] = np.nan
-        
         plt.style.use('dark_background')
-        
         for j in list_frame:
-            
-            
-            # récupère données de temp à chaque pas de temps
             temp = data.get(variable,time_idx=j)
-            
-            # récupère données de demi-hauteur à chaque pas de temps
             h = data.get('H',time_idx=j)
-            # initialiser a matrice 2D
-            frame = np.zeros((N,space+dist))
-            # associe à chaque valeur de h une valeur de température pour créer l'epaisseur
-            for i in range(100):
+            frame = np.zeros((N,space))
+            for i in range(size):
                 half_height = int(h[i]/norm)
-                frame[middle-half_height:half_height+middle,dist+i*index:dist+index*(i+1)] = temp[i]
+                up    = dist+i*index
+                down  = dist+index*(i+1)
+                frame[middle-half_height:half_height+middle,up:down] = temp[i]
             frame[frame==0] = np.nan
             frame = np.concatenate((frame[:,::-1],frame),axis=1)
-            fig,ax = plt.subplots(1,1,figsize=(40,15))
-            # le trou noir
-            circle = Circle( (space+dist,middle), dist/3, alpha=1,color='blue')
+            fig,ax = plt.subplots(1,1,figsize=(lenght,height))
+            circle = Circle((space,middle), R, alpha=1,color='blue')
             ax.add_patch(circle)
-            # affichage
             im = ax.imshow(frame,cmap='hot',vmin=interval[0],vmax=interval[1])
             ax.imshow(star,cmap='hot',vmin=interval[0],vmax=interval[1])
-            
-            # paramètres d'affichage
-            cbar = plt.colorbar(im,shrink=0.6)
-            cbar.ax.tick_params(labelsize=40)
+            cbar = plt.colorbar(im,fraction=0.04,aspect=40,pad=0.05,orientation='horizontal')
+            cbar.ax.tick_params(labelsize=25)
             plt.axis('off')
             plt.grid(visible=False)
-            plt.annotate('%s s'%time[j], (1.3,1.3),
-                        fontsize=40, xycoords=cbar.ax.transAxes,
-                        va="baseline", ha="center",color='white')
-            plt.annotate('1e7',(1.05,1.05),fontsize=40, xycoords=cbar.ax.transAxes,
-                        va="baseline", ha="center",color='white')
-                        
-            # enregistrement frame
-            plt.savefig(f'frame_h/frame_%s.png'%int((j*nb/(b-a))),dpi=65)
+            plt.annotate(f'{time[j]:.3f} s', (-0.2,0),fontsize=30,
+             xycoords=cbar.ax.transAxes,va="baseline", ha="center",color='white')
+            plt.annotate(r'$\times 10^{7}$'  ,(1.1,0),fontsize=25,
+             xycoords=cbar.ax.transAxes,va="baseline", ha="center",color='white')
+            plt.savefig(f'frame_h/frame_%s.png'%int((j*nb/(b-a))),dpi=100)
             plt.close()
+            
         return None
 	
 if __name__ == "__main__":
@@ -140,7 +130,7 @@ if __name__ == "__main__":
     variable = 'TEMP'
     
     # nombre de frame sur l'intervalle de temps
-    nb=2
+    nb=5
     
     # animation avec background
     if args.h:
