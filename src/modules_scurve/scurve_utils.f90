@@ -40,6 +40,8 @@ SUBROUTINE calc_H(TEMP_AD_, X_AD_, OMEGA_AD_, S_AD_, H_AD_)
 
     ! Racine positive du trinôme
     H_AD_ = -0.5_xp * (B2 + SIGN(SQRT(DELTA),B2)) / A2
+
+    ! Adimensionnement
     H_AD_ = H_AD_ / R_S
 
 !---------------------------------------------------------------------------------------------------
@@ -277,7 +279,7 @@ END SUBROUTINE LECTURE_POINTS_CRITIQUES
 
 SUBROUTINE calc_QpmQm (Temp_S_AD, S_S_AD, ipos, QpmQm)
 !---------------------------------------------------------------------------------------------------
-!> Subroutine qui calcule Q+ - Q- pour un triplet (Temp, Sigma, ipos) donné
+!> Subroutine qui calcule Q+ - Q- pour un triplet (Temp, Sigma, ipos) donné pour la branche épaisse
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     REAL(KIND=xp),  INTENT(in)  :: Temp_S_AD
@@ -310,53 +312,82 @@ SUBROUTINE calc_QpmQm (Temp_S_AD, S_S_AD, ipos, QpmQm)
 END SUBROUTINE calc_QpmQm
 !---------------------------------------------------------------------------------------------------
 
-SUBROUTINE map_QpmQm (T_min_map_AD, T_max_map_AD, S_min_map_AD, S_max_map_AD, n_map)
+SUBROUTINE map_QpmQm (T_min_map_AD, T_max_map_AD, ipos, S_min_map_AD, S_max_map_AD, n_map)
 !---------------------------------------------------------------------------------------------------
-!> Subroutine qui calcula la carte des valeurs de Q+ - Q- à tous les rayons dans l'espace Temp-Sigma
+!> Subroutine qui calcule la carte des valeurs de Q+ - Q- pour un rayon dans l'espace (Temp, Sigma)
 !---------------------------------------------------------------------------------------------------
     IMPLICIT NONE
     REAL(KIND=xp), INTENT(in)                          :: T_min_map_AD, T_max_map_AD
     REAL(KIND=xp), INTENT(in)                          :: S_min_map_AD, S_max_map_AD
     INTEGER,       INTENT(in)                          :: n_map
+    INTEGER,       INTENT(in)                          :: ipos
 
-    REAL(KIND=xp), DIMENSION(n_map)                    :: QpmQm_map
+    REAL(KIND=xp), DIMENSION(n_map, n_map)             :: QpmQm_map
     REAL(KIND=xp)                                      :: T_map_AD
     REAL(KIND=xp)                                      :: S_map_AD
-    INTEGER                                            :: j, ipos, k
+    INTEGER                                            :: j, k
 
     OPEN (unit=10, file="./output/scurve/map.out", status="unknown")
 
-    DO ipos=1,NX
+    ! Par soucis de concision, on ne calcule la carte que pour un seul rayon, spécifié en argument de la subroutine
 
-        T_map_AD = T_min_map_AD
-        S_map_AD = S_min_map_AD
+    DO k=1,n_map
 
-        CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(1))
-
-        DO j=2,n_map
+        DO j=1,n_map
             
-            S_map_AD = S_map_AD + ( S_max_map_AD - S_min_map_AD ) / n_map
-            CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(j))
+            T_map_AD = T_min_map_AD + (k-1) * ( T_max_map_AD - T_min_map_AD ) / n_map
+            S_map_AD = S_min_map_AD + (j-1) * ( S_max_map_AD - S_min_map_AD ) / n_map
+            CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(k, j))
 
         ENDDO
-            
-        WRITE(10,*) QpmQm_map
 
-        DO k=2,n_map
+    ENDDO
+
+    WRITE(10,*) QpmQm_map
+
+    CLOSE(10)
+
+!---------------------------------------------------------------------------------------------------
+END SUBROUTINE map_QpmQm
+!---------------------------------------------------------------------------------------------------
+
+SUBROUTINE coupe_QpmQm (T_min_map_AD, T_max_map_AD, S_coupe_AD, n_map)
+!---------------------------------------------------------------------------------------------------
+!> Subroutine qui calcule une coupe à Sigma fixé des valeurs de Q+ - Q- à tous les rayons dans l'espace Temp-Sigma
+!---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+    REAL(KIND=xp), INTENT(in)                          :: T_min_map_AD, T_max_map_AD   !! Températures minimales et maximales où calculer Q+-Q-
+    REAL(KIND=xp), INTENT(in)                          :: S_coupe_AD                   !! Densité de surface où Q+-Q- est calculé
+    INTEGER,       INTENT(in)                          :: n_map                        !! Nombre de températures où calculer Q+-Q-
+
+    REAL(KIND=xp)                                      :: QpmQm_coupe                  !! Valeur de Q+-Q- à (T,S)
+    REAL(KIND=xp)                                      :: T_map_AD                     !! Température où Q+-Q- est calculé
+    INTEGER                                            :: j                            !! Indice de boucle
+    INTEGER                                            :: ipos                         !! Indice pour la position
+
+    OPEN (unit=10, file="./output/scurve/coupe.out", status="unknown")
+
+    ! On parcourt les positions dans le disque
+    DO ipos=1,NX
+
+        ! On initialise T
+        T_map_AD = T_min_map_AD
+
+        CALL calc_QpmQm(T_map_AD, S_coupe_AD, ipos, QpmQm_coupe)
+
+        ! On écrit dans le fichier de sortie T, S Q+-Q-, X_AD et r en [SI]
+        WRITE(10,*) T_map_AD*TEMP_0, S_coupe_AD * S_0 / X_AD(ipos), QpmQm_coupe, X_AD(ipos), X_AD(ipos)**2._xp * R_S
+
+        ! On parcourt les températures
+        DO j=2,n_map
             
+            ! On incrémente T et on réinitialise S
             T_map_AD = T_map_AD + ( T_max_map_AD - T_min_map_AD ) / n_map
-            S_map_AD = S_min_map_AD
 
-            CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(1))
+            CALL calc_QpmQm(T_map_AD, S_coupe_AD, ipos, QpmQm_coupe)
 
-            DO j=2,n_map
-            
-                S_map_AD = S_map_AD + ( S_max_map_AD - S_min_map_AD ) / n_map
-                CALL calc_QpmQm(T_map_AD, S_map_AD, ipos, QpmQm_map(j))
-
-            ENDDO
-
-            WRITE(10,*) QpmQm_map
+            ! On écrit dans le fichier de sortie T, S Q+-Q-, X_AD et r en [SI]
+            WRITE(10,*) T_map_AD*TEMP_0, S_coupe_AD * S_0 / X_AD(ipos), QpmQm_coupe, X_AD(ipos), X_AD(ipos)**2._xp * R_S
 
         ENDDO
 
@@ -365,7 +396,7 @@ SUBROUTINE map_QpmQm (T_min_map_AD, T_max_map_AD, S_min_map_AD, S_max_map_AD, n_
     CLOSE(10)
 
 !---------------------------------------------------------------------------------------------------
-END SUBROUTINE map_QpmQm
+END SUBROUTINE coupe_QpmQm
 !---------------------------------------------------------------------------------------------------
 
 !===================================================================================================
