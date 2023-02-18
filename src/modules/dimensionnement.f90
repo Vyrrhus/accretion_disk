@@ -59,7 +59,6 @@ SUBROUTINE ADIM_TO_PHYSIQUE()
     Q_MOINS  = Q_MOINS_AD * Q_PLUS_0
     Q_ADV    = Q_ADV_AD * Q_ADV_0
     C_V      = C_V_AD * C_V_0
-    L_STEFAN = L_STEFAN_AD * L_STEFAN_0
     
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE ADIM_TO_PHYSIQUE
@@ -109,7 +108,6 @@ SUBROUTINE PHYSIQUE_TO_ADIM()
     Q_PLUS_AD   = Q_MOINS / Q_PLUS_0
     Q_ADV_AD    = Q_ADV / Q_ADV_0
     C_V_AD      = C_V / C_V_0
-    L_STEFAN_AD = L_STEFAN / L_STEFAN_0
     
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE PHYSIQUE_TO_ADIM
