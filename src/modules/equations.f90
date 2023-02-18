@@ -34,11 +34,7 @@ SUBROUTINE COMPUTE_EQS()
     ! Pression de radiation
     P_RAD_AD = TEMP_AD**4.0_xp
     
-    ! Luminosité du disque
-    L_STEFAN_AD = 0.0_xp
-    DO I=1,NX-1
-        L_STEFAN_AD = L_STEFAN_AD + TEMP_AD(I)**4.0_xp * X_AD(I)**3.0_xp * (X_AD(I+1) - X_AD(I))
-    ENDDO
+    
     
     ! Demi-hauteur du disque (calcul coefficients d'un trinôme du 2nd degré dont H est la solution positive)
     B_AD = (TEMP_AD**4._xp * X_AD) / (OMEGA_AD**2._xp * S_AD)
@@ -98,6 +94,12 @@ SUBROUTINE COMPUTE_EQS()
     ! Q- (chaleur dissipée)
     Q_MOINS_AD = 2.0_xp * X_AD * F_Z / (S_AD * S_0)  / Q_PLUS_0
       
+    ! Luminosité du disque
+    L_STEFAN = 0.0_xp
+    DO I=1,NX-1
+        L_STEFAN = L_STEFAN + F_Z(I)*8.0_xp*PI*R_S**2.0_xp*X_AD(I)**3.0_xp*(X_AD(I+1)-X_AD(I))
+    ENDDO
+    
 !---------------------------------------------------------------------------------------------------
 END SUBROUTINE COMPUTE_EQS
 !---------------------------------------------------------------------------------------------------

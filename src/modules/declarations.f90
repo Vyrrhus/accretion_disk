@@ -44,7 +44,7 @@ REAL(KIND=xp) :: TIME_TO_REACH       !! Temps dimensionné maximal pour la simul
 INTEGER       :: NB_BOUCLES_MAX      !! Nombre maximal de boucles à réaliser
 
 ! PARAMÈTRES SPATIAUX
-INTEGER,PARAMETER :: NX = 100       !! Nombre de points de discrétisation spatiale
+INTEGER,PARAMETER :: NX = 100        !! Nombre de points de discrétisation spatiale
 REAL(KIND=xp)     :: DX              !! Pas de discrétisation spatiale
 REAL(KIND=xp)     :: X_MIN           !! Rayon minimal adimensionné
 REAL(KIND=xp)     :: X_MAX           !! Rayon maximal adimensionné
@@ -75,7 +75,6 @@ REAL(KIND=xp)  :: M_CRIT_DOT    !! Taux d'acrétion critique
 ! CONSTANTES DE NORMALISATION
 REAL(KIND=xp)  :: SPEED_0       !! Vitesse d'accrétion
 REAL(KIND=xp)  :: NU_0          !! Viscosité
-REAL(KIND=xp)  :: L_STEFAN_0    !! Luminosié  
 REAL(KIND=xp)  :: SIGMA_0       !! Densité de surface
 REAL(KIND=xp)  :: S_0           !! \(S_0 = \Sigma_0\)
 REAL(KIND=xp)  :: RHO_0         !! Densité volumique
@@ -113,7 +112,6 @@ REAL(KIND=xp) :: Q_ADV_AD(NX)        !! Chaleur Advectée
 REAL(KIND=xp) :: C_V_AD(NX)          !! Capacité Calorifique
 REAL(KIND=xp) :: B_AD(NX)            !! Coefficient b du trinôme pour le calcul de H
 REAL(KIND=xp) :: C_AD(NX)            !! Coefficient c du trinôme pour le calcul de H
-REAL(KIND=xp) :: L_STEFAN_AD         !! Luminosité Adimensionnée
 
 ! VARIABLES 
 REAL(KIND=xp) :: TIME             !! Temps
@@ -260,7 +258,7 @@ SUBROUTINE CALCUL_CONSTANTES()
     S_0         = SIGMA_0
     RHO_0       = SIGMA_0 / (2._xp * R_S)
     TEMP_0      = (L_TOT / (9.0_xp * 4.0_xp * PI * R_S**2.0_xp * SIGMA_STEFAN))**(0.25_xp)
-    L_STEFAN_0  = 4.0_xp * PI * R_S**2.0_xp * SIGMA_STEFAN * TEMP_0**4_xp
+    !L_STEFAN_0  = 4.0_xp * PI * R_S**2.0_xp * SIGMA_STEFAN * TEMP_0**4_xp
     P_0         = M_0_DOT * OMEGA_MAX / (4.0_xp * PI * R_S)
     P_RAD_0     = A_RADIATION * TEMP_0**4.0_xp / 3.0_xp
     P_GAZ_0     = R_BOLTZ * RHO_0 * TEMP_0 / MU
@@ -309,7 +307,7 @@ SUBROUTINE CALCUL_CONSTANTES()
     WRITE(*,"('CONSTANTE DE VISCOSITE                    NU_0 = ',1pE12.4)") NU_0
     WRITE(*,"('CONSTANTE DE DENSITE                     RHO_0 = ',1pE12.4)") RHO_0
     WRITE(*,"('CONSTANTE DE TEMPERATURE                TEMP_0 = ',1pE12.4)") TEMP_0
-    WRITE(*,"('CONSTANTE DE LUMINOSITÉ             L_STEFAN_0 = ',1pE12.4)") L_STEFAN_0
+    !WRITE(*,"('CONSTANTE DE LUMINOSITÉ             L_STEFAN_0 = ',1pE12.4)") L_STEFAN_0
     WRITE(*,"('CONSTANTE DE DENSITE SURFACIQUE        SIGMA_0 = ',1pE12.4)") SIGMA_0
     WRITE(*,"('CONSTANTE DE DENSITE                       S_0 = ',1pE12.4)") S_0
     WRITE(*,"('CONSTANTE DE PRESSION                      P_0 = ',1pE12.4)") P_0
@@ -373,7 +371,7 @@ SUBROUTINE WRITE_CONSTANTES(FILE_UNIT)
     WRITE(FILE_UNIT,"('CONSTANTE DE VISCOSITE                    NU_0 = ',1pE12.4)") NU_0
     WRITE(FILE_UNIT,"('CONSTANTE DE DENSITE                     RHO_0 = ',1pE12.4)") RHO_0
     WRITE(FILE_UNIT,"('CONSTANTE DE TEMPERATURE                TEMP_0 = ',1pE12.4)") TEMP_0
-    WRITE(FILE_UNIT,"('CONSTANTE DE LUMINOSITÉ             L_STEFAN_0 = ',1pE12.4)") L_STEFAN_0
+    !WRITE(FILE_UNIT,"('CONSTANTE DE LUMINOSITÉ             L_STEFAN_0 = ',1pE12.4)") L_STEFAN_0
     WRITE(FILE_UNIT,"('CONSTANTE DE DENSITE SURFACIQUE        SIGMA_0 = ',1pE12.4)") SIGMA_0
     WRITE(FILE_UNIT,"('CONSTANTE DE DENSITE                       S_0 = ',1pE12.4)") S_0
     WRITE(FILE_UNIT,"('CONSTANTE DE PRESSION                      P_0 = ',1pE12.4)") P_0
